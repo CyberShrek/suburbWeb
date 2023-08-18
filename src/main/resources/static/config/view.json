@@ -1,0 +1,27 @@
+{
+  "code": "SUBURB",
+  "mainForm": {
+    "sections": {
+      "section0": {
+        "title": "Заголовок секции",
+        "fields": {
+          "field0": {
+            "type": "checkbox",
+            "label": "Чекбокс (галочка в квадратике)"
+          },
+          "field1": {
+            "type": "date",
+            "label": "Выбор периода дат"
+          }
+        }
+      }
+    },
+    "validationPath": "Относительная ссылка на эндпоинт валидации полей формы"
+  },
+  "reportSlots": [
+    {
+      "title": "Тута будет отчёт",
+      "path": "777"
+    }
+  ]
+}
