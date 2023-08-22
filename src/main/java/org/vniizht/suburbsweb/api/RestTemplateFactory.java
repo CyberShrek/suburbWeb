@@ -8,13 +8,14 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class RestTemplates {
+public class RestTemplateFactory {
 
     @Autowired
-    RestTemplateBuilder builder;
+    private RestTemplateBuilder builder;
 
+    // Basic rest template for json exchange
     @Bean(name = "jsonRest")
-    public RestTemplate getJsonRestTemplateBean(){
+    public RestTemplate createJsonRestTemplate(){
         return builder
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .build();
