@@ -1,0 +1,9 @@
+{
+  "type": "roads",
+  "propertiesSources": {
+    "date": "periodSection.dateField"
+  },
+  "properties": {
+    "countries": ["20"]
+  }
+}

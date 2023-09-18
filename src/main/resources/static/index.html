@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<script>
+  config = {
+    code: "SUBURB",
+    salesForm: {
+      title: "Отчёт по итогам продаж по пригороду",
+      periodSection: {
+        dateField: {
+          type: "datepicker",
+          range: true,
+          label: "Период продаж"
+        },
+        detailsToggleField: {
+          label: "Детализировать по дате продажи",
+          type: "switch",
+          size: 4
+        }
+      },
+
+      mainSection: {
+        carriersField: {
+          label: "Перевозчик",
+          type: "select",
+          search: true
+        },
+        roadsField: {
+          label: "Дорога продажи",
+          type: "select",
+          search: true
+        },
+        regionsField: {
+          label: "Субъект продажи",
+          type: "select",
+          search: true
+        }
+      },
+
+      additionalSection: {
+        switchField: {
+          type: "switch",
+          label: "Дополнительные параметры",
+          size: 4
+        },
+        calculationTypesField: {
+          type: "select",
+          label: "Виды расчёта",
+          multiple: true
+        },
+        travelDocumentTypesField: {
+          type: "select",
+          label: "Виды проездного документа",
+          multiple: true
+        },
+        shippingDocumentTypesField: {
+          type: "select",
+          label: "Виды перевозочного документа",
+          multiple: true
+        },
+        operationTypesField: {
+          type: "select",
+          label: "Виды операции",
+          multiple: true
+        }
+      },
+      submitText: "🔍︎ Поиск",
+      submitPath: "sales/report",
+      statementPath: "sales/form",
+      gridSize: 4
+    },
+
+    departuresForm: {
+      title: "Отчёт по итогам отправления по пригороду",
+
+      periodSection: {
+        dateField: {
+          type: "datepicker",
+          range: true,
+          label: "Период отправления"
+        },
+        detailsToggleField: {
+          label: "Детализировать по дате отправления",
+          type: "switch",
+          size: 4
+        }
+      },
+
+      mainSection: {
+        carriersField: {
+          label: "Перевозчик",
+          type: "select",
+          search: true
+        },
+        roadsField: {
+          label: "Дорога отправления",
+          type: "select",
+          search: true
+        }
+      },
+
+      additionalSection: {
+        switchField: {
+          type: "switch",
+          label: "Дополнительные параметры",
+          size: 4
+        },
+        trainCategoriesField: {
+          type: "select",
+          label: "Категории поезда",
+          multiple: true
+        }
+      },
+      submitText: "🔍︎ Поиск",
+      submitPath: "departures/report",
+      statementPath: "departures/form",
+      gridSize: 4
+    },
+    reportSlot: {
+      title: "Результат поиска"
+    }
+  }
+</script>
+<script type="module" src="/appforge/js/built/forge.js"></script>
+</html>

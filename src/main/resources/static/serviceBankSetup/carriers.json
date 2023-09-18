@@ -1,0 +1,6 @@
+{
+  "type": "carriers",
+  "propertiesSources": {
+    "date": "periodSection.dateField"
+  }
+}
