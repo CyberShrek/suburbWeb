@@ -15,8 +15,8 @@ public class MainController {
     private UserCheck userCheck;
 
     @GetMapping
-    public String index(HttpServletRequest request) throws UserCheckException {
-//        userCheck.checkRequest(request);
+    public String index(HttpServletRequest request) throws Exception {
+        userCheck.checkRequest(request);
         return "index.html";
     }
 }

@@ -1,0 +1,10 @@
+[
+  {"type": "text"},
+  {"type": "text", "replaceWithLabels": {"fields": ["additionalSection.calculationTypesField"]}},
+  {"type": "text", "replaceWithLabels": {"fields": ["additionalSection.travelDocumentTypesField", "additionalSection.shippingDocumentTypesField"]}},
+  {"type": "text", "replaceWithLabels": {"fields": ["additionalSection.operationTypesField"]}},
+  {"type": "numeric"},
+  {"type": "numeric"},
+  {"type": "numeric"},
+  {"type": "numeric"}
+]

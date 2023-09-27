@@ -1,27 +1,28 @@
 package org.vniizht.suburbsweb.model.report;
 
-import javax.sql.RowSet;
+import org.vniizht.suburbsweb.service.report.SalesReportJdbc;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class SalesReportModel extends ReportModel{
 
-    public SalesReportModel(Map<String, Object> formValues) {
-        super(formValues);
+    public SalesReportModel(Map<String, Object> formValues, SalesReportJdbc jdbc) {
+        super(formValues, jdbc);
 
+        slot = "salesReportSlot";
         title = "Аналитическая отчетность продажи по пригородным пассажирским компаниям";
 
-        addContextIfFieldHasOptions("Субъект", "mainSection.regionsField");
+        table.put("primaryColumnsNumber", 4);
 
-        addHeadCellIfFieldToggled("Дата продажи", "periodSection.detailsToggleField");
-        addHeadCellIfFieldHasOptions("Вид расчёта", "additionalSection.calculationTypesField");
-        addHeadCellIfFieldHasOptions("Вид проездного документа", "additionalSection.travelDocumentTypesField");
-        addHeadCellIfFieldHasOptions("Вид перевозочного документа", "additionalSection.shippingDocumentTypesField");
-        addHeadCellIfFieldHasOptions("Вид операции", "additionalSection.operationTypesField");
+        if(fieldIsTrueOrHasValues("mainSection.regionsField"))
+            this.context.put("Субъект", "mainSection.regionsField");
 
-        addHeadCell("Количество человек или перевозок");
-        addHeadCell("Доход");
-        addHeadCell("Недополученный доход");
-        addHeadCell("Сумма сбора");
-        addHeadCell("Доход за провоз ручной клади");
+        Map<String[], Integer> dataFeaturesFieldToColumns = new HashMap<>();
+        dataFeaturesFieldToColumns.put(new String[]{"additionalSection.calculationTypesField"}, 1);
+        dataFeaturesFieldToColumns.put(new String[]{"additionalSection.travelDocumentTypesField", "additionalSection.shippingDocumentTypesField"}, 2);
+        dataFeaturesFieldToColumns.put(new String[]{"additionalSection.operationTypesField"}, 3);
+
+        setupDataFeatures("sales.json", dataFeaturesFieldToColumns);
     }
 }

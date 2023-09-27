@@ -1,11 +1,8 @@
 package org.vniizht.suburbsweb.model.order;
 
-import org.vniizht.suburbsweb.util.ConfigAccess;
+import org.vniizht.suburbsweb.util.ResourcesAccess;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class FormStatementOrder
 {
@@ -37,17 +34,17 @@ public abstract class FormStatementOrder
     }
 
     protected void setWrongIfFieldIsEmpty(String fieldKey){
-        if(((Map<String, String>)formValues.get(fieldKey)).isEmpty()){
+        if(((List<String>)formValues.get(fieldKey)).isEmpty()){
             if(wrong == null) wrong = new HashSet<>();
             wrong.add(fieldKey);
         }
     }
 
     protected void putServiceBankSetup(String fieldKey, String configName){
-        setupServiceBank.put(fieldKey, ConfigAccess.getJson("serviceBankSetup/" + configName));
+        setupServiceBank.put(fieldKey, ResourcesAccess.getJson("serviceBankSetup/" + configName));
     }
 
     protected void putOptions(String fieldKey, String configName){
-        setOptions.put(fieldKey, ConfigAccess.getMap("options/" + configName));
+        setOptions.put(fieldKey, ResourcesAccess.getMap("options/" + configName));
     }
 }

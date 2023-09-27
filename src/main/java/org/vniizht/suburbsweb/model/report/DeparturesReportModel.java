@@ -1,20 +1,24 @@
 package org.vniizht.suburbsweb.model.report;
 
-import javax.sql.RowSet;
+import org.vniizht.suburbsweb.service.report.DeparturesReportJdbc;
+import org.vniizht.suburbsweb.util.ResourcesAccess;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class DeparturesReportModel extends ReportModel{
+    public DeparturesReportModel(Map<String, Object> formValues, DeparturesReportJdbc jdbc) {
+        super(formValues, jdbc);
 
-    public DeparturesReportModel(Map<String, Object> formValues) {
-        super(formValues);
-
+        slot  = "departuresReportSlot";
         title = "Аналитическая отчетность по отправлению по пригородным пассажирским компаниям";
 
-        addHeadCellIfFieldToggled("Дата отправления", "periodSection.detailsToggleField");
-        addHeadCellIfFieldHasOptions("Категория поезда", "additionalSection.trainCategoriesField");
+        table.put("primaryColumnsNumber", 2);
 
-        addHeadCell("Количество пассажиров");
-        addHeadCell("Средняя дальность");
-        addHeadCell("Пассажиро-км");
+        Map<String[], Integer> dataFeaturesFieldToColumns = new HashMap<>();
+        dataFeaturesFieldToColumns.put(new String[]{"additionalSection.trainCategoriesField"}, 1);
+
+        setupDataFeatures("departures.json", dataFeaturesFieldToColumns);
     }
 }

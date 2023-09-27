@@ -15,7 +15,7 @@ public class UserCheck {
     @Value("${code}")
     private String code;
 
-    public void checkRequest(HttpServletRequest request) throws UserCheckException {
+    public UserCheckRemote checkRequest(HttpServletRequest request) throws UserCheckException {
         try {
             UserCheckRemote uCheck = (UserCheckRemote) new InitialContext().lookup(EJB_NAME);
 
@@ -29,6 +29,7 @@ public class UserCheck {
             if (!uCheck.check()) {
                 throw new Exception("Доступ запрещён");
             }
+            return uCheck;
         } catch (Exception ex) {
             throw new UserCheckException(ex.getMessage());
         }

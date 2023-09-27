@@ -1,47 +1,79 @@
 package org.vniizht.suburbsweb.model.report;
 
-import javax.sql.RowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
+import org.vniizht.suburbsweb.service.report.ReportJdbc;
+import org.vniizht.suburbsweb.util.ResourcesAccess;
+
 import java.util.*;
 
 public abstract class ReportModel {
     public String title = "";
+    public String slot;
     public Map<String, String> context = new LinkedHashMap<>();
     public Map<String, Object> table = new HashMap<>();
 
-    List<Object[]> data = new ArrayList<>();
+    public List<Object[]> data = new ArrayList<>();
+    public List<Object> dataFeatures = new ArrayList<>();
 
-    private Map<String, Object> formValues;
+    private final Map<String, Object> formValues;
 
-    protected ReportModel(Map<String, Object> formValues){
+    protected ReportModel(Map<String, Object> formValues, ReportJdbc jdbc){
         this.formValues = formValues;
 
         context.put("Период",     "periodSection.dateField");
         context.put("Перевозчик", "mainSection.carriersField");
         context.put("Дорога",     "mainSection.roadsField");
 
-        table.put("head", new ArrayList<String>());
+        table.put("head", new ArrayList<>());
+        table.put("groupedColumnsNumber", 1);
+
+        applyData(jdbc.getDataByFieldValues(formValues));
     }
 
-    protected void addContextIfFieldHasOptions(String context, String fieldKey){
-        Object options = formValues.get(fieldKey);
-        if(options != null && !((Map)options).isEmpty())
-            this.context.put(context, fieldKey);
-    }
-
-    protected void addHeadCellIfFieldToggled(String headCell, String fieldKey){
+    protected boolean fieldIsTrueOrHasValues(String fieldKey){
         Object value = formValues.get(fieldKey);
-        if(value != null && ((Boolean)value))
-            addHeadCell(headCell);
+        return (value instanceof List && !((List<?>)value).isEmpty()
+             || value instanceof Boolean && (Boolean)value);
     }
 
-    protected void addHeadCellIfFieldHasOptions(String headCell, String fieldKey){
-        Object options = formValues.get(fieldKey);
-        if(options != null && !((Map)options).isEmpty())
-            addHeadCell(headCell);
+    protected void setupDataFeatures(String featureFileName, Map<String[], Integer> fieldsToColumns){
+        List<Object> dataFeaturesBuffer = ResourcesAccess.getList("dataFeatures/" + featureFileName);
+
+        fieldsToColumns.put(new String[]{"periodSection.detailsToggleField"}, 0);
+
+        fieldsToColumns.forEach((fieldKeys, columnIndex) -> {
+            boolean columnIsPresent = false;
+            for (String fieldKey : fieldKeys) {
+                if (fieldIsTrueOrHasValues(fieldKey)) {
+                    columnIsPresent = true;
+                    break;
+                }
+            }
+            if(!columnIsPresent) {
+                dataFeaturesBuffer.set(columnIndex, null);
+                table.replace("primaryColumnsNumber", ((Integer)table.get("primaryColumnsNumber")) - 1);
+            }
+        });
+
+        dataFeaturesBuffer.forEach(nullableDataFeature ->
+                Optional.ofNullable(nullableDataFeature).ifPresent(dataFeature ->
+                        dataFeatures.add(dataFeature)));
     }
 
-    protected void addHeadCell(String headCell){
-        ((List<String>)table.get("head"))
-                .add(headCell);
+    private void applyData(SqlRowSet sqlData){
+        SqlRowSetMetaData metaData = sqlData.getMetaData();
+        boolean headIsReady = false;
+        while(sqlData.next()){
+            List<Object> row = new ArrayList<>();
+            for (int columnIndex = 1; columnIndex <= metaData.getColumnCount(); columnIndex++) {
+                row.add(sqlData.getObject(columnIndex));
+                if (!headIsReady)
+                    ((List<String>)table.get("head"))
+                            .add(metaData.getColumnName(columnIndex));
+            }
+            headIsReady = true;
+            data.add(row.toArray());
+        }
     }
 }

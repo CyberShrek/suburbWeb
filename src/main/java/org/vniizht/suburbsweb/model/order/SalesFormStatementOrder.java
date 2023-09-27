@@ -1,5 +1,6 @@
 package org.vniizht.suburbsweb.model.order;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class SalesFormStatementOrder extends FormStatementOrder{

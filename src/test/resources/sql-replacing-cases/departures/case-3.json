@@ -1,0 +1,8 @@
+{
+  "periodSection.dateField": ["01-01-2022","01-01-2023"],
+  "periodSection.detailsToggleField": true,
+  "mainSection.carriersField": ["20.1"],
+  "mainSection.roadsField": ["О"],
+  "additionalSection.switchField": true,
+  "additionalSection.trainCategoriesField": ["О", "Я", "Л"]
+}
