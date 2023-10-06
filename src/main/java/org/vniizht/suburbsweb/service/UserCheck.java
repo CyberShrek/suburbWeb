@@ -29,6 +29,12 @@ public class UserCheck {
             if (!uCheck.check()) {
                 throw new Exception("Доступ запрещён");
             }
+
+            System.out.println(uCheck.getParamI("create"));
+            System.out.println(uCheck.getParamI("read"));
+            System.out.println(uCheck.getParamI("update"));
+            System.out.println(uCheck.getParamI("delete"));
+            System.out.println(uCheck.getUserRole());
             return uCheck;
         } catch (Exception ex) {
             throw new UserCheckException(ex.getMessage());
