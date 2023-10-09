@@ -2,7 +2,7 @@ package org.vniizht.suburbsweb.model.report;
 
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
-import org.vniizht.suburbsweb.service.report.ReportJdbc;
+import org.vniizht.suburbsweb.service.ReportJdbc;
 import org.vniizht.suburbsweb.util.ResourcesAccess;
 
 import java.util.*;
@@ -16,13 +16,19 @@ public abstract class ReportModel {
     public List<Object[]> data = new ArrayList<>();
     public List<Object> dataFeatures = new ArrayList<>();
 
+    protected final boolean hasCarriersColumn;
+
     private final Map<String, Object> formValues;
+    private String fieldKey;
 
     protected ReportModel(Map<String, Object> formValues, ReportJdbc jdbc){
         this.formValues = formValues;
 
+        hasCarriersColumn = ((List<?>)formValues.get("mainSection.carriersField")).size() >= 2;
+
         context.put("Период",     "periodSection.dateField");
-        context.put("Перевозчик", "mainSection.carriersField");
+        if(!hasCarriersColumn)
+            context.put("Перевозчик", "mainSection.carriersField");
         context.put("Дорога",     "mainSection.roadsField");
 
         table.put("head", new ArrayList<>());
@@ -33,7 +39,7 @@ public abstract class ReportModel {
 
     protected boolean fieldIsTrueOrHasValues(String fieldKey){
         Object value = formValues.get(fieldKey);
-        return (value instanceof List && !((List<?>)value).isEmpty()
+        return (value instanceof List && (((List<?>)value).size() > (fieldKey.equals("mainSection.carriersField") ? 1 : 0))
              || value instanceof Boolean && (Boolean)value);
     }
 
@@ -41,16 +47,13 @@ public abstract class ReportModel {
         List<Object> dataFeaturesBuffer = ResourcesAccess.getList("dataFeatures/" + featureFileName);
 
         fieldsToColumns.put(new String[]{"periodSection.detailsToggleField"}, 0);
+        fieldsToColumns.put(new String[]{"mainSection.carriersField"}, 1);
 
         fieldsToColumns.forEach((fieldKeys, columnIndex) -> {
-            boolean columnIsPresent = false;
-            for (String fieldKey : fieldKeys) {
-                if (fieldIsTrueOrHasValues(fieldKey)) {
-                    columnIsPresent = true;
-                    break;
-                }
-            }
+            boolean columnIsPresent = Arrays.stream(fieldKeys).anyMatch(this::fieldIsTrueOrHasValues);
+
             if(!columnIsPresent) {
+                // Erasing
                 dataFeaturesBuffer.set(columnIndex, null);
                 table.replace("primaryColumnsNumber", ((Integer)table.get("primaryColumnsNumber")) - 1);
             }

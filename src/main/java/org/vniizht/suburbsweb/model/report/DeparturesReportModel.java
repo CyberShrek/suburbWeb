@@ -1,10 +1,8 @@
 package org.vniizht.suburbsweb.model.report;
 
-import org.vniizht.suburbsweb.service.report.DeparturesReportJdbc;
-import org.vniizht.suburbsweb.util.ResourcesAccess;
+import org.vniizht.suburbsweb.service.DeparturesReportJdbc;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class DeparturesReportModel extends ReportModel{
@@ -14,10 +12,12 @@ public class DeparturesReportModel extends ReportModel{
         slot  = "departuresReportSlot";
         title = "Аналитическая отчетность по отправлению по пригородным пассажирским компаниям";
 
-        table.put("primaryColumnsNumber", 2);
+        int hasCarriersColumnAdd = hasCarriersColumn ? 1 : 0;
+
+        table.put("primaryColumnsNumber", 2 + hasCarriersColumnAdd);
 
         Map<String[], Integer> dataFeaturesFieldToColumns = new HashMap<>();
-        dataFeaturesFieldToColumns.put(new String[]{"additionalSection.trainCategoriesField"}, 1);
+        dataFeaturesFieldToColumns.put(new String[]{"additionalSection.trainCategoriesField"}, 2);
 
         setupDataFeatures("departures.json", dataFeaturesFieldToColumns);
     }

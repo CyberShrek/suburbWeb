@@ -8,9 +8,8 @@ import org.vniizht.suburbsweb.model.order.SalesFormStatementOrder;
 import org.vniizht.suburbsweb.model.report.DeparturesReportModel;
 import org.vniizht.suburbsweb.model.report.ReportModel;
 import org.vniizht.suburbsweb.model.report.SalesReportModel;
-import org.vniizht.suburbsweb.service.report.DeparturesReportJdbc;
-import org.vniizht.suburbsweb.service.report.ReportJdbc;
-import org.vniizht.suburbsweb.service.report.SalesReportJdbc;
+import org.vniizht.suburbsweb.service.DeparturesReportJdbc;
+import org.vniizht.suburbsweb.service.SalesReportJdbc;
 
 import javax.xml.ws.http.HTTPException;
 import java.util.Map;

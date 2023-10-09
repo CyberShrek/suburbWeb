@@ -1,5 +1,6 @@
 [
   {"type": "text"},
+  {"type": "text", "replaceWithLabels": {"fields": ["mainSection.carriersField"]}},
   {"type": "text", "replaceWithLabels": {"fields": ["additionalSection.trainCategoriesField"]}},
   {"type": "numeric"},
   {"type": "numeric", "formula": "(row[row.length-1] / row[row.length-3]).toFixed(3)"},

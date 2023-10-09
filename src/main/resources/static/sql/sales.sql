@@ -2,6 +2,7 @@ WITH base as (
     SELECT row_number() over () as row_number
          ,par_name
          ,date          -- $date
+         ,chp           -- $carrier
          ,kol_pas
          ,plata
          ,poteri
@@ -12,8 +13,8 @@ WITH base as (
     FROM l3_mes.prig_analit
     WHERE date         BETWEEN '$start_date' AND '$end_date'
       AND term_dor     LIKE ANY(ARRAY[$road_codes])
-      AND chp          IS NOT NULL
-      AND reg          = ANY(ARRAY[$region_codes:numeric])          -- $region_code
+      AND chp          = ANY(ARRAY[$carrier_codes:numeric])
+      AND reg          = ANY(ARRAY[$region_codes:numeric])     -- $region_code
       AND anal_rasch   LIKE ANY(ARRAY[$calculation_types])     -- $calculation_type
       AND anal_vid_bil LIKE ANY(ARRAY[$document_types])        -- $document_type
       AND anal_oper    LIKE ANY(ARRAY[$operation_types])       -- $operation_type
@@ -35,6 +36,7 @@ WITH base as (
      )
 SELECT
     date                         as "Дата продажи",  -- $date
+    concat('20.', chp)           as "Перевозчик",    -- $carrier
     substr(anal_rasch, 1, 3)     as "Вид расчёта",   -- $calculation_type
     substr(anal_vid_bil, 1, 3)   as "Вид документа", -- $document_type
     anal_oper                    as "Вид операции",  -- $operation_type
@@ -51,11 +53,13 @@ LEFT JOIN bags USING (row_number)
 
 GROUP BY TRUE
        ,"Дата продажи"          -- $date
+       ,"Перевозчик"       -- $carrier
        ,"Вид расчёта"    -- $calculation_type
        ,"Вид документа"  -- $document_type
        ,"Вид операции"     -- $operation_type
 ORDER BY TRUE
        ,"Дата продажи"          -- $date
+       ,"Перевозчик"       -- $carrier
        ,"Вид расчёта"    -- $calculation_type
        ,"Вид документа"  -- $document_type
        ,"Вид операции"     -- $operation_type

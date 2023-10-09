@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.report;
+package org.vniizht.suburbsweb.service;
 
 import org.springframework.stereotype.Service;
 

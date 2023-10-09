@@ -24,8 +24,6 @@ public class Handler {
             return HttpStatus.IM_USED;
         } else if (ex instanceof LoginException) {
             return HttpStatus.UNAUTHORIZED;
-        } else if (ex instanceof UserCheckException) {
-            return HttpStatus.FORBIDDEN;
         } else if (ex instanceof HttpMediaTypeNotSupportedException) {
             return HttpStatus.UNSUPPORTED_MEDIA_TYPE;
         } else if (ex instanceof HttpMessageNotReadableException || ex instanceof MissingRequestHeaderException) {

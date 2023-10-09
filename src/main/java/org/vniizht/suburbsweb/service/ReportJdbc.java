@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.report;
+package org.vniizht.suburbsweb.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,6 +18,7 @@ public abstract class ReportJdbc {
     // Key is a name of $<name> property.
     // Value is a field name.
     // In the query each line with specified name in the comment will be removed from query if the corresponding field has no value
+    // If field key has '!' in the start then line will be removed if the value array size is less or equal to 1
     protected HashMap<String, String> propertiesToDeleteLines = new HashMap<>();
 
     // Key is a name of $<name> property.
@@ -31,9 +32,11 @@ public abstract class ReportJdbc {
     ReportJdbc(){
         // Common
         propertiesToDeleteLines.put("$date", "periodSection.detailsToggleField");
+        propertiesToDeleteLines.put("$carrier", "!mainSection.carriersField");
         propertiesToReplace.put("$start_date", "periodSection.dateField");
         propertiesToReplace.put("$end_date", "periodSection.dateField");
         propertiesToReplace.put("$road_codes", "mainSection.roadsField");
+        propertiesToReplace.put("$carrier_codes:numeric", "mainSection.carriersField");
     }
 
     public SqlRowSet getDataByFieldValues(Map<String, Object> formValues) {
@@ -53,11 +56,12 @@ public abstract class ReportJdbc {
     private String getDeleteLinesRegexp(Map<String, Object> formValues){
         StringJoiner regexpJoiner = new StringJoiner("|");
         propertiesToDeleteLines.forEach((propertyName, fieldKey) -> {
-            Object formValue = formValues.get(fieldKey);
+            boolean valueIsSpecial = fieldKey.contains("!");
+            Object formValue = formValues.get(fieldKey.replace("!", ""));
             if (formValue == null
                 || formValue instanceof Boolean && !(Boolean) formValue
-                || formValue instanceof List && ((List<?>) formValue).isEmpty())
-                regexpJoiner.add(".*\\" + propertyName);
+                || formValue instanceof List && ((List<?>) formValue).size() <= (valueIsSpecial ? 1 : 0))
+                regexpJoiner.add(".*\\" + propertyName + "(?:$|\\s)");
         });
         return regexpJoiner.toString();
     }
@@ -73,7 +77,12 @@ public abstract class ReportJdbc {
                             propertyKey.equals("$end_date")   ? String.valueOf(((List<?>)formValue).get(1)) :
                                     ((List<?>)formValue)
                                             .stream()
-                                            .map(valueItem -> type.equals("numeric") ? String.valueOf(valueItem) : "'"+valueItem+"%'")
+                                            .map(valueItem -> {
+                                                String value = String.valueOf(valueItem);
+                                                if(value.contains("."))
+                                                    value = value.split("\\.")[1];
+                                                return type.equals("numeric") ? value : "'" + value + "%'";
+                                            })
                                             .collect(Collectors.joining(", ")));
                 }
             }

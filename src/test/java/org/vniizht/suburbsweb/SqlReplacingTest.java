@@ -1,14 +1,9 @@
 package org.vniizht.suburbsweb;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.vniizht.suburbsweb.service.report.DeparturesReportJdbc;
-import org.vniizht.suburbsweb.service.report.SalesReportJdbc;
-import org.vniizht.suburbsweb.util.ResourcesAccess;
-
-import java.io.File;
-import java.io.IOException;
+import org.vniizht.suburbsweb.service.DeparturesReportJdbc;
+import org.vniizht.suburbsweb.service.SalesReportJdbc;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
