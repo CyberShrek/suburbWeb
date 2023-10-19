@@ -79,8 +79,6 @@ public abstract class ReportJdbc {
                                             .stream()
                                             .map(valueItem -> {
                                                 String value = String.valueOf(valueItem);
-                                                if(value.contains("."))
-                                                    value = value.split("\\.")[1];
                                                 return type.equals("numeric") ? value : "'" + value + "%'";
                                             })
                                             .collect(Collectors.joining(", ")));

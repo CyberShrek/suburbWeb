@@ -4,6 +4,6 @@
     "date": "periodSection.dateField"
   },
   "properties": {
-    "countries": ["20"]
+    "countries": [20]
   }
 }

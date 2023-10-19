@@ -1,6 +1,6 @@
 SELECT
     date                         as "Дата продажи",     -- $date
-    concat('20.', chp)           as "Перевозчик",       -- $carrier
+    chp                          as "Перевозчик",       -- $carrier
     train_category               as "Категория поезда", -- $train_category
     sum(kol_pas)                 as "Количество пассажиров",
     ''                           as "Средняя дальность",

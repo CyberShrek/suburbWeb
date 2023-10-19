@@ -36,7 +36,7 @@ WITH base as (
      )
 SELECT
     date                         as "Дата продажи",  -- $date
-    concat('20.', chp)           as "Перевозчик",    -- $carrier
+    chp                          as "Перевозчик",    -- $carrier
     substr(anal_rasch, 1, 3)     as "Вид расчёта",   -- $calculation_type
     substr(anal_vid_bil, 1, 3)   as "Вид документа", -- $document_type
     anal_oper                    as "Вид операции",  -- $operation_type

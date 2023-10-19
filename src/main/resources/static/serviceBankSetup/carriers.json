@@ -2,5 +2,9 @@
   "type": "carriers",
   "propertiesSources": {
     "date": "periodSection.dateField"
-  }
+  },
+  "properties": {
+    "countries": [20],
+      "prpp": 1
+    }
 }
