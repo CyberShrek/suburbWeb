@@ -1,3 +1,12 @@
-p7
-p8
-p9
+yymm
+list
+dor
+kol_zap
+kol_del
+kol_raz
+kol_abon
+kol_ab_k
+plata
+poteri
+kol_porc
+date_zap

@@ -11,15 +11,15 @@ import javax.persistence.Table;
 @Getter
 @Setter
 public class T5 {
-    private float           yymm;
+    private int             yymm;
     private String          p1;
     private String          p2;
     private int             p3;
     private int             p4;
     private int             p5;
-    private float           p6;
-    private float           p7;
-    private float           p8;
-    private float           p9;
-    private float           p10;
+    private long            p6;
+    private long            p7;
+    private long            p8;
+    private long            p9;
+    private long            p10;
 }

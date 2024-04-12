@@ -11,7 +11,7 @@ import javax.persistence.Table;
 @Getter
 @Setter
 public class T2 {
-    private float           yymm;
+    private int             yymm;
     private String          p1;
     private String          p2;
     private int             p3;

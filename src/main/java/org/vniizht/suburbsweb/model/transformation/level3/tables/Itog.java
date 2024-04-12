@@ -15,15 +15,12 @@ import java.sql.Date;
 public class Itog {
     private long            idnum;
     private int             request_num;
-    @Id
     private short           yymm;
     private int             k_bil;
     private int             nom_mar;
     private int             nom_bil;
     private int             nom_dat;
-    @Id
     private Date            date_zap;
-    @Id
     private int             part_zap;
     private Date            date_beg;
     private Date            date_end;

@@ -14,7 +14,7 @@ import java.sql.Date;
 public class Times {
     private Date            date;
     private String          time;
-    private int             time2;
+    private double          time2;
     private String          dann;
     private String          oper;
     private Date            date_zap;

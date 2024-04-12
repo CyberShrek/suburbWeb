@@ -5,10 +5,11 @@ import lombok.Setter;
 import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "l2_prig_adi")
+@Table(name = "l2_prig_adi", indexes = @Index(name = "l2_prig_adi_indid", columnList = "id, doc_num"))
 @Getter
 @Setter
 public class Adi extends AbstractParent {

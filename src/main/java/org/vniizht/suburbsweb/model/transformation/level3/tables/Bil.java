@@ -5,15 +5,15 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.sql.Date;
 
 @Entity
-@Table(name = "prig_bil")
+@Table(name = "prig_bil", indexes = @Index(name = "l3_prig_prig_bil_ind", columnList = "nom_bil"))
 @Getter
 @Setter
 public class Bil {
-    @Id
     private int             nom_bil;
     private short           k_pas;
     private short           srok_bil;

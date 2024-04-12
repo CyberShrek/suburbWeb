@@ -5,13 +5,17 @@ import lombok.Setter;
 import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "l2_prig_main")
+@Table(name = "l2_prig_main", indexes = {
+        @Index(name = "l2_prig_main_ind0", columnList = "kodbi"),
+        @Index(name = "l2_prig_main_indid", columnList = "id, doc_num")
+})
 @Getter
 @Setter
 public class Main extends AbstractParent {

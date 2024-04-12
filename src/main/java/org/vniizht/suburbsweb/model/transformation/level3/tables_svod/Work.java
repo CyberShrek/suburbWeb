@@ -61,7 +61,7 @@ public class Work {
     private float           vatrate;
     private String          shipment_type;
     private char            flg_internet;
-    private float           card_cost;
+    private int             card_cost;
     private float           vat_cost;
     private float           sum_sbv;
     private float           vatrate_vz;
