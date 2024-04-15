@@ -2,6 +2,7 @@ package org.vniizht.suburbsweb.model.transformation.level2.tables;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
 
 import javax.persistence.Entity;
@@ -12,27 +13,30 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "l2_prig_main", indexes = {
-        @Index(name = "l2_prig_main_ind0", columnList = "kodbi"),
+@Table(schema = "zzz_rawdl2_old",
+        name = "l2_prig_main", indexes = {
+        @Index(name = "l2_prig_main_ind0", columnList = "kodbl"),
         @Index(name = "l2_prig_main_indid", columnList = "id, doc_num")
 })
+@ToString(callSuper=true)
 @Getter
 @Setter
 public class Main extends AbstractParent {
+    private String      kodbl;
     private Time        request_time;
-    private short       request_type;
-    private short       request_subtype;
-    private char        oper;
-    private char        oper_g;
-    private char        registration_method;
+    private Short       request_type;
+    private Short       request_subtype;
+    private Character   oper;
+    private Character   oper_g;
+    private Character   registration_method;
     private Date        operation_date;
     private Date        ticket_begdate;
-    private char        train_category;
+    private Character   train_category;
     private String      train_num;
-    private short       agent_code;
-    private short       carriage_code;
-    private char        paymenttype;
-    private String      channels_code;
+    private Short       agent_code;
+    private Short       carriage_code;
+    private Character   paymenttype;
+    private String      els_code;
     private String      sale_station;
     private String      region_code;
     private String      payagent_id;
@@ -40,53 +44,53 @@ public class Main extends AbstractParent {
     private String      departure_station;
     private String      arrival_station;
     private String      intermed_station;
-    private short       departure_zone;
-    private short       arrival_zone;
-    private short       intermed_zone;
-    private char        doc_type;
-    private short       pass_qty;
-    private char        carryon_type;
-    private short       carryon_weight;
-    private char        flg_2wayticket;
-    private char        flg_1wayticket;
-    private char        flg_child;
-    private char        flg_military;
-    private char        flg_benefit;
-    private char        flg_so;
-    private char        flg_nu;
-    private char        flg_tt;
-    private short       seatstick_limit;
-    private char        carriage_class;
+    private Short       departure_zone;
+    private Short       arrival_zone;
+    private Short       intermed_zone;
+    private Character   doc_type;
+    private Short       pass_qty;
+    private Character   carryon_type;
+    private Short       carryon_weight;
+    private Character   flg_2wayticket;
+    private Character   flg_1wayticket;
+    private Character   flg_child;
+    private Character   flg_military;
+    private Character   flg_benefit;
+    private Character   flg_so;
+    private Character   flg_nu;
+    private Character   flg_tt;
+    private Short       seatstick_limit;
+    private Character   carriage_class;
     private String      benefitgroup_code;
     private String      benefit_code;
-    private char        flg_bsp;
+    private Character   flg_bsp;
     private Date        ticket_enddate;
     private Date        return_date;
     private String      benefit_region;
-    private long        total_sum;
-    private long        tariff_sum;
-    private long        department_sum;
-    private long        fee_sum;
-    private long        fee_vat;
-    private long        refundfee_sum;
-    private long        refunddepart_sum;
-    private short       military_code;
-    private short       benefit_percent;
+    private Long        total_sum;
+    private Long        tariff_sum;
+    private Long        department_sum;
+    private Long        fee_sum;
+    private Long        fee_vat;
+    private Long        refundfee_sum;
+    private Long        refunddepart_sum;
+    private Short       military_code;
+    private Short       benefit_percent;
     private String      abonement_type;
-    private char        flg_carryon;
-    private char        flg_fee_onboard;
-    private char        flg_fee_o;
-    private char        flg_fee_v;
-    private char        flg_service;
+    private Character   flg_carryon;
+    private Character   flg_fee_onboard;
+    private Character   flg_fee_o;
+    private Character   flg_fee_v;
+    private Character   flg_service;
     private String      user_id;
     private String      payment_id;
-    private char        spectarif_code;
-    private int         date_template;
+    private Character   spectarif_code;
+    private Integer     date_template;
     private String      server_datetime;
-    private int         server_reqnum;
-    private int         server_stcode;
-    private char        abonement_subtype;
-    private char        flg_official_benefit;
-    private char        no_use;
+    private Integer     server_reqnum;
+    private Integer     server_stcode;
+    private Character   abonement_subtype;
+    private Character   flg_official_benefit;
+    private Character   no_use;
     private Timestamp   write_time;
 }
