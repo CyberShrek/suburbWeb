@@ -25,22 +25,28 @@ public class Level2Data {
     @Transactional
     public Map<Long, Record> getRecordsByIdGreaterThan(Long id) {
         Map<Long, Record> result = new LinkedHashMap<>();
-        processRepoInserts(Adi.class, result);
-        processRepoInserts(Cost.class, result);
-        processRepoInserts(Main.class, result);
-        return result;
-    }
-
-    private void processRepoInserts(Class<? extends AbstractParent> itemClass, Map<Long, Record> targetMap){
+        processRecordAdd(Adi.class, item, targetMap);
+        addEntity(Adi.class, result);
+        addEntity(Cost.class, result);
+        addEntity(Main.class, result);
         (itemClass == Adi.class ? adiRepo
                 : itemClass == Cost.class ? costRepo
                 : mainRepo).findAll().forEach(
-                        item -> processRecordInsert(itemClass, item, targetMap));
+                item -> processRecordAdd(itemClass, item, targetMap));
+        return result;
     }
 
-    private void processRecordInsert(Class<? extends AbstractParent> itemClass,
-                                     AbstractParent recordItem,
-                                     Map<Long, Record> targetMap) {
+    private void addEntity(Class<? extends AbstractParent> itemClass,
+                           Map<Long, Record> targetMap){
+        (itemClass == Adi.class ? adiRepo
+                : itemClass == Cost.class ? costRepo
+                : mainRepo).findAll().forEach(
+                        item -> processRecordAdd(itemClass, item, targetMap));
+    }
+
+    private void processRecordAdd(Class<? extends AbstractParent> itemClass,
+                                  AbstractParent recordItem,
+                                  Map<Long, Record> targetMap) {
         targetMap.compute(recordItem.getId(), (key, record) -> {
             if(record == null) {
                 record = new Record();

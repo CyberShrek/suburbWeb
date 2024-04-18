@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "zzz_rawdl2_old",
+@Table(schema = "rawdl2",
         name = "l2_prig_cost",
         indexes = @Index(name = "l2_prig_cost_indid", columnList = "id, doc_num"))
 @IdClass(Cost.Identifier.class)

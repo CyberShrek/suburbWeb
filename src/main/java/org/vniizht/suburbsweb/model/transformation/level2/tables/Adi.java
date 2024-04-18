@@ -10,7 +10,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
-@Table(schema = "zzz_rawdl2_old",
+@Table(schema = "rawdl2",
         name = "l2_prig_adi",
         indexes = @Index(name = "l2_prig_adi_indid", columnList = "id, doc_num"))
 @Getter

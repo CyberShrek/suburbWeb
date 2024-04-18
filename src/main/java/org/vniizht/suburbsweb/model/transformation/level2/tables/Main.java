@@ -13,7 +13,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 @Entity
-@Table(schema = "zzz_rawdl2_old",
+@Table(schema = "rawdl2",
         name = "l2_prig_main", indexes = {
         @Index(name = "l2_prig_main_ind0", columnList = "kodbl"),
         @Index(name = "l2_prig_main_indid", columnList = "id, doc_num")
