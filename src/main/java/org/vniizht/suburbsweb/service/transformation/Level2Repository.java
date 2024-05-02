@@ -1,6 +1,7 @@
 package org.vniizht.suburbsweb.service.transformation;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Adi;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
@@ -8,23 +9,23 @@ import org.vniizht.suburbsweb.model.transformation.level2.tables.Main;
 
 import java.util.List;
 
-@Repository
-interface Level2Repo<ENTITY, PK> extends JpaRepository<ENTITY, PK> {
-    List<ENTITY> findAllByIdnumGreaterThan(Long id);
+@NoRepositoryBean
+interface Level2Repository<ENTITY, PK> extends JpaRepository<ENTITY, PK> {
+    List<ENTITY> findAllByIdnumGreaterThan(Long idnum);
 }
 
 @Repository
-interface AdiRepo extends Level2Repo<Adi, Long> {
-
-}
-
-@Repository
-interface CostRepo extends Level2Repo<Cost, Cost.Identifier> {
+interface AdiRepository extends Level2Repository<Adi, Long> {
 
 }
 
 @Repository
-interface MainRepo extends Level2Repo<Main, Long> {
+interface CostRepository extends Level2Repository<Cost, Cost.Identifier> {
+
+}
+
+@Repository
+interface MainRepository extends Level2Repository<Main, Long> {
 
 }
 

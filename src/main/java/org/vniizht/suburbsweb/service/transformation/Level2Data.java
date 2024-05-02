@@ -2,12 +2,14 @@ package org.vniizht.suburbsweb.service.transformation;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
+import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Adi;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Main;
+import org.vniizht.suburbsweb.service.Logger;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -18,48 +20,40 @@ import java.util.Map;
 @Service
 public class Level2Data {
 
-    @Autowired private AdiRepo    adiRepo;
-    @Autowired private CostRepo   costRepo;
-    @Autowired private MainRepo   mainRepo;
+    @Autowired private Logger logger;
+
+    @Autowired private AdiRepository adiRepo;
+    @Autowired private CostRepository costRepo;
+    @Autowired private MainRepository mainRepo;
 
     @Transactional
     public Map<Long, Record> getRecordsByIdGreaterThan(Long id) {
         Map<Long, Record> result = new LinkedHashMap<>();
-        processRecordAdd(Adi.class, item, targetMap);
-        addEntity(Adi.class, result);
-        addEntity(Cost.class, result);
-        addEntity(Main.class, result);
-        (itemClass == Adi.class ? adiRepo
-                : itemClass == Cost.class ? costRepo
-                : mainRepo).findAll().forEach(
-                item -> processRecordAdd(itemClass, item, targetMap));
+        addEntityByIdGreaterThan(id, Adi.class, result);
+        addEntityByIdGreaterThan(id, Cost.class, result);
+        addEntityByIdGreaterThan(id, Main.class, result);
         return result;
     }
 
-    private void addEntity(Class<? extends AbstractParent> itemClass,
-                           Map<Long, Record> targetMap){
+    private void addEntityByIdGreaterThan(Long id,
+                                          Class<? extends L2Common> itemClass,
+                                          Map<Long, Record> targetMap){
         (itemClass == Adi.class ? adiRepo
                 : itemClass == Cost.class ? costRepo
-                : mainRepo).findAll().forEach(
+                : mainRepo).findAllByIdnumGreaterThan(id).forEach(
                         item -> processRecordAdd(itemClass, item, targetMap));
     }
 
-    private void processRecordAdd(Class<? extends AbstractParent> itemClass,
-                                  AbstractParent recordItem,
+    private void processRecordAdd(Class<? extends L2Common> itemClass,
+                                  L2Common recordItem,
                                   Map<Long, Record> targetMap) {
-        targetMap.compute(recordItem.getId(), (key, record) -> {
-            if(record == null) {
-                record = new Record();
-            }
-            if(itemClass == Adi.class) {
-                record.setAdi((Adi) recordItem);
-            }
-            else if(itemClass == Main.class) {
-                record.setMain((Main) recordItem);
-            }
-            else if(itemClass == Cost.class) {
-                if(record.getCost() == null) record.setCost(new ArrayList<>());
-                record.getCost().add((Cost) recordItem);
+        targetMap.compute(recordItem.getIdnum(), (key, record) -> {
+            if      (record == null)          record = new Record();
+            if      (itemClass == Adi.class)  record.setAdi((Adi) recordItem);
+            else if (itemClass == Main.class) record.setMain((Main) recordItem);
+            else if (itemClass == Cost.class) {
+                 if (record.getCost() == null) record.setCost(new ArrayList<>());
+                 record.getCost().add((Cost) recordItem);
             }
             return record;
         });
@@ -77,5 +71,9 @@ public class Level2Data {
         public Adi adi;
         public List<Cost> cost;
         public Main main;
+
+        public String toString() {
+            return "adi:\t" + adi + "\ncost:\t" + cost + "\nmain\t" + main;
+        }
     }
 }

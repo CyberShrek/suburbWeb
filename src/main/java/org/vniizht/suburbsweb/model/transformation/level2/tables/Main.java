@@ -3,10 +3,9 @@ package org.vniizht.suburbsweb.model.transformation.level2.tables;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
+import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 import java.sql.Date;
 import java.sql.Time;
@@ -14,14 +13,21 @@ import java.sql.Timestamp;
 
 @Entity
 @Table(schema = "rawdl2",
-        name = "l2_prig_main", indexes = {
-        @Index(name = "l2_prig_main_ind0", columnList = "kodbl"),
-        @Index(name = "l2_prig_main_indid", columnList = "id, doc_num")
-})
+        name = "l2_prig_main")
 @ToString(callSuper=true)
 @Getter
 @Setter
-public class Main extends AbstractParent {
+public class Main extends L2Common {
+    private Long        id;
+    private Integer     request_num;
+    private String      term_pos;
+    private Character   term_dor;
+    private String      term_trm;
+    private Short       arxiv_code;
+    private Short       reply_code;
+    private Short       doc_num;
+    private String      ticket_ser;
+    private Integer     ticket_num;
     private String      kodbl;
     private Time        request_time;
     private Short       request_type;

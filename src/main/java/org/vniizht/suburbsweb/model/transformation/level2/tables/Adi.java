@@ -2,20 +2,19 @@ package org.vniizht.suburbsweb.model.transformation.level2.tables;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Value;
-import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
+import lombok.ToString;
+import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 
 import javax.persistence.Entity;
-import javax.persistence.Index;
 import javax.persistence.Table;
 
 @Entity
 @Table(schema = "rawdl2",
-        name = "l2_prig_adi",
-        indexes = @Index(name = "l2_prig_adi_indid", columnList = "id, doc_num"))
+        name = "l2_prig_adi")
 @Getter
 @Setter
-public class Adi extends AbstractParent {
+@ToString(callSuper=true)
+public class Adi extends L2Common {
     private String      surname;
     private String      initials;
     private String      passport;

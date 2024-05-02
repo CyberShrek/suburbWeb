@@ -4,20 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.vniizht.suburbsweb.model.transformation.level2.AbstractParent;
+import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table(schema = "rawdl2",
-        name = "l2_prig_cost",
-        indexes = @Index(name = "l2_prig_cost_indid", columnList = "id, doc_num"))
+        name = "l2_prig_cost")
 @IdClass(Cost.Identifier.class)
-@ToString(callSuper=true)
 @Getter
 @Setter
-public class Cost extends AbstractParent {
+@ToString(callSuper=true)
+public class Cost extends L2Common {
     @Id
     private Short       doc_reg;
     private Short       route_num;
@@ -33,5 +32,7 @@ public class Cost extends AbstractParent {
     static public class Identifier implements Serializable {
         private Long    idnum;
         private Short   doc_reg;
+
+        public Identifier() { }
     }
 }

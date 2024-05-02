@@ -13,19 +13,9 @@ import java.sql.Date;
 @ToString
 @Getter
 @Setter
-abstract public class AbstractParent implements Serializable {
+abstract public class L2Common implements Serializable {
     @Id
     private Long        idnum;
-    private Long        id;
     private Integer     yyyymm;
     private Date        request_date;
-    private Integer     request_num;
-    private String      term_pos;
-    private Character   term_dor;
-    private String      term_trm;
-    private Short       arxiv_code;
-    private Short       reply_code;
-    private Short       doc_num;
-    private String      ticket_ser;
-    private Integer     ticket_num;
 }
