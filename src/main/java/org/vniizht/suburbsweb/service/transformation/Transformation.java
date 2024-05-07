@@ -7,6 +7,9 @@ import org.vniizht.suburbsweb.model.transformation.level3.tables_co22.*;
 import org.vniizht.suburbsweb.model.transformation.level3.tables_lgot.Reestr;
 import org.vniizht.suburbsweb.model.transformation.level3.tables_lgot.Stat;
 import org.vniizht.suburbsweb.service.Logger;
+import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
+import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
+import org.vniizht.suburbsweb.service.transformation.data.NsiData;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
@@ -16,6 +19,7 @@ import java.util.Map;
 public class Transformation {
 
     @Autowired private Logger     logger;
+    @Autowired private NsiData    nsiData;
     @Autowired private Level2Data level2Data;
     @Autowired private Level3Data level3Data;
 
@@ -33,35 +37,35 @@ public class Transformation {
         logger.log("Конец трансформации");
     }
 
-    private void transform(Long id, Level2Data.Record record) {
+    private void transform(Long id, Level2Data.Record l2Record) {
         logger.log("Трансформация " + id);
 
         logger.log("\tЦО22");
-        T1 t1 = createT1(record);
-        T2 t2 = createT2(record, t1);
-        T3 t3 = createT3(record, t1);
-        T4 t4 = createT4(record, t1);
-        T5 t5 = createT5(record, t1, t2, t3);
-        T6 t6 = createT6(record, t1);
+        T1 t1 = createT1(l2Record, 1);
+        T2 t2 = createT2(l2Record, t1);
+        T3 t3 = createT3(l2Record, t1);
+        T4 t4 = createT4(l2Record, t1);
+        T5 t5 = createT5(l2Record, t1, t2, t3);
+        T6 t6 = createT6(l2Record, t1);
 
         logger.log("\tЛьготные");
-        Reestr reestr = createReestr(record);
-        Stat   stat   = createStat  (record);
+        Reestr reestr = createReestr(l2Record);
+        Stat   stat   = createStat  (l2Record);
     }
 
-    private T1 createT1(Level2Data.Record record) {
+    private T1 createT1(Level2Data.Record l2, int serial) {
         logger.log("\t\tprig_co22_t1");
         return T1.builder()
-                .idnum(record.main.getIdnum())
-                .request_num(record.main.getRequest_num())
-                .yymm(record.main.getYyyymm() - (record.main.getYyyymm()/1000000*1000000))
+                .idnum(l2.main.getIdnum())
+                .request_num(l2.main.getRequest_num())
+                .yymm(Util.yyyymm2yymm(l2.main.getYyyymm()))
                 .p1("tab1")
-//                .p2(1)
-                .p3()
-//                .p4()
-//                .p5()
-//                .p6()
-//                .p7()
+                .p2(serial)
+                .p3(Util.date2yyyy(l2.main.getOperation_date()))
+                .p4(Util.date2mm(l2.main.getOperation_date()))
+                .p5(nsiData.getRoadByStationAndDate(l2.main.getDeparture_station(), l2.main.getOperation_date(), true)) // ??
+                .p6(nsiData.getRoadByStationAndDate(l2.main.getDeparture_station(), l2.main.getOperation_date())) // ??
+                .p7(nsiData.getRoadByStationAndDate(l2.main.getDeparture_station(), l2.main.getOperation_date())) // ??
 //                .p8()
 //                .p9()
 //                .p10()
@@ -177,11 +181,11 @@ public class Transformation {
     @PostConstruct
     private void showSome(){
 
-//        Long lastLevel3Id = level3Data.getLastId();
-//        logger.log("Last level 3 id: " + lastLevel3Id);
-//        Map<Long, Level2Data.Record> records = level2Data.getRecordsByIdGreaterThan(lastLevel3Id);
-//        logger.log("Level 2 data with id greater than " + lastLevel3Id + " size: " + records.size());
-//        logger.log("The data:");
-//        records.forEach((id, record) -> logger.log(id + ":\n" + record.toString()));
+        Long lastLevel3Id = level3Data.getLastId();
+        logger.log("Last level 3 id: " + lastLevel3Id);
+        Map<Long, Level2Data.Record> records = level2Data.getRecordsByIdGreaterThan(lastLevel3Id);
+        logger.log("Level 2 data with id greater than " + lastLevel3Id + " size: " + records.size());
+        logger.log("The data:");
+        records.forEach((id, record) -> logger.log(id + ":\n" + record.toString()));
     }
 }

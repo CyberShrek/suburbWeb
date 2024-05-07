@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.transformation;
+package org.vniizht.suburbsweb.service.transformation.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;

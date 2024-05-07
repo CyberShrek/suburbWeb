@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.transformation;
+package org.vniizht.suburbsweb.service.transformation.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;

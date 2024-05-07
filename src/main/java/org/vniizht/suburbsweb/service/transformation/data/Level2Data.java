@@ -1,8 +1,7 @@
-package org.vniizht.suburbsweb.service.transformation;
+package org.vniizht.suburbsweb.service.transformation.data;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
