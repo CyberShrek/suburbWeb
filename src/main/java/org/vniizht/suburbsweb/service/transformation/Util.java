@@ -12,6 +12,14 @@ public class Util {
         return Integer.toString(date.getYear() + 1900);
     }
 
+    public static String date2yy(Date date) {
+        return Integer.toString(date.getYear() % 100);
+    }
+
+    public static String date2yymm(Date date) {
+        return date2yy(date) + date2mm(date);
+    }
+
     public static String date2mm(Date date) {
         return Integer.toString(date.getMonth() + 1);
     }

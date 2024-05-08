@@ -18,4 +18,5 @@ public class Sf {
     @Id
     private Integer         id;
     private String sf_kodokato;
+    private String     sf_kod2;
 }

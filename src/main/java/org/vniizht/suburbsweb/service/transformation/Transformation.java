@@ -13,6 +13,7 @@ import org.vniizht.suburbsweb.service.transformation.data.NsiData;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Scope("singleton")
@@ -63,19 +64,19 @@ public class Transformation {
                 .p2(serial)
                 .p3(Util.date2yyyy(l2.main.getOperation_date()))
                 .p4(Util.date2mm(l2.main.getOperation_date()))
-                .p5(nsiData.getRoadByStationAndDate(l2.main.getDeparture_station(), l2.main.getOperation_date(), true)) // ??
-                .p6(nsiData.getRoadByStationAndDate(l2.main.getDeparture_station(), l2.main.getOperation_date())) // ??
-                .p7(nsiData.getRoadByStationAndDate(l2.main.getDeparture_station(), l2.main.getOperation_date())) // ??
-//                .p8()
-//                .p9()
-//                .p10()
-//                .p11()
-//                .p12()
-//                .p13()
-//                .p14()
-//                .p15()
-//                .p16()
-//                .p17()
+                .p5(nsiData.getRoad(l2.main.getSale_station(), l2.main.getOperation_date(), true)) // ??
+                .p6(nsiData.getRoad(l2.main.getSale_station(), l2.main.getOperation_date())) // ??
+                .p7(nsiData.getRoad(l2.main.getSale_station(), l2.main.getOperation_date())) // ??
+                .p8(l2.main.getSale_station())
+                .p9(String.valueOf(l2.main.getCarriage_code()))
+                .p10(Optional.ofNullable(nsiData.getRegion(l2.main.getSale_station(), l2.main.getOperation_date())).orElse("00"))
+                .p11(Optional.ofNullable(nsiData.getOkato(l2.main.getSale_station(), l2.main.getOperation_date())).orElse("00000")) // ?? см метод
+                .p12(Util.date2yymm(l2.main.getTicket_begdate())) // ??
+                .p13(nsiData.getRoad(l2.main.getDeparture_station(), l2.main.getTicket_begdate())) // !!
+                .p14(String.valueOf(l2.main.getDeparture_zone())) // ??
+                .p15(l2.main.getDeparture_station())
+                .p16(Optional.ofNullable(nsiData.getRegion(l2.main.getDeparture_station(), l2.main.getOperation_date())).orElse("00"))
+                .p17(Optional.ofNullable(nsiData.getOkato(l2.main.getDeparture_station(), l2.main.getOperation_date())).orElse("00000"))
 //                .p18()
 //                .p19()
 //                .p20()
