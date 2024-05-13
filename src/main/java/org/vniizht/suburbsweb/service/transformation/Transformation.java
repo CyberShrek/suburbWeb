@@ -12,8 +12,8 @@ import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
 import org.vniizht.suburbsweb.service.transformation.data.NsiData;
 
 import javax.annotation.PostConstruct;
+import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Scope("singleton")
@@ -56,41 +56,71 @@ public class Transformation {
 
     private T1 createT1(Level2Data.Record l2, int serial) {
         logger.log("\t\tprig_co22_t1");
+
+        // Даты
+        Date operationDate = l2.main.getOperation_date(),
+             ticketBegDate = l2.main.getTicket_begdate(),
+             ticketEndDate = l2.main.getTicket_enddate();
+
+        // Станции
+        String operationStation = l2.main.getSale_station(),
+                depStation = l2.main.getDeparture_station(),
+                arrStation = l2.main.getArrival_station();
+
+        // Флаги
+        Character  so = l2.main.getFlg_so(),
+                  bsp = l2.main.getFlg_bsp(),
+                child = l2.main.getFlg_child(),
+                  bag = l2.main.getFlg_carryon(),
+               twoWay = l2.main.getFlg_2wayticket();
+
+        // Прочее
+        String   carriageCode = String.valueOf(l2.main.getCarriage_code()),
+                  benefitCode = l2.main.getBenefit_code(),
+                        webId = l2.main.getWeb_id();
+        Character paymentType = l2.main.getPaymenttype(),
+                abonementType = l2.main.getAbonement_type().charAt(0),
+                  luggageType = l2.main.getCarryon_type(),
+                trainCategory = l2.main.getTrain_category(),
+                carriageClass = l2.main.getCarriage_class();
+
+        // Игнорировать если действие билета истекло
         return T1.builder()
                 .idnum(l2.main.getIdnum())
                 .request_num(l2.main.getRequest_num())
-                .yymm(Util.yyyymm2yymm(l2.main.getYyyymm()))
+                .date_zap(l2.main.getRequest_date())
+//                .yymm(Transformer.yyyymm2yymm(l2.main.getYyyymm()))
                 .p1("tab1")
                 .p2(serial)
-                .p3(Util.date2yyyy(l2.main.getOperation_date()))
-                .p4(Util.date2mm(l2.main.getOperation_date()))
-                .p5(nsiData.getRoad(l2.main.getSale_station(), l2.main.getOperation_date(), true)) // ??
-                .p6(nsiData.getRoad(l2.main.getSale_station(), l2.main.getOperation_date())) // ??
-                .p7(nsiData.getRoad(l2.main.getSale_station(), l2.main.getOperation_date())) // ??
-                .p8(l2.main.getSale_station())
-                .p9(String.valueOf(l2.main.getCarriage_code()))
-                .p10(Optional.ofNullable(nsiData.getRegion(l2.main.getSale_station(), l2.main.getOperation_date())).orElse("00"))
-                .p11(Optional.ofNullable(nsiData.getOkato(l2.main.getSale_station(), l2.main.getOperation_date())).orElse("00000")) // ?? см метод
-                .p12(Util.date2yymm(l2.main.getTicket_begdate())) // ??
-                .p13(nsiData.getRoad(l2.main.getDeparture_station(), l2.main.getTicket_begdate())) // !!
-                .p14(String.valueOf(l2.main.getDeparture_zone())) // ??
-                .p15(l2.main.getDeparture_station())
-                .p16(Optional.ofNullable(nsiData.getRegion(l2.main.getDeparture_station(), l2.main.getOperation_date())).orElse("00"))
-                .p17(Optional.ofNullable(nsiData.getOkato(l2.main.getDeparture_station(), l2.main.getOperation_date())).orElse("00000"))
-//                .p18()
-//                .p19()
-//                .p20()
-//                .p21()
-//                .p22()
-//                .p23()
-//                .p24()
-//                .p25()
-//                .p26()
-//                .p27()
-//                .p28()
-//                .p29()
-//                .p30()
-//                .p31()
+                .p3(Transformer.date2yyyy(operationDate))
+                .p4(Transformer.date2mm(operationDate))
+                .p5("17")
+                .p6(nsiData.getRoad(operationStation, operationDate)) // ??
+                .p7(nsiData.getRoad(operationStation, operationDate)) // ??
+                .p8(operationStation)
+                .p9(carriageCode)
+                .p10("00")
+                .p11(nsiData.getOkato(operationStation, operationDate))
+//                .p12(Transformer.date2yymm(ticketBegDate))
+                .p13(nsiData.getRoad(depStation, operationDate)) // !!
+                .p14(Transformer.interpretDepartment(nsiData.getDepartment(depStation, operationDate))) // !!
+                .p15(depStation)
+                .p16(nsiData.getRegion(depStation, operationDate)) // !!
+                .p17(nsiData.getOkato(depStation, operationDate)) // !!
+                .p18(nsiData.getArea(depStation, operationDate)) // !!
+                .p19(Transformer.interpretTrainCategory(trainCategory, '?')) // !! 2 и 3
+                .p20(Transformer.interpretCarriageClass(carriageClass))
+                .p21(Transformer.interpretTicketType('?', bag, '?', abonementType, twoWay, '?')) // Спросить Корзун про тип документа
+                .p22(Transformer.interpretPassengerCategory(bsp, child, benefitCode))
+                .p23('3') // ?
+                .p24(benefitCode)
+                .p25(Transformer.interpretPaymentType(paymentType, benefitCode, '?' , webId)) // !!
+                .p26("?") // lgots.lgot
+                //.p27() // берётся из функции
+                //.p28() // берётся из функции
+                //.p29() // берётся из функции
+                .p30(Transformer.interpretOkato(nsiData.getOkato(arrStation, operationDate)))
+                .p31(nsiData.getArea(arrStation, operationDate))
 //                .p32()
 //                .p33()
 //                .p34()
@@ -111,18 +141,18 @@ public class Transformation {
 //                .p49()
 //                .p50()
 //                .p51()
-//                .p52()
-//                .p53()
-//                .p54()
-//                .p55()
-//                .p56()
-//                .p57()
-//                .p58()
-//                .p59()
-//                .p60()
-//                .p61()
-//                .p62()
-//                .p63()
+                .p52(Transformer.interpretDocRegistration('?', "?", l2.main.getRequest_type(), l2.main.getRequest_subtype()))
+                .p53(String.valueOf(l2.main.getAgent_code()))
+                .p54(arrStation)
+                .p55(Transformer.interpretAbonementType(abonementType))
+//                .p56() жду справочник
+                .p57(Transformer.interpretLuggageType(luggageType))
+                .p58(so)
+                .p59(so)
+                .p60("???")
+//                .p61() // берётся из функции
+//                .p62() // берётся из функции
+//                .p63() // берётся из функции
                 .build();
     }
 

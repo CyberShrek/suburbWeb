@@ -21,6 +21,6 @@ interface DorRepository extends NsiRepository<Dor, Integer> {
 
 @Repository
 interface StanvRepository extends NsiRepository<Stanv, Integer> {
-    Stanv findFirstByStanAndDatandGreaterThanEqualAndDatakdLessThanEqual(String stan, Date date1, Date date2);
+    Stanv findFirstByStanAndDataniGreaterThanEqualAndDatakdLessThanEqual(String stan, Date date1, Date date2);
 }
 

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.nsi.Stanv;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class NsiData {
@@ -23,16 +24,24 @@ public class NsiData {
         return getRoad(stationCode, date, false);
     }
 
+    public String getDepartment(String stationCode, Date date) {
+        return findStanv(stationCode, date).getOtd();
+    }
+
     public String getRegion(String stationCode, Date date) {
-        return findStanv(stationCode, date).getSf();
+        return Optional.ofNullable(findStanv(stationCode, date).getSf()).orElse("00");
     }
 
     public String getOkato(String stationCode, Date date) {
-        return findStanv(stationCode, date).getKodokato();
+        return Optional.ofNullable(findStanv(stationCode, date).getKodokato()).orElse("00000");
+    }
+
+    public String getArea(String stationCode, Date date) {
+        return findStanv(stationCode, date).getNopr(); // ??
     }
 
     private Stanv findStanv(String stationCode, Date date){
         return stanvRepo
-                .findFirstByStanAndDatandGreaterThanEqualAndDatakdLessThanEqual(stationCode, date, date);
+                .findFirstByStanAndDataniGreaterThanEqualAndDatakdLessThanEqual(stationCode, date, date);
     }
 }

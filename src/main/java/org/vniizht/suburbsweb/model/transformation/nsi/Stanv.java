@@ -21,9 +21,10 @@ public class Stanv {
     private String        stan;
     private String        nopr;
     private Character      dor;
+    private String         otd;
     private String          sf;
     private String         gos;
     private String    kodokato;
-    private Date        datand;
+    private Date        datani;
     private Date        datakd;
 }
