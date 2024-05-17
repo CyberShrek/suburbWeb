@@ -60,18 +60,24 @@ public class Transformer {
         return "0" + carriageClass;
     }
 
-    public static Character interpretTicketType(Character carrionType,
+    public static Character interpretTicketType(
                                                 Character abonementType,
+                                                Character carrion,
+                                                Character onboard,
                                                 Character twoWay) {
-        if(abonementType == '0') {
-            if(carrionType == ' ')
-                return (twoWay == '1') ? '3' : '2';
-            else
-                return '6';
-        }
+        if(onboard == '1')
+            return '8';
 
+        if(carrion == '1')
+            return '6';
 
-        return '0';
+        if(abonementType == '8')
+            return '1';
+
+        if(abonementType == '0')
+            return (twoWay == '1') ? '3' : '2';
+
+        return '5';
     }
 
     public static Character interpretPassengerCategory(Character bsp,

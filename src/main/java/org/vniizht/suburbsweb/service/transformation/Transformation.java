@@ -71,7 +71,8 @@ public class Transformation {
         Character  so = l2.main.getFlg_so(),
                   bsp = l2.main.getFlg_bsp(),
                 child = l2.main.getFlg_child(),
-                  bag = l2.main.getFlg_carryon(),
+              carryon = l2.main.getFlg_carryon(),
+              onboard = l2.main.getFlg_fee_onboard(),
                twoWay = l2.main.getFlg_2wayticket();
 
         // Прочее
@@ -110,7 +111,7 @@ public class Transformation {
                 .p18(nsiData.getArea(depStation, operationDate)) // !!
                 .p19(Transformer.interpretTrainCategory(trainCategory, '?')) // !! 2 и 3
                 .p20(Transformer.interpretCarriageClass(carriageClass))
-                .p21(Transformer.interpretTicketType(carrionType, abonementType, twoWay))
+                .p21(Transformer.interpretTicketType(abonementType, carrion, onboard, twoWay))
                 .p22(Transformer.interpretPassengerCategory(bsp, child, benefitCode))
                 .p23('3') // ?
                 .p24(benefitCode)
