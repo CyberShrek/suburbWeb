@@ -32,28 +32,17 @@ public class Transformer {
         return okato.substring(0, 5); // ???
     }
 
-    public static Character interpretTrainCategory(Character category, Character prod) {
-//                case.
-//         when train_category='С' then '6'
-//         when train_category='7' then '5'
-//         when train_category='А' then '8'
-//         when train_category='Г' then '9'
-//         when train_category='Л' then 'Л'
-//         when train_category='Б' then '7'
-//         when train_category in('1','М') then '4'
-//         when prod in('i','m') then '4'  else '1' end
+    public static Character interpretTrainCategory(Character category) {
         switch (category){
-            case 'С': category = '6'; break;
-            case '7': category = '5'; break;
-            case 'А': category = '8'; break;
-            case 'Г': category = '9'; break;
-            case 'Б': category = '7'; break;
+            case 'С': return '6'; // скорые пригородные поезда типа «Спутник» (7ХХХ)
+            case '7': return '5'; // скорые пригородные поезда без предоставления мест (7ХХХ)
+            case 'А': return '8'; // рельсовые автобусы 6000-е
+            case 'Б': return '7'; // рельсовые автобусы 7000-е
+            case 'Г': return '9'; // городские линии
             case '1':
-            case 'М': category = '4'; break;
-            default:  category = '1';
+            case 'М': return '4'; // скорые пригородные с предоставлением мест (7XXX(8xx-c АМГ))
+            default:  return '1'; // пригородные пассажирские
         }
-        return category == '1' && (prod == 'i' || prod == 'm')
-                ? '4' : category;
     }
 
     public static String interpretCarriageClass(Character carriageClass) {
@@ -65,56 +54,75 @@ public class Transformer {
                                                 Character carrion,
                                                 Character onboard,
                                                 Character twoWay) {
+
+        // Квитанция за оформление в поезде
         if(onboard == '1')
             return '8';
 
+        // Перевозочный документ (для багажа)
         if(carrion == '1')
             return '6';
 
-        if(abonementType == '8')
-            return '1';
+        // Билет выходного дня
+        if(abonementType == '5' || abonementType == '6')
+            return '4';
 
+        // Разовый
         if(abonementType == '0')
-            return (twoWay == '1') ? '3' : '2';
+            return (twoWay == '1') ? '3' : '2'; // “туда+обратно” или только “туда”
 
+        // Абонементный
         return '5';
     }
 
     public static Character interpretPassengerCategory(Character bsp,
                                                        Character child,
                                                        String benefitCode) {
-        return    bsp   == '1' ? '4'
-                : child == '1' ? '2'
-                : benefitCode.equals("0") ? '1'
-                : '3';
+        return    bsp   == '1' ? '4'            // Бесплатный
+                : child == '1' ? '2'            // Детский
+                : benefitCode.equals("0") ? '1' // Полный
+                : '3';                          // Льготный
     }
 
-    public static Character interpretPaymentType(Character paymentType,
-                                                 String benefitCode,
-                                                 Character prod,
-                                                 String webId) {
-        return '?';
+    public static Character interpretPaymentType(Character  paymentType,
+                                                 String     siteType,
+                                                 String     plagnVr) {
+
+        // Электронный кошелёк
+        if(siteType.equals("09") && plagnVr.equals("6 "))
+            return '4';
+
+        switch (paymentType){
+            case '8': return '3'; // Банковские карты
+            case '9': return '1'; // Льготные
+            case '1':
+            case '3': return '2'; // Наличные
+            case '6': return '5'; // Безнал для юр. лиц
+        }
+
+        // Интернет
+        return '6';
     }
 
-    public static Character interpretDocRegistration(Character flgRuch,
-                                                     String tsite,
-                                                     short requestType,
+    public static Character interpretDocRegistration(short requestType,
                                                      short requestSubtype) {
-        return flgRuch == '0' ? '1'
-                : tsite != null ? tsite.charAt(0)
-                : requestSubtype == 10 || requestSubtype == 20 || requestSubtype == 25 ? '4'
+        return requestSubtype == 10 || requestSubtype == 20 || requestSubtype == 25 ? '4'
                 : requestType != 64 && requestSubtype >= 200 && requestSubtype <= 299 ? '2'
                 : '5';
     }
 
     public static Character interpretAbonementType(Character abonementType) {
-        return abonementType == '3' ? '1'
-                : abonementType == '5' || abonementType == '6' ? '2'
-                : abonementType == '7' || abonementType == '8' ? '3'
-                : abonementType == '4' ? '1'
-                : abonementType == '1' ? '5'
-                : abonementType == '2' ? '4'
-                : abonementType;
+        switch (abonementType){
+            case '1': return '5'; // билет на количество поездок
+            case '2': return '4'; // билет на определенные даты
+            case '3':
+            case '4': return '1'; // билет «ежедневно»
+            case '5':
+            case '6': return '2'; // билет «выходного дня»
+            case '7':
+            case '8': return '3'; // билет «рабочего дня»
+        }
+        return abonementType;
     }
 
     public static String interpretAbonementValidity(Character abonementType,
@@ -129,10 +137,10 @@ public class Transformer {
 
     public static Character interpretCarrionType(Character carrionType){
         switch (carrionType){
-            case 'Ж': carrionType = '1'; break;
-            case 'Т': carrionType = '2'; break;
-            case 'В': carrionType = '3'; break;
-            case 'Р': carrionType = '4';
+            case 'Ж': return '1'; // живность
+            case 'Т': return '2'; // телевизор
+            case 'В': return '3'; // велосипед
+            case 'Р': return '4'; // излишний вес ручной клади
         }
         return carrionType;
     }

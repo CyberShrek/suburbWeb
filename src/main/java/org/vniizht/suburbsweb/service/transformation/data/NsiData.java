@@ -2,6 +2,8 @@ package org.vniizht.suburbsweb.service.transformation.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.transformation.nsi.Plagn;
+import org.vniizht.suburbsweb.model.transformation.nsi.Site;
 import org.vniizht.suburbsweb.model.transformation.nsi.Stanv;
 
 import java.util.Date;
@@ -12,6 +14,8 @@ public class NsiData {
 
     @Autowired private DorRepository    dorRepo;
     @Autowired private StanvRepository  stanvRepo;
+    @Autowired private SiteRepository   siteRepo;
+    @Autowired private PlagnRepository  plagnRepo;
 
     public String getRoad(String stationCode, Date date, boolean isVc) {
         Stanv stanv = findStanv(stationCode, date);
@@ -40,8 +44,26 @@ public class NsiData {
         return findStanv(stationCode, date).getNopr(); // ??
     }
 
+    public String getTSite(String siteId, String countryCode, Date date){
+        return findSite(siteId, countryCode, date).getTsite();
+    }
+
+    public String getPlagnVr(String plagnId, String countryCode, Date date){
+        return findPlagn(plagnId, countryCode, date).getVr();
+    }
+
     private Stanv findStanv(String stationCode, Date date){
         return stanvRepo
                 .findFirstByStanAndDataniGreaterThanEqualAndDatakdLessThanEqual(stationCode, date, date);
+    }
+
+    private Site findSite(String siteId, String countryCode, Date date){
+        return siteRepo
+                .getFirstByIdsiteAndGosAndDatanGreaterThanEqualAndDatakLessThanEqual(siteId, countryCode, date, date);
+    }
+
+    private Plagn findPlagn(String plagnId, String countryCode, Date date){
+        return plagnRepo
+                .getFirstByIdplagnAndGosAndDatanGreaterThanEqualAndDatakLessThanEqual(plagnId, countryCode, date, date);
     }
 }

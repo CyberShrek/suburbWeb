@@ -62,23 +62,25 @@ public class Transformation {
              ticketBegDate = l2.main.getTicket_begdate(),
              ticketEndDate = l2.main.getTicket_enddate();
 
-        // Станции
+        // Субъекты
         String operationStation = l2.main.getSale_station(),
                      depStation = l2.main.getDeparture_station(),
-                     arrStation = l2.main.getArrival_station();
+                     arrStation = l2.main.getArrival_station(),
+               operationCountry = operationStation.substring(0, 2);
 
         // Флаги
         Character  so = l2.main.getFlg_so(),
                   bsp = l2.main.getFlg_bsp(),
                 child = l2.main.getFlg_child(),
-              carryon = l2.main.getFlg_carryon(),
+              carrion = l2.main.getFlg_carryon(),
               onboard = l2.main.getFlg_fee_onboard(),
                twoWay = l2.main.getFlg_2wayticket();
 
         // Прочее
         String   carriageCode = String.valueOf(l2.main.getCarriage_code()),
                   benefitCode = l2.main.getBenefit_code(),
-                        webId = l2.main.getWeb_id();
+                        webId = l2.main.getWeb_id(),
+                   payagentId = l2.main.getPayagent_id();
         Character paymentType = l2.main.getPaymenttype(),
                 abonementType = l2.main.getAbonement_type().charAt(0),
                   carrionType = l2.main.getCarryon_type(),
@@ -109,13 +111,13 @@ public class Transformation {
                 .p16(nsiData.getRegion(depStation, operationDate)) // !!
                 .p17(nsiData.getOkato(depStation, operationDate)) // !!
                 .p18(nsiData.getArea(depStation, operationDate)) // !!
-                .p19(Transformer.interpretTrainCategory(trainCategory, '?')) // !! 2 и 3
+                .p19(Transformer.interpretTrainCategory(trainCategory))
                 .p20(Transformer.interpretCarriageClass(carriageClass))
                 .p21(Transformer.interpretTicketType(abonementType, carrion, onboard, twoWay))
                 .p22(Transformer.interpretPassengerCategory(bsp, child, benefitCode))
                 .p23('3') // ?
                 .p24(benefitCode)
-                .p25(Transformer.interpretPaymentType(paymentType, benefitCode, '?' , webId)) // !!
+                .p25(Transformer.interpretPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
                 .p26("?") // lgots.lgot
                 //.p27() // берётся из функции
                 //.p28() // берётся из функции
@@ -142,7 +144,7 @@ public class Transformation {
 //                .p49()
 //                .p50()
 //                .p51()
-                .p52(Transformer.interpretDocRegistration('?', "?", l2.main.getRequest_type(), l2.main.getRequest_subtype()))
+                .p52('?')
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)
                 .p55(Transformer.interpretAbonementType(abonementType))
