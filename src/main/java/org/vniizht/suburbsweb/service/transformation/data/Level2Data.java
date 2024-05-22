@@ -68,8 +68,8 @@ public class Level2Data {
     @Setter
     static public class Record{
         public Adi adi;
-        public List<Cost> cost;
         public Main main;
+        public List<Cost> cost;
 
         public String toString() {
             return "adi:\t" + adi + "\ncost:\t" + cost + "\nmain\t" + main;

@@ -5,15 +5,16 @@ import java.util.Date;
 public class Transformer {
 
     public static Integer yyyymm2yymm(Integer yyyymm) {
-        return yyyymm - (yyyymm/1000000*1000000);
+        return yyyymm - (yyyymm/10000*10000);
     }
 
     public static String date2yyyy(Date date) {
-        return Integer.toString(date.getYear() + 1900);
+        return Integer.toString(date.getYear());
     }
 
     public static String date2yy(Date date) {
-        return Integer.toString(date.getYear() % 100);
+        int year = date.getYear() % 100;
+        return (year < 10 ? "0" : "") + year;
     }
 
     public static String date2yymm(Date date) {
@@ -21,7 +22,8 @@ public class Transformer {
     }
 
     public static String date2mm(Date date) {
-        return Integer.toString(date.getMonth() + 1);
+        int month = date.getMonth() + 1;
+        return (month < 10 ? "0" : "") + month;
     }
 
     public static String interpretDepartment(String department) {
@@ -125,15 +127,15 @@ public class Transformer {
         return abonementType;
     }
 
-    public static String interpretAbonementValidity(Character abonementType,
-                                                    short srok_mon,
-                                                    k_pas,
-                                                    srok_bil) {
-        return abonementType == '1' ? '4' + k_pas * 2
-                : abonementType > '1' && srok_bil < 10 ? '10' + srok_bil
-                : abonementType > '1' ? '1' + srok_bil
-                : "000";
-    }
+//    public static String interpretAbonementValidity(Character abonementType,
+//                                                    short srok_mon,
+//                                                    k_pas,
+//                                                    srok_bil) {
+//        return abonementType == '1' ? '4' + k_pas * 2
+//                : abonementType > '1' && srok_bil < 10 ? '10' + srok_bil
+//                : abonementType > '1' ? '1' + srok_bil
+//                : "000";
+//    }
 
     public static Character interpretCarrionType(Character carrionType){
         switch (carrionType){
@@ -143,5 +145,16 @@ public class Transformer {
             case 'Р': return '4'; // излишний вес ручной клади
         }
         return carrionType;
+    }
+
+    public static long interpretPassengersCount(Character ticketType, short passengersCount, short carrionWeight) {
+        switch (ticketType){
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5': return passengersCount;
+        }
+        return carrionWeight;
     }
 }

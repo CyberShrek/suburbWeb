@@ -18,20 +18,19 @@ interface NsiRepository<ENTITY, PK> extends JpaRepository<ENTITY, PK> {
 @Repository
 interface DorRepository extends NsiRepository<Dor, Integer> {
     Dor findFirstByKoddAndKodg(Character kodd, String kodg);
-    Dor findFirstByVcAndKodg(Character vc, String kodg);
 }
 
 @Repository
 interface StanvRepository extends NsiRepository<Stanv, Integer> {
-    Stanv findFirstByStanAndDataniGreaterThanEqualAndDatakdLessThanEqual(String stan, Date date1, Date date2);
+    Stanv findFirstByStanAndDataniLessThanEqualAndDatakdGreaterThanEqual(String stan, Date date1, Date date2);
 }
 
 @Repository
 interface SiteRepository extends NsiRepository<Site, Integer> {
-    Site getFirstByIdsiteAndGosAndDatanGreaterThanEqualAndDatakLessThanEqual(String idsite, String gos, Date datan, Date datak);
+    Site getFirstByIdsiteAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(String idsite, String gos, Date datan, Date datak);
 }
 
 @Repository
 interface PlagnRepository extends NsiRepository<Plagn, Integer> {
-    Plagn getFirstByIdplagnAndGosAndDatanGreaterThanEqualAndDatakLessThanEqual(String idplagn, String gos, Date datan, Date datak);
+    Plagn getFirstByIdplagnAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(String idplagn, String gos, Date datan, Date datak);
 }

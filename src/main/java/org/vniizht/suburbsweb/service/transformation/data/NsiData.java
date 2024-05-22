@@ -17,15 +17,11 @@ public class NsiData {
     @Autowired private SiteRepository   siteRepo;
     @Autowired private PlagnRepository  plagnRepo;
 
-    public String getRoad(String stationCode, Date date, boolean isVc) {
-        Stanv stanv = findStanv(stationCode, date);
-        return (isVc
-                ? dorRepo.findFirstByVcAndKodg(stanv.getDor(), stanv.getGos())
-                : dorRepo.findFirstByKoddAndKodg(stanv.getDor(), stanv.getGos())
-        ).getNomd3();
-    }
     public String getRoad(String stationCode, Date date) {
-        return getRoad(stationCode, date, false);
+        Stanv stanv = findStanv(stationCode, date);
+        return dorRepo
+                .findFirstByKoddAndKodg(stanv.getDor(), stanv.getGos())
+                .getNomd3();
     }
 
     public String getDepartment(String stationCode, Date date) {
@@ -45,25 +41,27 @@ public class NsiData {
     }
 
     public String getTSite(String siteId, String countryCode, Date date){
-        return findSite(siteId, countryCode, date).getTsite();
+        Site site = findSite(siteId, countryCode, date);
+        return site == null ? "  " : site.getTsite();
     }
 
     public String getPlagnVr(String plagnId, String countryCode, Date date){
-        return findPlagn(plagnId, countryCode, date).getVr();
+        Plagn plagn = findPlagn(plagnId, countryCode, date);
+        return plagn == null ? "  " : plagn.getVr();
     }
 
     private Stanv findStanv(String stationCode, Date date){
         return stanvRepo
-                .findFirstByStanAndDataniGreaterThanEqualAndDatakdLessThanEqual(stationCode, date, date);
+                .findFirstByStanAndDataniLessThanEqualAndDatakdGreaterThanEqual(stationCode, date, date);
     }
 
     private Site findSite(String siteId, String countryCode, Date date){
         return siteRepo
-                .getFirstByIdsiteAndGosAndDatanGreaterThanEqualAndDatakLessThanEqual(siteId, countryCode, date, date);
+                .getFirstByIdsiteAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(siteId, countryCode, date, date);
     }
 
     private Plagn findPlagn(String plagnId, String countryCode, Date date){
         return plagnRepo
-                .getFirstByIdplagnAndGosAndDatanGreaterThanEqualAndDatakLessThanEqual(plagnId, countryCode, date, date);
+                .getFirstByIdplagnAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(plagnId, countryCode, date, date);
     }
 }

@@ -5,6 +5,10 @@ HELP.md
 #!**/src/main/**/target/
 #!**/src/test/**/target/
 
+/node_modules
+/.pnp
+.pnp.js
+
 ### STS ###
 .apt_generated
 .classpath

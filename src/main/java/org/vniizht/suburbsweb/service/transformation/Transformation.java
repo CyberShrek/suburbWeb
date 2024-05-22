@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.transformation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
 import org.vniizht.suburbsweb.model.transformation.level3.tables_co22.*;
 import org.vniizht.suburbsweb.model.transformation.level3.tables_lgot.Reestr;
 import org.vniizht.suburbsweb.model.transformation.level3.tables_lgot.Stat;
@@ -24,7 +25,6 @@ public class Transformation {
     @Autowired private Level2Data level2Data;
     @Autowired private Level3Data level3Data;
 
-    @PostConstruct
     public synchronized void run() {
         logger.log("Запуск трансформации данных по пригороду со второго уровня в третий");
         Long lastLevel3Id = level3Data.getLastId();
@@ -87,6 +87,9 @@ public class Transformation {
                 trainCategory = l2.main.getTrain_category(),
                 carriageClass = l2.main.getCarriage_class();
 
+        // Интерпретировано
+        Character interpretedTicketType = Transformer.interpretTicketType(abonementType, carrion, onboard, twoWay);
+
         // Игнорировать если действие билета истекло
         return T1.builder()
                 .idnum(l2.main.getIdnum())
@@ -113,7 +116,7 @@ public class Transformation {
                 .p18(nsiData.getArea(depStation, operationDate)) // !!
                 .p19(Transformer.interpretTrainCategory(trainCategory))
                 .p20(Transformer.interpretCarriageClass(carriageClass))
-                .p21(Transformer.interpretTicketType(abonementType, carrion, onboard, twoWay))
+                .p21(interpretedTicketType)
                 .p22(Transformer.interpretPassengerCategory(bsp, child, benefitCode))
                 .p23('3') // ?
                 .p24(benefitCode)
@@ -124,25 +127,25 @@ public class Transformation {
                 //.p29() // берётся из функции
                 .p30(Transformer.interpretOkato(nsiData.getOkato(arrStation, operationDate)))
                 .p31(nsiData.getArea(arrStation, operationDate))
-//                .p32()
-//                .p33()
-//                .p34()
-//                .p35()
-//                .p36()
-//                .p37()
-//                .p38()
-//                .p39()
-//                .p40()
-//                .p41()
-//                .p42()
-//                .p43()
+                .p32((short) l2.cost.stream().mapToInt(Cost::getRoute_distance).sum())
+                .p33(Transformer.interpretPassengersCount(interpretedTicketType, l2.main.getPass_qty(), l2.main.getCarryon_weight()))
+                .p34(0L)
+                .p35(0L)
+                .p36(l2.main.getTotal_sum())
+                .p37(0L)
+                .p38(0L)
+                .p39(0L)
+                .p40(0L)
+                .p41(0L)
+                .p42(0L)
+                .p43(0L)
 //                .p44()
-//                .p45()
-//                .p46()
-//                .p47()
-//                .p48()
-//                .p49()
-//                .p50()
+                .p45(0L)
+                .p46(0L)
+                .p47(0L)
+                .p48(0L)
+                .p49(0L)
+                .p50(0L)
 //                .p51()
                 .p52('?')
                 .p53(String.valueOf(l2.main.getAgent_code()))
@@ -244,16 +247,5 @@ public class Transformation {
         logger.log("\t\tprig_lgot_stat");
         return Stat.builder()
                 .build();
-    }
-
-    @PostConstruct
-    private void showSome(){
-
-        Long lastLevel3Id = level3Data.getLastId();
-        logger.log("Last level 3 id: " + lastLevel3Id);
-        Map<Long, Level2Data.Record> records = level2Data.getRecordsByIdGreaterThan(lastLevel3Id);
-        logger.log("Level 2 data with id greater than " + lastLevel3Id + " size: " + records.size());
-        logger.log("The data:");
-        records.forEach((id, record) -> logger.log(id + ":\n" + record.toString()));
     }
 }

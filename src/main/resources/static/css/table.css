@@ -1,0 +1,115 @@
+.table {
+    border-top: var(--light-border);
+    margin-bottom: var(--border-radius);
+    overflow: auto;
+    max-height: 100vh;
+}
+
+table {
+    border-spacing: 0;
+    width: 100%;
+}
+:is(th, td){
+    border-right: var(--light-border);
+    border-top: var(--light-border);
+}
+thead tr:first-of-type :is(th, td){
+    border-top: 0;
+}
+td:last-of-type{
+    border-right: 0;
+}
+
+:is(thead, tfoot) {
+    z-index: 10;
+    position: sticky;
+    top: -1px;
+    bottom: 0;
+    transition: none;
+}
+
+table .tool-row td {
+    padding: 0;
+}
+
+table .tool-bar td {
+    padding: 0;
+}
+
+th {
+    padding: var(--indent);
+    color: white;
+    width: 100vw;
+    vertical-align: bottom;
+    text-align: center !important;
+    font-size: 16px;
+    font-weight: normal;
+    background: var(--primary-color);
+}
+
+th input[type=text]{
+    margin-top: var(--indent);
+    height: 5px;
+}
+
+td {
+    color: var(--primary-color);
+    padding: var(--indent);
+    text-align: center;
+    font-size: 14px;
+    vertical-align: top;
+    background-color: white;
+}
+
+td, td * {
+    transition: 0.2s;
+}
+
+:is(tr.total td, td.total){
+    font-weight: bold;
+    background: var(--secondary-color);
+}
+
+:is(td, th).checkbox{
+    vertical-align: top;
+    width: min-content;
+}
+
+tr.total td{
+    background: var(--secondary-color);
+}
+
+td.link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+:is(td.link, td.checkbox):hover {
+    filter: contrast(85%);
+}
+
+td.labelized {
+    padding: 0;
+}
+td.labelized.framed {
+    border: 0;
+}
+
+table input[type=checkbox]{
+    transform: scale(1.5);
+    background-color: aqua;
+}
+
+td > button{
+    margin-left: auto !important;
+    height: 0 !important;
+    background: transparent !important;
+    filter: none !important;
+    transform: translateY(-15px) !important;
+}
+
+table tr .number, table .primary.string {
+    text-align: right;
+}
+table tr .string.string {
+    text-align: left;
+}

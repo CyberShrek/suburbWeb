@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class TransformationController {
 
     @GetMapping("/transformation")
-    public String getInstruction() {
-        return "preprocess-instruction.html";
+    public String get() {
+        return "transformation.html";
     }
 
     @PostMapping("/transformation")
