@@ -14,6 +14,7 @@ const addCSS = (name) => {
 Promise.all([
     addCSS("global"),
     addCSS("states"),
+    addCSS("modal"),
     addCSS("table"),
     addCSS("loader"),
     addCSS("third-party/sweetalert2")

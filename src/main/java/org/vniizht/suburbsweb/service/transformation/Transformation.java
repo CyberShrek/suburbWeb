@@ -1,5 +1,8 @@
 package org.vniizht.suburbsweb.service.transformation;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -12,7 +15,6 @@ import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
 import org.vniizht.suburbsweb.service.transformation.data.NsiData;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Map;
 
@@ -38,9 +40,8 @@ public class Transformation {
         logger.log("Конец трансформации");
     }
 
-    private void transform(Long id, Level2Data.Record l2Record) {
-        logger.log("Трансформация " + id);
-
+    public Transformed getTransformed(Long idnum) {
+        Level2Data.Record l2Record = level2Data.getRecordByIdnum(idnum);
         logger.log("\tЦО22");
         T1 t1 = createT1(l2Record, 1);
         T2 t2 = createT2(l2Record,(short)1, t1);
@@ -48,10 +49,26 @@ public class Transformation {
         T4 t4 = createT4(l2Record,(short)1, t1);
         T5 t5 = createT5(l2Record,          t1, t2, t3);
         T6 t6 = createT6(l2Record,(short)1, t1);
+//        Stat   stat   = createStat  (l2Record);
+//        Reestr reestr = createReestr(l2Record);
+        return Transformed.builder()
+                .t1(t1)
+                .t2(t2)
+                .t3(t3)
+                .t4(t4)
+                .t5(t5)
+                .t6(t6)
+//                .stat(stat)
+//                .reestr(reestr)
+                .build();
+    }
+
+    private void transform(Long id, Level2Data.Record l2Record) {
+        logger.log("Трансформация " + id);
+
+        Transformed transformed = getTransformed(id);
 
         logger.log("\tЛьготные");
-        Reestr reestr = createReestr(l2Record);
-        Stat   stat   = createStat  (l2Record);
     }
 
     private T1 createT1(Level2Data.Record l2, int serial) {
@@ -122,16 +139,16 @@ public class Transformation {
                 .p24(benefitCode)
                 .p25(Transformer.interpretPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
                 .p26("?") // lgots.lgot
-                //.p27() // берётся из функции
-                //.p28() // берётся из функции
-                //.p29() // берётся из функции
+                .p27("ждёт функции")
+                .p28("ждёт функции")
+                .p29("ждёт функции")
                 .p30(Transformer.interpretOkato(nsiData.getOkato(arrStation, operationDate)))
                 .p31(nsiData.getArea(arrStation, operationDate))
                 .p32((short) l2.cost.stream().mapToInt(Cost::getRoute_distance).sum())
                 .p33(Transformer.interpretPassengersCount(interpretedTicketType, l2.main.getPass_qty(), l2.main.getCarryon_weight()))
                 .p34(0L)
                 .p35(0L)
-                .p36(l2.main.getTotal_sum())
+                .p36(l2.main.getTariff_sum())
                 .p37(0L)
                 .p38(0L)
                 .p39(0L)
@@ -139,26 +156,26 @@ public class Transformation {
                 .p41(0L)
                 .p42(0L)
                 .p43(0L)
-//                .p44()
+                .p44(l2.main.getDepartment_sum())
                 .p45(0L)
                 .p46(0L)
                 .p47(0L)
                 .p48(0L)
                 .p49(0L)
                 .p50(0L)
-//                .p51()
+                .p51((long) l2.cost.size()) // ?
                 .p52('?')
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)
                 .p55(Transformer.interpretAbonementType(abonementType))
-//                .p56() жду справочник
+                .p56("ждёт справочник")
                 .p57(Transformer.interpretCarrionType(carrionType))
                 .p58(so)
                 .p59(so)
                 .p60("???")
-//                .p61() // берётся из функции
-//                .p62() // берётся из функции
-//                .p63() // берётся из функции
+                .p61('?')
+                .p62((short) -1)
+                .p63('?')
                 .build();
     }
 
@@ -170,9 +187,9 @@ public class Transformation {
                 .p2(t1.getP5())
                 .p3(t1.getP2())
                 .p4(serial)
-//                .p5()  // берётся из функции
-//                .p6()  // берётся из функции
-//                .p7()  // берётся из функции
+                .p5("ждёт функции")
+                .p6("ждёт функции")
+                .p7((short) -1)
                 .build();
     }
 
@@ -184,9 +201,9 @@ public class Transformation {
                 .p2(t1.getP5())
                 .p3(t1.getP2())
                 .p4(serial)
-//                .p5()  // берётся из функции
-//                .p6()  // берётся из функции
-//                .p7()  // берётся из функции
+                .p5("ждёт функции")
+                .p6("ждёт функции")
+                .p7((short) -1)
                 .build();
     }
 
@@ -198,11 +215,11 @@ public class Transformation {
                 .p2(t1.getP5())
                 .p3(t1.getP2())
                 .p4(serial)
-//                .p5()  // берётся из функции
-//                .p6()  // берётся из функции
-//                .p7()  // берётся из функции
-//                .p8()  // берётся из функции
-//                .p9()  // берётся из функции
+                .p5("ждёт функции")
+                .p6("ждёт функции")
+                .p7(-1L)
+                .p8(-1L)
+                .p9((short) -1)
                 .build();
     }
 
@@ -212,9 +229,9 @@ public class Transformation {
                 .yymm(t1.getYymm())
                 .p1("tab5")
                 .p2(t1.getP5())
-//                .p3()
-//                .p4()
-//                .p5()
+                .p3(1)
+                .p4(1)
+                .p5(1)
                 .p6(t1.getP33())
                 .p7(0L) // ??
                 .p8(0L) // ??
@@ -231,21 +248,37 @@ public class Transformation {
                 .p2(t1.getP5())
                 .p3(t1.getP2())
                 .p4(serial)
-//                .p5()  // берётся из функции
-//                .p6()  // берётся из функции
-//                .p7()  // берётся из функции
+                .p5("ждёт функции")  // берётся из функции
+                .p6(-1)  // берётся из функции
+                .p7((short) -1)  // берётся из функции
                 .build();
     }
     
-    private Reestr createReestr(Level2Data.Record l2) {
+    private Reestr createReestr(Level2Data.Record l2, T1 t1) {
         logger.log("\t\tprig_lgot_reestr");
         return Reestr.builder()
                 .build();
     }
     
-    private Stat createStat(Level2Data.Record l2) {
+    private Stat createStat(Level2Data.Record l2, T1 t1) {
         logger.log("\t\tprig_lgot_stat");
         return Stat.builder()
+                .yymm(t1.getYymm().shortValue())
+                .list("Имя файла - ?")
                 .build();
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    static public class Transformed{
+        private T1 t1;
+        private T2 t2;
+        private T3 t3;
+        private T4 t4;
+        private T5 t5;
+        private T6 t6;
+//        private Reestr reestr;
+//        private Stat stat;
     }
 }

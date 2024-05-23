@@ -1,6 +1,8 @@
 package org.vniizht.suburbsweb.service.transformation.data;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,15 @@ public class Level2Data {
         return result;
     }
 
+    @Transactional
+    public Record getRecordByIdnum(Long idnum) {
+        return Record.builder()
+                .main(mainRepo.findById(idnum).orElse(null))
+                .cost(costRepo.findAllByIdnum(idnum))
+                .adi(adiRepo.findById(idnum).orElse(null))
+                .build();
+    }
+
     private void addEntityByIdGreaterThan(Long id,
                                           Class<? extends L2Common> itemClass,
                                           Map<Long, Record> targetMap){
@@ -47,7 +58,7 @@ public class Level2Data {
                                   L2Common recordItem,
                                   Map<Long, Record> targetMap) {
         targetMap.compute(recordItem.getIdnum(), (key, record) -> {
-            if      (record == null)          record = new Record();
+            if      (record == null)          record = new Record(null, null, null);
             if      (itemClass == Adi.class)  record.setAdi((Adi) recordItem);
             else if (itemClass == Main.class) record.setMain((Main) recordItem);
             else if (itemClass == Cost.class) {
@@ -66,6 +77,7 @@ public class Level2Data {
 
     @Getter
     @Setter
+    @Builder
     static public class Record{
         public Adi adi;
         public Main main;

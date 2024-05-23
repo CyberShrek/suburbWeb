@@ -1,8 +1,8 @@
 .table {
-    border-top: var(--light-border);
-    margin-bottom: var(--border-radius);
+    border: var(--light-border);
+    margin: var(--border-radius);
+    max-height: 90vh;
     overflow: auto;
-    max-height: 100vh;
 }
 
 table {
@@ -12,6 +12,7 @@ table {
 :is(th, td){
     border-right: var(--light-border);
     border-top: var(--light-border);
+    white-space: nowrap;
 }
 thead tr:first-of-type :is(th, td){
     border-top: 0;
@@ -75,6 +76,11 @@ td, td * {
     width: min-content;
 }
 
+tr:hover td {
+    background: lightgrey;
+    opacity: 0.8;
+}
+
 tr.total td{
     background: var(--secondary-color);
 }
@@ -85,13 +91,6 @@ td.link {
 }
 :is(td.link, td.checkbox):hover {
     filter: contrast(85%);
-}
-
-td.labelized {
-    padding: 0;
-}
-td.labelized.framed {
-    border: 0;
 }
 
 table input[type=checkbox]{

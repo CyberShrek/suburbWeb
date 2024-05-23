@@ -12,10 +12,7 @@ export default  {
         {
             dir: "./src/main/resources/static/js/built",
             format: "es",
-            sourcemap: true,
-            manualChunks:{
-                sweetAlert2: ["sweetalert2"]
-            }
+            sourcemap: true
         }
     ],
     plugins: [
@@ -28,12 +25,5 @@ export default  {
         svelte({
             preprocess: sveltePreprocess(),
         })
-    ],
-    onwarn: (warning, handle) => {
-        // Ignore node_modules warnings
-        if(warning.loc?.file?.includes("node_modules") || warning.ids?.toString()?.includes("node_modules"))
-            return
-
-        handle(warning.message)
-    }
+    ]
 }

@@ -25,16 +25,18 @@
 *{
 	font-family: Roboto, serif;
 	color: var(--font-color);
-	transition: 0.1s;
 }
 
 body {
 	display: grid;
 	align-content: start;
-  row-gap: calc(var(--indent) * 3);
 	margin: var(--indent);
 	min-height: 100vh;
 	background-color: var(--background-color);
+}
+
+p, h1, h2, h3, h4, h5, h6{
+	padding: 0 var(--indent);
 }
 
 li{
