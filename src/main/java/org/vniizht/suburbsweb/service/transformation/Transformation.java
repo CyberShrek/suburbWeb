@@ -122,9 +122,9 @@ public class Transformation {
                 .p7(nsiData.getRoad(operationStation, operationDate)) // ??
                 .p8(operationStation)
                 .p9(carriageCode)
-                .p10("00")
+                .p10("00") // ?
                 .p11(nsiData.getOkato(operationStation, operationDate))
-//                .p12(Transformer.date2yymm(ticketBegDate))
+//                .p12(Transformer.date2yymm(ticketBegDate)) ?
                 .p13(nsiData.getRoad(depStation, operationDate)) // !!
                 .p14(Transformer.interpretDepartment(nsiData.getDepartment(depStation, operationDate))) // !!
                 .p15(depStation)
@@ -164,7 +164,7 @@ public class Transformation {
                 .p49(0L)
                 .p50(0L)
                 .p51((long) l2.cost.size()) // ?
-                .p52('?')
+                .p52('?') // ?
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)
                 .p55(Transformer.interpretAbonementType(abonementType))
@@ -172,7 +172,7 @@ public class Transformation {
                 .p57(Transformer.interpretCarrionType(carrionType))
                 .p58(so)
                 .p59(so)
-                .p60("???")
+//                .p60("???")
                 .p61('?')
                 .p62((short) -1)
                 .p63('?')
