@@ -123,7 +123,7 @@ public class Transformation {
                 .p8(operationStation)
                 .p9(carriageCode)
                 .p10("00") // ?
-                .p11(nsiData.getOkato(operationStation, operationDate))
+                .p11(nsiData.getOkato(operationStation, operationDate)) // Сократить до 5 символов. Брать из SF
 //                .p12(Transformer.date2yymm(ticketBegDate)) ?
                 .p13(nsiData.getRoad(depStation, operationDate)) // !!
                 .p14(Transformer.interpretDepartment(nsiData.getDepartment(depStation, operationDate))) // !!
@@ -138,7 +138,7 @@ public class Transformation {
                 .p23('3') // ?
                 .p24(benefitCode)
                 .p25(Transformer.interpretPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26("?") // lgots.lgot
+                .p26("?") // lgots.nomgvc брать по льготе и дате операции
                 .p27("ждёт функции")
                 .p28("ждёт функции")
                 .p29("ждёт функции")
@@ -156,14 +156,14 @@ public class Transformation {
                 .p41(0L)
                 .p42(0L)
                 .p43(0L)
-                .p44(l2.main.getDepartment_sum())
+                .p44(l2.main.getDepartment_sum()) // ????????
                 .p45(0L)
                 .p46(0L)
                 .p47(0L)
                 .p48(0L)
                 .p49(0L)
                 .p50(0L)
-                .p51((long) l2.cost.size()) // ?
+                .p51((long) l2.cost.size()) // Гашение = -pass_qty, Возврат = 0, остальное = +pass_qty
                 .p52('?') // ?
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)
@@ -172,7 +172,7 @@ public class Transformation {
                 .p57(Transformer.interpretCarrionType(carrionType))
                 .p58(so)
                 .p59(so)
-//                .p60("???")
+                .p60("000")
                 .p61('?')
                 .p62((short) -1)
                 .p63('?')

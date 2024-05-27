@@ -127,15 +127,17 @@ public class Transformer {
         return abonementType;
     }
 
-//    public static String interpretAbonementValidity(Character abonementType,
-//                                                    short srok_mon,
-//                                                    k_pas,
-//                                                    srok_bil) {
-//        return abonementType == '1' ? '4' + k_pas * 2
-//                : abonementType > '1' && srok_bil < 10 ? '10' + srok_bil
-//                : abonementType > '1' ? '1' + srok_bil
-//                : "000";
-//    }
+    public static String interpretDepartureYYMM(){
+        // Для разового билета - yymm даты начала действия
+        // Для абонементов     - yymm даты начала действия
+        // Во всем остальном   - yymm
+        return "";
+    }
+
+    public static String interpretDocRegistrationType(Character ruch){
+        // web_id
+        return "";
+    }
 
     public static Character interpretCarrionType(Character carrionType){
         switch (carrionType){
