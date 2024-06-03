@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
-import org.vniizht.suburbsweb.model.transformation.level3.tables_co22.*;
-import org.vniizht.suburbsweb.model.transformation.level3.tables_lgot.Reestr;
-import org.vniizht.suburbsweb.model.transformation.level3.tables_lgot.Stat;
+import org.vniizht.suburbsweb.model.transformation.level3.co22.*;
+import org.vniizht.suburbsweb.model.transformation.level3.lgot.Reestr;
+import org.vniizht.suburbsweb.model.transformation.level3.lgot.Stat;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
@@ -109,10 +109,6 @@ public class Transformation {
 
         // Игнорировать если действие билета истекло
         return T1.builder()
-                .idnum(l2.main.getIdnum())
-                .request_num(l2.main.getRequest_num())
-                .date_zap(l2.main.getRequest_date())
-                .yymm(Transformer.yyyymm2yymm(l2.main.getYyyymm()))
                 .p1("tab1")
                 .p2(serial)
                 .p3(Transformer.date2yyyy(operationDate))
@@ -182,7 +178,6 @@ public class Transformation {
     private T2 createT2(Level2Data.Record l2, short serial, T1 t1) {
         logger.log("\t\tprig_co22_t2");
         return T2.builder()
-                .yymm(t1.getYymm())
                 .p1("tab2")
                 .p2(t1.getP5())
                 .p3(t1.getP2())
@@ -196,7 +191,6 @@ public class Transformation {
     private T3 createT3(Level2Data.Record l2, short serial, T1 t1) {
         logger.log("\t\tprig_co22_t3");
         return T3.builder()
-                .yymm(t1.getYymm())
                 .p1("tab3")
                 .p2(t1.getP5())
                 .p3(t1.getP2())
@@ -210,7 +204,6 @@ public class Transformation {
     private T4 createT4(Level2Data.Record l2, short serial, T1 t1) {
         logger.log("\t\tprig_co22_t4");
         return T4.builder()
-                .yymm(t1.getYymm())
                 .p1("tab4")
                 .p2(t1.getP5())
                 .p3(t1.getP2())
@@ -226,7 +219,6 @@ public class Transformation {
     private T5 createT5(Level2Data.Record l2, T1 t1, T2 t2, T3 t3) {
         logger.log("\t\tprig_co22_t5");
         return T5.builder()
-                .yymm(t1.getYymm())
                 .p1("tab5")
                 .p2(t1.getP5())
                 .p3(1)
@@ -243,7 +235,6 @@ public class Transformation {
     private T6 createT6(Level2Data.Record l2, short serial, T1 t1) {
         logger.log("\t\tprig_co22_t6");
         return T6.builder()
-                .yymm(t1.getYymm())
                 .p1("tab6")
                 .p2(t1.getP5())
                 .p3(t1.getP2())
@@ -263,7 +254,6 @@ public class Transformation {
     private Stat createStat(Level2Data.Record l2, T1 t1) {
         logger.log("\t\tprig_lgot_stat");
         return Stat.builder()
-                .yymm(t1.getYymm().shortValue())
                 .list("Имя файла - ?")
                 .build();
     }
