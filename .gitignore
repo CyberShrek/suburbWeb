@@ -1,9 +1,9 @@
 HELP.md
-#target/
-#!target/*.war
-#!.mvn/wrapper/maven-wrapper.jar
-#!**/src/main/**/target/
-#!**/src/test/**/target/
+target/
+!target/*.war
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 /node_modules
 /.pnp
