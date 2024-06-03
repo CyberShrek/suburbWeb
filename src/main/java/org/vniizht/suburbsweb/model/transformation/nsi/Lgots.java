@@ -18,6 +18,8 @@ import java.sql.Date;
 public class Lgots {
     @Id
     private Integer         id;
+    private Integer     nomgvc;
+    private String      lgotgr;
     private String        lgot;
     private Date        datand;
     private Date        datakd;

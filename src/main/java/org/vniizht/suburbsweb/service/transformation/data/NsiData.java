@@ -2,9 +2,7 @@ package org.vniizht.suburbsweb.service.transformation.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.nsi.Plagn;
-import org.vniizht.suburbsweb.model.transformation.nsi.Site;
-import org.vniizht.suburbsweb.model.transformation.nsi.Stanv;
+import org.vniizht.suburbsweb.model.transformation.nsi.*;
 
 import java.util.Date;
 import java.util.Optional;
@@ -16,11 +14,12 @@ public class NsiData {
     @Autowired private StanvRepository  stanvRepo;
     @Autowired private SiteRepository   siteRepo;
     @Autowired private PlagnRepository  plagnRepo;
+    @Autowired private SfRepository     sfRepo;
+    @Autowired private LgotsRepository  lgotsRepo;
 
     public String getRoad(String stationCode, Date date) {
         Stanv stanv = findStanv(stationCode, date);
-        return dorRepo
-                .findFirstByKoddAndKodg(stanv.getDor(), stanv.getGos())
+        return findDor(stanv.getDor(), stanv.getGos())
                 .getNomd3();
     }
 
@@ -33,7 +32,13 @@ public class NsiData {
     }
 
     public String getOkato(String stationCode, Date date) {
-        return Optional.ofNullable(findStanv(stationCode, date).getKodokato()).orElse("00000");
+        Sf sf = findSf(getRegion(stationCode, date), date);
+        if (sf == null) {
+            return "00000";
+        }
+        return Optional.ofNullable(
+                sf.getOkato()
+                ).orElse("00000");
     }
 
     public String getArea(String stationCode, Date date) {
@@ -50,6 +55,22 @@ public class NsiData {
         return plagn == null ? "  " : plagn.getVr();
     }
 
+    public String getNomgvc(String benefitGroupCode, String benefitCode, Date date){
+        Lgots lgots = findLgots(benefitGroupCode, benefitCode, date);
+        if (lgots == null || lgots.getNomgvc() == null) {
+            return null;
+        }
+        return String.valueOf(lgots.getNomgvc());
+    }
+
+
+    /* Accessors */
+
+    private Dor findDor(Character roadCode, String countryCode){
+        return dorRepo
+                .findFirstByKoddAndKodg(roadCode, countryCode);
+    }
+
     private Stanv findStanv(String stationCode, Date date){
         return stanvRepo
                 .findFirstByStanAndDataniLessThanEqualAndDatakdGreaterThanEqual(stationCode, date, date);
@@ -57,11 +78,24 @@ public class NsiData {
 
     private Site findSite(String siteId, String countryCode, Date date){
         return siteRepo
-                .getFirstByIdsiteAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(siteId, countryCode, date, date);
+                .findFirstByIdsiteAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(siteId, countryCode, date, date);
     }
 
     private Plagn findPlagn(String plagnId, String countryCode, Date date){
         return plagnRepo
-                .getFirstByIdplagnAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(plagnId, countryCode, date, date);
+                .findFirstByIdplagnAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(plagnId, countryCode, date, date);
+    }
+
+    private Sf findSf(Integer regionCode, Date date){
+        return sfRepo
+                .findFirstByVidAndDatanLessThanEqualAndDatakGreaterThanEqual(regionCode, date, date);
+    }
+    private Sf findSf(String regionCode, Date date){
+        return findSf(Integer.parseInt(regionCode), date);
+    }
+
+    private Lgots findLgots(String benefitGroupCode, String benefitCode, Date date){
+        return lgotsRepo
+                .findFirstByLgotgrAndLgotAndDatandLessThanEqualAndDatakdGreaterThanEqual(benefitGroupCode, benefitCode, date, date);
     }
 }

@@ -3,10 +3,7 @@ package org.vniizht.suburbsweb.service.transformation.data;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
-import org.vniizht.suburbsweb.model.transformation.nsi.Dor;
-import org.vniizht.suburbsweb.model.transformation.nsi.Plagn;
-import org.vniizht.suburbsweb.model.transformation.nsi.Site;
-import org.vniizht.suburbsweb.model.transformation.nsi.Stanv;
+import org.vniizht.suburbsweb.model.transformation.nsi.*;
 
 import java.util.Date;
 
@@ -27,10 +24,20 @@ interface StanvRepository extends NsiRepository<Stanv, Integer> {
 
 @Repository
 interface SiteRepository extends NsiRepository<Site, Integer> {
-    Site getFirstByIdsiteAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(String idsite, String gos, Date datan, Date datak);
+    Site findFirstByIdsiteAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(String idsite, String gos, Date datan, Date datak);
 }
 
 @Repository
 interface PlagnRepository extends NsiRepository<Plagn, Integer> {
-    Plagn getFirstByIdplagnAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(String idplagn, String gos, Date datan, Date datak);
+    Plagn findFirstByIdplagnAndGosAndDatanLessThanEqualAndDatakGreaterThanEqual(String idplagn, String gos, Date datan, Date datak);
+}
+
+@Repository
+interface SfRepository extends NsiRepository<Sf, Integer> {
+    Sf findFirstByVidAndDatanLessThanEqualAndDatakGreaterThanEqual(Integer vid, Date datan, Date datak);
+}
+
+@Repository
+interface LgotsRepository extends NsiRepository<Lgots, Integer> {
+    Lgots findFirstByLgotgrAndLgotAndDatandLessThanEqualAndDatakdGreaterThanEqual(String lgotgr, String lgot, Date datand, Date datakd);
 }

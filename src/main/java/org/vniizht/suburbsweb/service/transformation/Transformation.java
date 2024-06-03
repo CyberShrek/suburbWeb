@@ -114,27 +114,27 @@ public class Transformation {
                 .p3(Transformer.date2yyyy(operationDate))
                 .p4(Transformer.date2mm(operationDate))
                 .p5("17")
-                .p6(nsiData.getRoad(operationStation, operationDate)) // ??
-                .p7(nsiData.getRoad(operationStation, operationDate)) // ??
+                .p6(nsiData.getRoad(operationStation, operationDate))
+                .p7(nsiData.getRoad(operationStation, operationDate))
                 .p8(operationStation)
                 .p9(carriageCode)
-                .p10("00") // ?
-                .p11(nsiData.getOkato(operationStation, operationDate)) // Сократить до 5 символов. Брать из SF
-//                .p12(Transformer.date2yymm(ticketBegDate)) ?
-                .p13(nsiData.getRoad(depStation, operationDate)) // !!
-                .p14(Transformer.interpretDepartment(nsiData.getDepartment(depStation, operationDate))) // !!
+                .p10("00")
+                .p11(nsiData.getOkato(operationStation, operationDate))
+                .p12(Transformer.interpretDepartureDate2yymm(interpretedTicketType, ticketBegDate, l2.main.getYyyymm()))
+                .p13(nsiData.getRoad(depStation, operationDate))
+                .p14(Transformer.interpretDepartment(nsiData.getDepartment(depStation, operationDate)))
                 .p15(depStation)
-                .p16(nsiData.getRegion(depStation, operationDate)) // !!
-                .p17(nsiData.getOkato(depStation, operationDate)) // !!
-                .p18(nsiData.getArea(depStation, operationDate)) // !!
+                .p16(nsiData.getRegion(depStation, operationDate))
+                .p17(nsiData.getOkato(depStation, operationDate))
+                .p18(nsiData.getArea(depStation, operationDate))
                 .p19(Transformer.interpretTrainCategory(trainCategory))
                 .p20(Transformer.interpretCarriageClass(carriageClass))
                 .p21(interpretedTicketType)
                 .p22(Transformer.interpretPassengerCategory(bsp, child, benefitCode))
-                .p23('3') // ?
+                .p23('3')
                 .p24(benefitCode)
                 .p25(Transformer.interpretPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26("?") // lgots.nomgvc брать по льготе и дате операции
+                .p26(nsiData.getNomgvc(l2.main.getBenefitgroup_code(), l2.main.getBenefit_code(), operationDate))
                 .p27("ждёт функции")
                 .p28("ждёт функции")
                 .p29("ждёт функции")
@@ -159,7 +159,7 @@ public class Transformation {
                 .p48(0L)
                 .p49(0L)
                 .p50(0L)
-                .p51((long) l2.cost.size()) // Гашение = -pass_qty, Возврат = 0, остальное = +pass_qty
+                .p51(Transformer.interpretDocumentsCount(l2.main.getOper(), l2.main.getOper_g(), l2.main.getPass_qty()))
                 .p52('?') // ?
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)

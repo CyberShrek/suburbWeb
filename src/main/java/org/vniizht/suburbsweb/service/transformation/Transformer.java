@@ -127,11 +127,17 @@ public class Transformer {
         return abonementType;
     }
 
-    public static String interpretDepartureYYMM(){
-        // Для разового билета - yymm даты начала действия
-        // Для абонементов     - yymm даты начала действия
-        // Во всем остальном   - yymm
-        return "";
+    public static String interpretDepartureDate2yymm(Character interpretedTicketType,
+                                                     Date ticketBegDate,
+                                                     Integer yyyymm){
+        // Для разового билета и абонементов - yymm даты начала действия
+        switch (interpretedTicketType){
+            case '2':
+            case '3':
+            case '5': return date2yymm(ticketBegDate);
+        }
+        // Во всем остальном - yymm
+        return String.valueOf(yyyymm2yymm(yyyymm));
     }
 
     public static String interpretDocRegistrationType(Character ruch){
@@ -149,14 +155,27 @@ public class Transformer {
         return carrionType;
     }
 
-    public static long interpretPassengersCount(Character ticketType, short passengersCount, short carrionWeight) {
+    public static long interpretPassengersCount(Character ticketType, short passengersQuantity, short carrionWeight) {
         switch (ticketType){
             case '1':
             case '2':
             case '3':
             case '4':
-            case '5': return passengersCount;
+            case '5': return passengersQuantity;
         }
         return carrionWeight;
+    }
+
+    public static long interpretDocumentsCount(Character operType,
+                                               Character operCancelType,
+                                               short passengersQuantity) {
+        // Гашение = -pass_qty, Возврат = 0, остальное = +pass_qty
+        if (operType == 'V')
+            return 0;
+
+        if (operCancelType == 'G')
+            return -passengersQuantity;
+
+        return passengersQuantity;
     }
 }
