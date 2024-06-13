@@ -2,7 +2,7 @@ package org.vniizht.suburbsweb.service.transformation;
 
 import java.util.Date;
 
-public class Transformer {
+public class Converter {
 
     public static Integer yyyymm2yymm(Integer yyyymm) {
         return yyyymm - (yyyymm/10000*10000);
@@ -26,15 +26,15 @@ public class Transformer {
         return (month < 10 ? "0" : "") + month;
     }
 
-    public static String interpretDepartment(String department) {
+    public static String convertDepartment(String department) {
         return department.substring(1);
     }
 
-    public static String interpretOkato(String okato) {
+    public static String convertOkato(String okato) {
         return okato.substring(0, 5); // ???
     }
 
-    public static Character interpretTrainCategory(Character category) {
+    public static Character convertTrainCategory(Character category) {
         switch (category){
             case 'С': return '6'; // скорые пригородные поезда типа «Спутник» (7ХХХ)
             case '7': return '5'; // скорые пригородные поезда без предоставления мест (7ХХХ)
@@ -47,11 +47,11 @@ public class Transformer {
         }
     }
 
-    public static String interpretCarriageClass(Character carriageClass) {
+    public static String convertCarriageClass(Character carriageClass) {
         return "0" + carriageClass;
     }
 
-    public static Character interpretTicketType(
+    public static Character convertTicketType(
                                                 Character abonementType,
                                                 Character carrion,
                                                 Character onboard,
@@ -77,18 +77,18 @@ public class Transformer {
         return '5';
     }
 
-    public static Character interpretPassengerCategory(Character bsp,
-                                                       Character child,
-                                                       String benefitCode) {
+    public static Character convertPassengerCategory(Character bsp,
+                                                     Character child,
+                                                     String benefitCode) {
         return    bsp   == '1' ? '4'            // Бесплатный
                 : child == '1' ? '2'            // Детский
                 : benefitCode.equals("0") ? '1' // Полный
                 : '3';                          // Льготный
     }
 
-    public static Character interpretPaymentType(Character  paymentType,
-                                                 String     siteType,
-                                                 String     plagnVr) {
+    public static Character convertPaymentType(Character  paymentType,
+                                               String     siteType,
+                                               String     plagnVr) {
 
         // Электронный кошелёк
         if(siteType.equals("09") && plagnVr.equals("6 "))
@@ -106,14 +106,14 @@ public class Transformer {
         return '6';
     }
 
-    public static Character interpretDocRegistration(short requestType,
-                                                     short requestSubtype) {
+    public static Character convertDocRegistration(short requestType,
+                                                   short requestSubtype) {
         return requestSubtype == 10 || requestSubtype == 20 || requestSubtype == 25 ? '4'
                 : requestType != 64 && requestSubtype >= 200 && requestSubtype <= 299 ? '2'
                 : '5';
     }
 
-    public static Character interpretAbonementType(Character abonementType) {
+    public static Character convertAbonementType(Character abonementType) {
         switch (abonementType){
             case '1': return '5'; // билет на количество поездок
             case '2': return '4'; // билет на определенные даты
@@ -127,9 +127,9 @@ public class Transformer {
         return abonementType;
     }
 
-    public static String interpretDepartureDate2yymm(Character interpretedTicketType,
-                                                     Date ticketBegDate,
-                                                     Integer yyyymm){
+    public static String convertDepartureDate2yymm(Character interpretedTicketType,
+                                                   Date ticketBegDate,
+                                                   Integer yyyymm){
         // Для разового билета и абонементов - yymm даты начала действия
         switch (interpretedTicketType){
             case '2':
@@ -140,12 +140,12 @@ public class Transformer {
         return String.valueOf(yyyymm2yymm(yyyymm));
     }
 
-    public static String interpretDocRegistrationType(Character ruch){
+    public static String convertDocRegistrationType(Character ruch){
         // web_id
         return "";
     }
 
-    public static Character interpretCarrionType(Character carrionType){
+    public static Character convertCarrionType(Character carrionType){
         switch (carrionType){
             case 'Ж': return '1'; // живность
             case 'Т': return '2'; // телевизор
@@ -155,7 +155,7 @@ public class Transformer {
         return carrionType;
     }
 
-    public static long interpretPassengersCount(Character ticketType, short passengersQuantity, short carrionWeight) {
+    public static long convertPassengersCount(Character ticketType, short passengersQuantity, short carrionWeight) {
         switch (ticketType){
             case '1':
             case '2':
@@ -166,9 +166,9 @@ public class Transformer {
         return carrionWeight;
     }
 
-    public static long interpretDocumentsCount(Character operType,
-                                               Character operCancelType,
-                                               short passengersQuantity) {
+    public static long convertDocumentsCount(Character operType,
+                                             Character operCancelType,
+                                             short passengersQuantity) {
         // Гашение = -pass_qty, Возврат = 0, остальное = +pass_qty
         if (operType == 'V')
             return 0;

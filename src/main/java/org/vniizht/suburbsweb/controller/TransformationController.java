@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.vniizht.suburbsweb.service.transformation.Conversion;
 import org.vniizht.suburbsweb.service.transformation.Transformation;
 
 @Controller
@@ -26,7 +27,7 @@ public class TransformationController {
 
     @GetMapping("/transformation/co22/{idnum}")
     @ResponseBody
-    public Transformation.Transformed getCO22Tables(@PathVariable Long idnum) {
-        return transformation.getTransformed(idnum);
+    public Conversion.Converted getCO22Tables(@PathVariable Long idnum) {
+        return transformation.getConvertedByIdnum(idnum);
     }
 }

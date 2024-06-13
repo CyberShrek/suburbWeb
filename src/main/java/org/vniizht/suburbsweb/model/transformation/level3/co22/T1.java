@@ -73,5 +73,4 @@ public class T1 {
     private Character       p61;
     private Short           p62;
     private Character       p63;
-
 }
