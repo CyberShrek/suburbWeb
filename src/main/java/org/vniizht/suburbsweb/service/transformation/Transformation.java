@@ -32,6 +32,11 @@ public class Transformation {
         logger.log("Конец трансформации");
     }
 
+    public void transform(Long id, Level2Data.Record l2Record) {
+        logger.log("\t" + id);
+//        level3Data.addRecord(conversion.convert(l2Record));
+    }
+
     public Conversion.Converted getConvertedByIdnum(Long idnum) {
         return conversion.convert(level2Data.getRecordByIdnum(idnum));
     }

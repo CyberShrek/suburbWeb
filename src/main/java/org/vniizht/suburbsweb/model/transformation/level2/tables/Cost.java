@@ -32,7 +32,5 @@ public class Cost extends L2Common {
     static public class Identifier implements Serializable {
         private Long    idnum;
         private Short   doc_reg;
-
-        public Identifier() { }
     }
 }
