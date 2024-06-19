@@ -67,6 +67,7 @@ public class Conversion {
               onboard = l2.main.getFlg_fee_onboard(),
                twoWay = l2.main.getFlg_2wayticket();
 
+
         // Прочее
         String   carriageCode = String.valueOf(l2.main.getCarriage_code()),
                   benefitCode = l2.main.getBenefit_code(),
@@ -85,21 +86,20 @@ public class Conversion {
         return T1.builder()
                 .p1("tab1")
                 .p2(serial)
-                .p3(Converter.date2yyyy(operationDate))
-                .p4(Converter.date2mm(operationDate))
+                .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
                 .p5("17")
                 .p6(nsiData.getRoad(operationStation, operationDate))
                 .p7(nsiData.getRoad(operationStation, operationDate))
                 .p8(operationStation)
                 .p9(carriageCode)
                 .p10("00")
-                .p11(nsiData.getOkato(operationStation, operationDate))
+                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
                 .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.main.getYyyymm()))
                 .p13(nsiData.getRoad(depStation, operationDate))
                 .p14(Converter.convertDepartment(nsiData.getDepartment(depStation, operationDate)))
                 .p15(depStation)
                 .p16(nsiData.getRegion(depStation, operationDate))
-                .p17(nsiData.getOkato(depStation, operationDate))
+                .p17(Converter.convertOkato(nsiData.getOkato(depStation, operationDate)))
                 .p18(nsiData.getArea(depStation, operationDate))
                 .p19(Converter.convertTrainCategory(trainCategory))
                 .p20(Converter.convertCarriageClass(carriageClass))
@@ -126,7 +126,7 @@ public class Conversion {
                 .p41(0L)
                 .p42(0L)
                 .p43(0L)
-                .p44(l2.main.getDepartment_sum()) // ????????
+                .p44(l2.main.getDepartment_sum())
                 .p45(0L)
                 .p46(0L)
                 .p47(0L)
@@ -146,6 +146,7 @@ public class Conversion {
                 .p61('?')
                 .p62((short) -1)
                 .p63('?')
+//                .routes(l2.cost.stream().map(Cost::getRoute).collect(Collectors.toList()))
                 .build();
     }
 

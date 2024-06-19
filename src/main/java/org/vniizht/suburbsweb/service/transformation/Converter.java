@@ -31,7 +31,7 @@ public class Converter {
     }
 
     public static String convertOkato(String okato) {
-        return okato.substring(0, 5); // ???
+        return okato.substring(0, 5);
     }
 
     public static Character convertTrainCategory(Character category) {
