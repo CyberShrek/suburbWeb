@@ -12,7 +12,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 @Entity
-@Table(schema = "rawdl2",
+@Table(schema = "zzz_rawdl2",
         name = "l2_prig_main")
 @ToString(callSuper=true)
 @Getter

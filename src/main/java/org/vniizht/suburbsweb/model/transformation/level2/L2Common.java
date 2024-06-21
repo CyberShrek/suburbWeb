@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
@@ -17,5 +18,6 @@ abstract public class L2Common implements Serializable {
     @Id
     private Long        idnum;
     private Integer     yyyymm;
-    private Date        request_date;
+    @Column(name = "request_date")
+    private Date        requestDate;
 }

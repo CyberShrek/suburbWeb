@@ -15,6 +15,7 @@ import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.NsiData;
 
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Service
 @Scope("singleton")
@@ -24,29 +25,29 @@ public class Conversion {
     @Autowired private NsiData    nsiData;
 
     public Converted convert(Level2Data.Record l2Record) {
-        logger.log("\tЦО22");
+//        logger.log("\tЦО22");
         T1 t1 = createT1(l2Record, 1);
-        T2 t2 = createT2(l2Record,(short)1, t1);
-        T3 t3 = createT3(l2Record,(short)1, t1);
-        T4 t4 = createT4(l2Record,(short)1, t1);
-        T5 t5 = createT5(l2Record,          t1, t2, t3);
-        T6 t6 = createT6(l2Record,(short)1, t1);
+//        T2 t2 = createT2(l2Record,(short)1, t1);
+//        T3 t3 = createT3(l2Record,(short)1, t1);
+//        T4 t4 = createT4(l2Record,(short)1, t1);
+//        T5 t5 = createT5(l2Record,          t1, t2, t3);
+//        T6 t6 = createT6(l2Record,(short)1, t1);
 //        Stat   stat   = createStat  (l2Record);
 //        Reestr reestr = createReestr(l2Record);
         return Converted.builder()
                 .t1(t1)
-                .t2(t2)
-                .t3(t3)
-                .t4(t4)
-                .t5(t5)
-                .t6(t6)
+//                .t2(t2)
+//                .t3(t3)
+//                .t4(t4)
+//                .t5(t5)
+//                .t6(t6)
 //                .stat(stat)
 //                .reestr(reestr)
                 .build();
     }
 
     private T1 createT1(Level2Data.Record l2, int serial) {
-        logger.log("\t\tprig_co22_t1");
+//        logger.log("\t\tprig_co22_t1");
 
         // Даты
         Date operationDate = l2.main.getOperation_date(),
@@ -88,32 +89,32 @@ public class Conversion {
                 .p2(serial)
                 .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
                 .p5("17")
-                .p6(nsiData.getRoad(operationStation, operationDate))
-                .p7(nsiData.getRoad(operationStation, operationDate))
+//                .p6(nsiData.getRoad(operationStation, operationDate))
+//                .p7(nsiData.getRoad(operationStation, operationDate))
                 .p8(operationStation)
                 .p9(carriageCode)
                 .p10("00")
-                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
+//                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
                 .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.main.getYyyymm()))
-                .p13(nsiData.getRoad(depStation, operationDate))
-                .p14(Converter.convertDepartment(nsiData.getDepartment(depStation, operationDate)))
+                .p13("ждёт функции")
+                .p14("ждёт функции")
                 .p15(depStation)
-                .p16(nsiData.getRegion(depStation, operationDate))
-                .p17(Converter.convertOkato(nsiData.getOkato(depStation, operationDate)))
-                .p18(nsiData.getArea(depStation, operationDate))
+                .p16("ждёт функции")
+//                .p17(Converter.convertOkato(nsiData.getOkato(depStation, operationDate)))
+//                .p18(nsiData.getArea(depStation, operationDate))
                 .p19(Converter.convertTrainCategory(trainCategory))
                 .p20(Converter.convertCarriageClass(carriageClass))
                 .p21(convertedTicketType)
                 .p22(Converter.convertPassengerCategory(bsp, child, benefitCode))
                 .p23('3')
                 .p24(benefitCode)
-                .p25(Converter.convertPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26(nsiData.getNomgvc(l2.main.getBenefitgroup_code(), l2.main.getBenefit_code(), operationDate))
+//                .p25(Converter.convertPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
+//                .p26(nsiData.getNomgvc(l2.main.getBenefitgroup_code(), l2.main.getBenefit_code(), operationDate))
                 .p27("ждёт функции")
                 .p28("ждёт функции")
                 .p29("ждёт функции")
-                .p30(Converter.convertOkato(nsiData.getOkato(arrStation, operationDate)))
-                .p31(nsiData.getArea(arrStation, operationDate))
+//                .p30(Converter.convertOkato(nsiData.getOkato(arrStation, operationDate)))
+//                .p31(nsiData.getArea(arrStation, operationDate))
                 .p32((short) l2.cost.stream().mapToInt(Cost::getRoute_distance).sum())
                 .p33(Converter.convertPassengersCount(convertedTicketType, l2.main.getPass_qty(), l2.main.getCarryon_weight()))
                 .p34(0L)
@@ -146,12 +147,12 @@ public class Conversion {
                 .p61('?')
                 .p62((short) -1)
                 .p63('?')
-//                .routes(l2.cost.stream().map(Cost::getRoute).collect(Collectors.toList()))
+                .routes(l2.cost.stream().map(Cost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
                 .build();
     }
 
     private T2 createT2(Level2Data.Record l2, short serial, T1 t1) {
-        logger.log("\t\tprig_co22_t2");
+//        logger.log("\t\tprig_co22_t2");
         return T2.builder()
                 .p1("tab2")
                 .p2(t1.getP5())
@@ -164,7 +165,7 @@ public class Conversion {
     }
 
     private T3 createT3(Level2Data.Record l2, short serial, T1 t1) {
-        logger.log("\t\tprig_co22_t3");
+//        logger.log("\t\tprig_co22_t3");
         return T3.builder()
                 .p1("tab3")
                 .p2(t1.getP5())
@@ -177,7 +178,7 @@ public class Conversion {
     }
 
     private T4 createT4(Level2Data.Record l2, short serial, T1 t1) {
-        logger.log("\t\tprig_co22_t4");
+//        logger.log("\t\tprig_co22_t4");
         return T4.builder()
                 .p1("tab4")
                 .p2(t1.getP5())
@@ -192,7 +193,7 @@ public class Conversion {
     }
 
     private T5 createT5(Level2Data.Record l2, T1 t1, T2 t2, T3 t3) {
-        logger.log("\t\tprig_co22_t5");
+//        logger.log("\t\tprig_co22_t5");
         return T5.builder()
                 .p1("tab5")
                 .p2(t1.getP5())
@@ -208,7 +209,7 @@ public class Conversion {
     }
 
     private T6 createT6(Level2Data.Record l2, short serial, T1 t1) {
-        logger.log("\t\tprig_co22_t6");
+//        logger.log("\t\tprig_co22_t6");
         return T6.builder()
                 .p1("tab6")
                 .p2(t1.getP5())
@@ -221,13 +222,13 @@ public class Conversion {
     }
     
     private Reestr createReestr(Level2Data.Record l2, T1 t1) {
-        logger.log("\t\tprig_lgot_reestr");
+//        logger.log("\t\tprig_lgot_reestr");
         return Reestr.builder()
                 .build();
     }
     
     private Stat createStat(Level2Data.Record l2, T1 t1) {
-        logger.log("\t\tprig_lgot_stat");
+//        logger.log("\t\tprig_lgot_stat");
         return Stat.builder()
                 .list("Имя файла - ?")
                 .build();

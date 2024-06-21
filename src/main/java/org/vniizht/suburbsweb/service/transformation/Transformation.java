@@ -7,7 +7,8 @@ import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
 
-import java.util.Map;
+import javax.annotation.PostConstruct;
+import java.util.*;
 
 @Service
 @Scope("singleton")
@@ -39,5 +40,23 @@ public class Transformation {
 
     public Conversion.Converted getConvertedByIdnum(Long idnum) {
         return conversion.convert(level2Data.getRecordByIdnum(idnum));
+    }
+
+    @PostConstruct
+    public void speedCheck() {
+        Date startDate = new Date();
+        int yyyy = 2024, mm = 2, dd = 19;
+        Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
+        logger.log("Проверка скорости выполнения трансформации записей за 2024-02-19");
+        logger.log("Загружаю записи...");
+        Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
+        logger.log("Загружено записей: " + records.size());
+        if(!records.isEmpty()) {
+            logger.log("Трансформирую записи...");
+            List<Conversion.Converted> convertedList = new ArrayList<>();
+            records.forEach((idnum, record) -> convertedList.add(conversion.convert(record)));
+            logger.log("Записи успешно трансформированы");
+        }
+        logger.log("Итоговое время выполнения: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
     }
 }

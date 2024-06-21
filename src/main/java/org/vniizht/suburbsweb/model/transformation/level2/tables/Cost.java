@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "rawdl2",
+@Table(schema = "zzz_rawdl2",
         name = "l2_prig_cost")
 @IdClass(Cost.Identifier.class)
 @Getter
@@ -32,5 +32,7 @@ public class Cost extends L2Common {
     static public class Identifier implements Serializable {
         private Long    idnum;
         private Short   doc_reg;
+
+        public Identifier() {}
     }
 }

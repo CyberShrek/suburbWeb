@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.sql.Date;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(schema = "l3_prig",
@@ -84,7 +85,7 @@ public class T1 {
     @Id private Character       p61;
     @Id private Short           p62;
     @Id private Character       p63;
-    @Id private List<Integer> routes;
+    @Id private String       routes;
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {
@@ -119,5 +120,17 @@ public class T1 {
         private String          p30;
         private String          p31;
         private Short           p32;
+        private String          p53;
+        private String          p54;
+        private Character       p55;
+        private String          p56;
+        private Character       p57;
+        private Character       p58;
+        private Character       p59;
+        private String          p60;
+        private Character       p61;
+        private Short           p62;
+        private Character       p63;
+        private String          routes;
     }
 }

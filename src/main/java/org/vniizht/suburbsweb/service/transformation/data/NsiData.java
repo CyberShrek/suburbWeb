@@ -23,10 +23,6 @@ public class NsiData {
                 .getNomd3();
     }
 
-    public String getDepartment(String stationCode, Date date) {
-        return findStanv(stationCode, date).getOtd();
-    }
-
     public String getRegion(String stationCode, Date date) {
         return Optional.ofNullable(findStanv(stationCode, date).getSf()).orElse("00");
     }

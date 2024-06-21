@@ -2,35 +2,48 @@ package org.vniizht.suburbsweb.service.transformation.data;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
-import org.vniizht.suburbsweb.model.transformation.level2.tables.Adi;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Main;
 import org.vniizht.suburbsweb.service.Logger;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class Level2Data {
 
     @Autowired private Logger logger;
 
-    @Autowired private AdiRepository adiRepo;
     @Autowired private CostRepository costRepo;
     @Autowired private MainRepository mainRepo;
+
+    public Map<Long,Record> getRecordsByRequestDate(Date requestDate) {
+        Map<Long, Record> result = new LinkedHashMap<>();
+        List<Main> mainList = mainRepo.findAllByRequestDate(requestDate);
+        List<Cost> costList = costRepo.findAllByRequestDate(requestDate);
+
+        mainList.forEach(main -> result.put(main.getIdnum(), new Record(main, new ArrayList<>())));
+//        costList.forEach(cost -> {
+//            Record record = result.get(cost.getIdnum());
+//            if (record != null)
+//                record.getCost().add(cost);
+//        });
+        return result;
+    }
 
     @Transactional
     public Map<Long, Record> getRecordsByIdGreaterThan(Long id) {
         Map<Long, Record> result = new LinkedHashMap<>();
-        addEntityByIdGreaterThan(id, Adi.class, result);
         addEntityByIdGreaterThan(id, Cost.class, result);
         addEntityByIdGreaterThan(id, Main.class, result);
         return result;
@@ -41,25 +54,22 @@ public class Level2Data {
         return Record.builder()
                 .main(mainRepo.findById(idnum).orElse(null))
                 .cost(costRepo.findAllByIdnum(idnum))
-                .adi(adiRepo.findById(idnum).orElse(null))
                 .build();
     }
 
     private void addEntityByIdGreaterThan(Long id,
                                           Class<? extends L2Common> itemClass,
                                           Map<Long, Record> targetMap){
-        (itemClass == Adi.class ? adiRepo
-                : itemClass == Cost.class ? costRepo
-                : mainRepo).findAllByIdnumGreaterThan(id).forEach(
-                        item -> processRecordAdd(itemClass, item, targetMap));
+        (itemClass == Cost.class ? costRepo : mainRepo)
+                .findAllByIdnumGreaterThan(id)
+                .forEach(item -> processRecordAdd(itemClass, item, targetMap));
     }
 
     private void processRecordAdd(Class<? extends L2Common> itemClass,
                                   L2Common recordItem,
                                   Map<Long, Record> targetMap) {
         targetMap.compute(recordItem.getIdnum(), (key, record) -> {
-            if      (record == null)          record = new Record(null, null, null);
-            if      (itemClass == Adi.class)  record.setAdi((Adi) recordItem);
+            if      (record == null)          record = new Record(null, null);
             else if (itemClass == Main.class) record.setMain((Main) recordItem);
             else if (itemClass == Cost.class) {
                  if (record.getCost() == null) record.setCost(new ArrayList<>());
@@ -70,7 +80,6 @@ public class Level2Data {
     }
 
     private void showById(long idnum) {
-        adiRepo.findById(idnum).ifPresent(System.out::println);
         costRepo.findById(new Cost.Identifier(idnum, (short) 1)).ifPresent(System.out::println);
         mainRepo.findById(idnum).ifPresent(System.out::println);
     }
@@ -79,12 +88,11 @@ public class Level2Data {
     @Setter
     @Builder
     static public class Record{
-        public Adi adi;
         public Main main;
         public List<Cost> cost;
 
         public String toString() {
-            return "adi:\t" + adi + "\ncost:\t" + cost + "\nmain\t" + main;
+            return "cost:\t" + cost + "\nmain\t" + main;
         }
     }
 }
