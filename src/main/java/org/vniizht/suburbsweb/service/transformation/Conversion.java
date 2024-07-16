@@ -70,8 +70,7 @@ public class Conversion {
 
 
         // Прочее
-        String   carriageCode = String.valueOf(l2.main.getCarriage_code()),
-                  benefitCode = l2.main.getBenefit_code(),
+        String   benefitCode = l2.main.getBenefit_code(),
                         webId = l2.main.getWeb_id(),
                    payagentId = l2.main.getPayagent_id();
         Character paymentType = l2.main.getPaymenttype(),
@@ -92,9 +91,9 @@ public class Conversion {
 //                .p6(nsiData.getRoad(operationStation, operationDate))
 //                .p7(nsiData.getRoad(operationStation, operationDate))
                 .p8(operationStation)
-                .p9(carriageCode)
+                .p9(Converter.convertCarriageCode(l2.main.getCarriage_code()))
                 .p10("00")
-//                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
+                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
                 .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.main.getYyyymm()))
                 .p13("ждёт функции")
                 .p14("ждёт функции")
@@ -139,7 +138,7 @@ public class Conversion {
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)
                 .p55(Converter.convertAbonementType(abonementType))
-                .p56("ждёт справочник")
+                .p56(Converter.convertSeatStickLimit(l2.main.getSeatstick_limit()))
                 .p57(Converter.convertCarrionType(carrionType))
                 .p58(so)
                 .p59(so)

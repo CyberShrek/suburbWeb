@@ -26,6 +26,11 @@ public class Converter {
         return (month < 10 ? "0" : "") + month;
     }
 
+    public static String convertCarriageCode(Short carriageCode) {
+        // Числовой тип исходного поля приводится к строковому. Остаток строки заполняется нулями до длины строки 9
+        return String.format("%09d", carriageCode);
+    }
+
     public static String convertDepartment(String department) {
         return department.substring(1);
     }
@@ -82,7 +87,7 @@ public class Converter {
                                                      String benefitCode) {
         return    bsp   == '1' ? '4'            // Бесплатный
                 : child == '1' ? '2'            // Детский
-                : benefitCode.equals("0") ? '1' // Полный
+                : benefitCode.equals("00") ? '1' // Полный
                 : '3';                          // Льготный
     }
 
@@ -104,6 +109,12 @@ public class Converter {
 
         // Интернет
         return '6';
+    }
+
+    public static String convertSeatStickLimit(Short seatStickLimit) {
+        if (seatStickLimit == 0 || seatStickLimit == 10 || seatStickLimit == 11)
+            return "000";
+
     }
 
     public static Character convertDocRegistration(short requestType,
