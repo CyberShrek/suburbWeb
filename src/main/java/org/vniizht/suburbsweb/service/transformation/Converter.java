@@ -28,7 +28,7 @@ public class Converter {
 
     public static String convertCarriageCode(Short carriageCode) {
         // Числовой тип исходного поля приводится к строковому. Остаток строки заполняется нулями до длины строки 9
-        return String.format("%09d", carriageCode);
+        return String.format("%-9d", carriageCode).replace(' ', '0');
     }
 
     public static String convertDepartment(String department) {
@@ -111,10 +111,27 @@ public class Converter {
         return '6';
     }
 
-    public static String convertSeatStickLimit(Short seatStickLimit) {
-        if (seatStickLimit == 0 || seatStickLimit == 10 || seatStickLimit == 11)
+    public static String convertSeatStickLimit(Short seatStickLimit, Character abonementType) {
+        if (seatStickLimit == 0 || seatStickLimit == 10 || seatStickLimit == 11 || abonementType == '0')
             return "000";
 
+        char type;
+        switch (abonementType) {
+            // Месячный
+            case '3':
+            case '5':
+            case '7': type = '0'; break;
+
+            // Посуточный
+            case '2':
+            case '4':
+            case '6':
+            case '8': type = '1'; break;
+
+            // Количество поездок
+            default: type = '4'; break;
+        }
+        return type + String.format("%02d", seatStickLimit);
     }
 
     public static Character convertDocRegistration(short requestType,
@@ -164,6 +181,34 @@ public class Converter {
             case 'Р': return '4'; // излишний вес ручной клади
         }
         return carrionType;
+    }
+
+    public static Character convert58(String benefitGroupCode, String bilGroupCode){
+        if(!benefitGroupCode.equals("22"))
+            return null;
+
+        if(Integer.parseInt(bilGroupCode) > 4)
+            return '1';
+
+        return '0';
+    }
+
+    public static Character convert59(String benefitGroupCode, Character employeeCategory){
+        if(!benefitGroupCode.equals("22"))
+            return null;
+
+        if(employeeCategory == 'Ф')
+            return '1';
+
+        return '0';
+    }
+
+    public static Character covertMCD(String trainNum){
+        String trimmed = trainNum.trim();
+        if(trimmed.length() == 1)
+            return trimmed.charAt(0);
+
+        return '0';
     }
 
     public static long convertPassengersCount(Character ticketType, short passengersQuantity, short carrionWeight) {

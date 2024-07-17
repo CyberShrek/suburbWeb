@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
+import org.vniizht.suburbsweb.model.transformation.level2.tables.Adi;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
 import org.vniizht.suburbsweb.model.transformation.level2.tables.Main;
 import org.vniizht.suburbsweb.service.Logger;
@@ -26,18 +27,25 @@ public class Level2Data {
 
     @Autowired private CostRepository costRepo;
     @Autowired private MainRepository mainRepo;
+    @Autowired private AdiRepository  adiRepo;
 
     public Map<Long,Record> getRecordsByRequestDate(Date requestDate) {
         Map<Long, Record> result = new LinkedHashMap<>();
         List<Main> mainList = mainRepo.findAllByRequestDate(requestDate);
         List<Cost> costList = costRepo.findAllByRequestDate(requestDate);
+        List<Adi>  adiList  = adiRepo.findAllByRequestDate(requestDate);
 
-        mainList.forEach(main -> result.put(main.getIdnum(), new Record(main, new ArrayList<>())));
-//        costList.forEach(cost -> {
-//            Record record = result.get(cost.getIdnum());
-//            if (record != null)
-//                record.getCost().add(cost);
-//        });
+        mainList.forEach(main -> result.put(main.getIdnum(), new Record(main, new ArrayList<>(), null)));
+        costList.forEach(cost -> {
+            Record record = result.get(cost.getIdnum());
+            if (record != null)
+                record.getCost().add(cost);
+        });
+        adiList.forEach(adi -> {
+            Record record = result.get(adi.getIdnum());
+            if (record != null)
+                record.setAdi(adi);
+        });
         return result;
     }
 
@@ -69,7 +77,7 @@ public class Level2Data {
                                   L2Common recordItem,
                                   Map<Long, Record> targetMap) {
         targetMap.compute(recordItem.getIdnum(), (key, record) -> {
-            if      (record == null)          record = new Record(null, null);
+            if      (record == null)          record = new Record(null, null, null);
             else if (itemClass == Main.class) record.setMain((Main) recordItem);
             else if (itemClass == Cost.class) {
                  if (record.getCost() == null) record.setCost(new ArrayList<>());
@@ -90,6 +98,7 @@ public class Level2Data {
     static public class Record{
         public Main main;
         public List<Cost> cost;
+        public Adi adi;
 
         public String toString() {
             return "cost:\t" + cost + "\nmain\t" + main;
