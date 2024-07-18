@@ -12,7 +12,7 @@ import org.vniizht.suburbsweb.model.transformation.level3.lgot.Reestr;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Stat;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
-import org.vniizht.suburbsweb.service.transformation.data.NsiData;
+import org.vniizht.suburbsweb.service.transformation.data.ReferenceData;
 
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class Conversion {
 
     @Autowired private Logger     logger;
-    @Autowired private NsiData    nsiData;
+    @Autowired private ReferenceData referenceData;
 
     public Converted convert(Level2Data.Record l2Record) {
 //        logger.log("\tЦО22");
@@ -88,32 +88,32 @@ public class Conversion {
                 .p2(serial)
                 .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
                 .p5("17")
-                .p6(nsiData.getRoad(operationStation, operationDate))
-                .p7(nsiData.getRoad(operationStation, operationDate))
+                .p6(referenceData.getRoad(operationStation, operationDate))
+                .p7(referenceData.getRoad(operationStation, operationDate))
                 .p8(operationStation)
                 .p9(Converter.convertCarriageCode(l2.main.getCarriage_code()))
                 .p10("00")
-                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
+                .p11(Converter.convertOkato(referenceData.getOkato(operationStation, operationDate)))
                 .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.main.getYyyymm()))
                 .p13("ждёт функции")
                 .p14("ждёт функции")
                 .p15(depStation)
                 .p16("ждёт функции")
-                .p17(Converter.convertOkato(nsiData.getOkato(depStation, operationDate)))
-                .p18(nsiData.getArea(depStation, operationDate))
+                .p17(Converter.convertOkato(referenceData.getOkato(depStation, operationDate)))
+                .p18(referenceData.getArea(depStation, operationDate))
                 .p19(Converter.convertTrainCategory(trainCategory))
                 .p20(Converter.convertCarriageClass(carriageClass))
                 .p21(convertedTicketType)
                 .p22(Converter.convertPassengerCategory(bsp, child, benefitCode))
                 .p23('3')
                 .p24(benefitCode)
-                .p25(Converter.convertPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26(nsiData.getNomgvc(l2.main.getBenefitgroup_code(), l2.main.getBenefit_code(), operationDate))
+                .p25(Converter.convertPaymentType(paymentType, referenceData.getTSite(webId, operationCountry, operationDate), referenceData.getPlagnVr(payagentId, operationCountry, operationDate)))
+                .p26(referenceData.getGvc(l2.main.getBenefitgroup_code(), l2.main.getBenefit_code(), operationDate))
                 .p27("ждёт функции")
                 .p28("ждёт функции")
                 .p29("ждёт функции")
-                .p30(Converter.convertOkato(nsiData.getOkato(arrStation, operationDate)))
-                .p31(nsiData.getArea(arrStation, operationDate))
+                .p30(Converter.convertOkato(referenceData.getOkato(arrStation, operationDate)))
+                .p31(referenceData.getArea(arrStation, operationDate))
                 .p32((short) l2.cost.stream().mapToInt(Cost::getRoute_distance).sum())
                 .p33(Converter.convertPassengersCount(convertedTicketType, l2.main.getPass_qty(), l2.main.getCarryon_weight()))
                 .p34(0L)
@@ -134,7 +134,7 @@ public class Conversion {
                 .p49(0L)
                 .p50(0L)
                 .p51(Converter.convertDocumentsCount(l2.main.getOper(), l2.main.getOper_g(), l2.main.getPass_qty()))
-                .p52('?') // ?
+                .p52(Converter.convertDocRegistration(referenceData.getTSite(webId, operationCountry, operationDate), l2.main.getRequest_subtype()))
                 .p53(String.valueOf(l2.main.getAgent_code()))
                 .p54(arrStation)
                 .p55(Converter.convertAbonementType(abonementType))

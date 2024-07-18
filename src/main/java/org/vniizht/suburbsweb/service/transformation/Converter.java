@@ -134,11 +134,16 @@ public class Converter {
         return type + String.format("%02d", seatStickLimit);
     }
 
-    public static Character convertDocRegistration(short requestType,
+    public static Character convertDocRegistration(String tsite,
                                                    short requestSubtype) {
-        return requestSubtype == 10 || requestSubtype == 20 || requestSubtype == 25 ? '4'
-                : requestType != 64 && requestSubtype >= 200 && requestSubtype <= 299 ? '2'
-                : '5';
+        if(!tsite.equals("  "))
+            return String.valueOf(Integer.parseInt(tsite.trim())).charAt(0);
+
+        switch (requestSubtype / 256){
+            case 0: return '3';
+            case 1: return '2';
+        }
+        return  '5';
     }
 
     public static Character convertAbonementType(Character abonementType) {

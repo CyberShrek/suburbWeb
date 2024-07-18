@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.model.transformation.nsi;
+package org.vniizht.suburbsweb.model.transformation.reference;
 
 import lombok.Getter;
 import lombok.Setter;

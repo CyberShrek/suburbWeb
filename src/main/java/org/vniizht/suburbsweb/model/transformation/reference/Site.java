@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.model.transformation.nsi;
+package org.vniizht.suburbsweb.model.transformation.reference;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,16 +11,16 @@ import java.sql.Date;
 
 @Entity
 @Table(schema = "nsi",
-        name = "lgots")
+        name = "site")
 @Getter
 @Setter
 @ToString
-public class Lgots {
+public class Site {
     @Id
     private Integer         id;
-    private Integer     nomgvc;
-    private String      lgotgr;
-    private String        lgot;
-    private Date        datand;
-    private Date        datakd;
+    private String      idsite;
+    private String       tsite;
+    private String         gos;
+    private Date         datan;
+    private Date         datak;
 }

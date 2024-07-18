@@ -2,20 +2,20 @@ package org.vniizht.suburbsweb.service.transformation.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.nsi.*;
+import org.vniizht.suburbsweb.model.transformation.reference.*;
 
 import java.util.Date;
 import java.util.Optional;
 
 @Service
-public class NsiData {
+public class ReferenceData {
 
     @Autowired private DorRepository    dorRepo;
     @Autowired private StanvRepository  stanvRepo;
     @Autowired private SiteRepository   siteRepo;
     @Autowired private PlagnRepository  plagnRepo;
     @Autowired private SfRepository     sfRepo;
-    @Autowired private LgotsRepository  lgotsRepo;
+    @Autowired private SublxRepository lgotsRepo;
 
     public String getRoad(String stationCode, Date date) {
         Stanv stanv = findStanv(stationCode, date);
@@ -51,12 +51,12 @@ public class NsiData {
         return plagn == null ? "  " : plagn.getVr();
     }
 
-    public String getNomgvc(String benefitGroupCode, String benefitCode, Date date){
-        Lgots lgots = findLgots(benefitGroupCode, benefitCode, date);
-        if (lgots == null || lgots.getNomgvc() == null) {
+    public String getGvc(String benefitGroupCode, String benefitCode, Date date){
+        Sublx sublx = findSublx(benefitGroupCode, benefitCode, date);
+        if (sublx == null || sublx.getGvc() == null) {
             return null;
         }
-        return String.valueOf(lgots.getNomgvc());
+        return String.valueOf(sublx.getGvc());
     }
 
 
@@ -90,8 +90,8 @@ public class NsiData {
         return findSf(Integer.parseInt(regionCode), date);
     }
 
-    private Lgots findLgots(String benefitGroupCode, String benefitCode, Date date){
+    private Sublx findSublx(String benefitGroupCode, String benefitCode, Date date){
         return lgotsRepo
-                .findFirstByLgotgrAndLgotAndDatandLessThanEqualAndDatakdGreaterThanEqual(benefitGroupCode, benefitCode, date, date);
+                .findFirstByLgAndDatanLessThanEqualAndDatakGreaterThanEqual(benefitGroupCode + benefitCode, date, date);
     }
 }
