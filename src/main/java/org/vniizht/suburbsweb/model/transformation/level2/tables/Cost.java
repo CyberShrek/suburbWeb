@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 @Entity
 @Table(schema = "zzz_rawdl2",
-        name = "l2_prig_cost")
+        name = "l2_pass_cost")
 @IdClass(Cost.Identifier.class)
 @Getter
 @Setter

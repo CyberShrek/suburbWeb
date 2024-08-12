@@ -45,18 +45,18 @@ public class Transformation {
     @PostConstruct
     public void speedCheck() {
         Date startDate = new Date();
-        int yyyy = 2024, mm = 2, dd = 19;
+        int yyyy = 2024, mm = 2, dd = 9;
         Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
-        logger.log("Проверка скорости выполнения трансформации записей за 2024-02-19");
+        logger.log("Проверка скорости выполнения трансформации записей за 2024-02-09");
         logger.log("Загружаю записи...");
         Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
         logger.log("Загружено записей: " + records.size());
-        if(!records.isEmpty()) {
-            logger.log("Трансформирую записи...");
-            List<Conversion.Converted> convertedList = new ArrayList<>();
-            records.forEach((idnum, record) -> convertedList.add(conversion.convert(record)));
-            logger.log("Записи успешно трансформированы");
-        }
-        logger.log("Итоговое время выполнения: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+//        if(!records.isEmpty()) {
+//            logger.log("Трансформирую записи...");
+//            List<Conversion.Converted> convertedList = new ArrayList<>();
+//            records.forEach((idnum, record) -> convertedList.add(conversion.convert(record)));
+//            logger.log("Записи успешно трансформированы");
+//        }
+//        logger.log("Итоговое время выполнения: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
     }
 }
