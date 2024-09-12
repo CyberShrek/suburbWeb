@@ -11,16 +11,16 @@ import java.util.Set;
 
 @Service
 @Scope("singleton")
-public class Aggregation {
+public class PrigAggregation {
 
     @Autowired private Logger logger;
-    @Autowired private Conversion conversion;
+    @Autowired private PrigConversion prigConversion;
 
-    public Set<Conversion.Converted> aggregate(List<Conversion.Converted> raws) {
-        Set<Conversion.Converted> converted = new HashSet<>();
+    public Set<PrigConversion.Converted> aggregate(List<PrigConversion.Converted> raws) {
+        Set<PrigConversion.Converted> converted = new HashSet<>();
 
         logger.log("Агрегация");
-        for (Conversion.Converted raw : raws) {
+        for (PrigConversion.Converted raw : raws) {
             converted.add(raw);
         }
 

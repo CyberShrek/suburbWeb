@@ -14,8 +14,8 @@ import java.util.*;
 @Scope("singleton")
 public class Transformation {
 
-    @Autowired private Conversion conversion;
-    @Autowired private Aggregation aggregation;
+    @Autowired private PrigConversion prigConversion;
+    @Autowired private PrigAggregation prigAggregation;
     @Autowired private Logger logger;
     @Autowired private Level2Data level2Data;
     @Autowired private Level3Data level3Data;
@@ -38,11 +38,11 @@ public class Transformation {
 //        level3Data.addRecord(conversion.convert(l2Record));
     }
 
-    public Conversion.Converted getConvertedByIdnum(Long idnum) {
-        return conversion.convert(level2Data.getRecordByIdnum(idnum));
+    public PrigConversion.Converted getConvertedByIdnum(Long idnum) {
+        return prigConversion.convert(level2Data.getRecordByIdnum(idnum));
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void speedCheck() {
         Date startDate = new Date();
         int yyyy = 2024, mm = 2, dd = 9;
@@ -51,12 +51,13 @@ public class Transformation {
         logger.log("Загружаю записи...");
         Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
         logger.log("Загружено записей: " + records.size());
-//        if(!records.isEmpty()) {
-//            logger.log("Трансформирую записи...");
-//            List<Conversion.Converted> convertedList = new ArrayList<>();
-//            records.forEach((idnum, record) -> convertedList.add(conversion.convert(record)));
-//            logger.log("Записи успешно трансформированы");
-//        }
-//        logger.log("Итоговое время выполнения: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+        logger.log("Затрачено времени: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+        if(!records.isEmpty()) {
+            logger.log("Трансформирую записи...");
+            List<PrigConversion.Converted> convertedList = new ArrayList<>();
+            records.forEach((idnum, record) -> convertedList.add(prigConversion.convert(record)));
+            logger.log("Записи успешно трансформированы");
+        }
+        logger.log("Итоговое время выполнения: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
     }
 }

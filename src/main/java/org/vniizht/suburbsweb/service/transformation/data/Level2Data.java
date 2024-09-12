@@ -6,9 +6,9 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
-import org.vniizht.suburbsweb.model.transformation.level2.tables.Adi;
-import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
-import org.vniizht.suburbsweb.model.transformation.level2.tables.Main;
+import org.vniizht.suburbsweb.model.transformation.level2.PrigAdi;
+import org.vniizht.suburbsweb.model.transformation.level2.PrigCost;
+import org.vniizht.suburbsweb.model.transformation.level2.PrigMain;
 import org.vniizht.suburbsweb.service.Logger;
 
 import javax.transaction.Transactional;
@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class Level2Data {
@@ -31,20 +29,20 @@ public class Level2Data {
 
     public Map<Long,Record> getRecordsByRequestDate(Date requestDate) {
         Map<Long, Record> result = new LinkedHashMap<>();
-        List<Main> mainList = mainRepo.findAllByRequestDate(requestDate);
-        List<Cost> costList = costRepo.findAllByRequestDate(requestDate);
-        List<Adi>  adiList  = adiRepo.findAllByRequestDate(requestDate);
+        List<PrigMain> prigMainList = mainRepo.findAllByRequestDate(requestDate);
+        List<PrigCost> prigCostList = costRepo.findAllByRequestDate(requestDate);
+        List<PrigAdi> prigAdiList = adiRepo.findAllByRequestDate(requestDate);
 
-        mainList.forEach(main -> result.put(main.getIdnum(), new Record(main, new ArrayList<>(), null)));
-        costList.forEach(cost -> {
+        prigMainList.forEach(prigMain -> result.put(prigMain.getIdnum(), new Record(prigMain, new ArrayList<>(), null)));
+        prigCostList.forEach(cost -> {
             Record record = result.get(cost.getIdnum());
             if (record != null)
-                record.getCost().add(cost);
+                record.getPrigCost().add(cost);
         });
-        adiList.forEach(adi -> {
-            Record record = result.get(adi.getIdnum());
+        prigAdiList.forEach(prigAdi -> {
+            Record record = result.get(prigAdi.getIdnum());
             if (record != null)
-                record.setAdi(adi);
+                record.setPrigAdi(prigAdi);
         });
         return result;
     }
@@ -52,23 +50,23 @@ public class Level2Data {
     @Transactional
     public Map<Long, Record> getRecordsByIdGreaterThan(Long id) {
         Map<Long, Record> result = new LinkedHashMap<>();
-        addEntityByIdGreaterThan(id, Cost.class, result);
-        addEntityByIdGreaterThan(id, Main.class, result);
+        addEntityByIdGreaterThan(id, PrigCost.class, result);
+        addEntityByIdGreaterThan(id, PrigMain.class, result);
         return result;
     }
 
     @Transactional
     public Record getRecordByIdnum(Long idnum) {
         return Record.builder()
-                .main(mainRepo.findById(idnum).orElse(null))
-                .cost(costRepo.findAllByIdnum(idnum))
+                .prigMain(mainRepo.findById(idnum).orElse(null))
+                .prigCost(costRepo.findAllByIdnum(idnum))
                 .build();
     }
 
     private void addEntityByIdGreaterThan(Long id,
                                           Class<? extends L2Common> itemClass,
                                           Map<Long, Record> targetMap){
-        (itemClass == Cost.class ? costRepo : mainRepo)
+        (itemClass == PrigCost.class ? costRepo : mainRepo)
                 .findAllByIdnumGreaterThan(id)
                 .forEach(item -> processRecordAdd(itemClass, item, targetMap));
     }
@@ -78,17 +76,17 @@ public class Level2Data {
                                   Map<Long, Record> targetMap) {
         targetMap.compute(recordItem.getIdnum(), (key, record) -> {
             if      (record == null)          record = new Record(null, null, null);
-            else if (itemClass == Main.class) record.setMain((Main) recordItem);
-            else if (itemClass == Cost.class) {
-                 if (record.getCost() == null) record.setCost(new ArrayList<>());
-                 record.getCost().add((Cost) recordItem);
+            else if (itemClass == PrigMain.class) record.setPrigMain((PrigMain) recordItem);
+            else if (itemClass == PrigCost.class) {
+                 if (record.getPrigCost() == null) record.setPrigCost(new ArrayList<>());
+                 record.getPrigCost().add((PrigCost) recordItem);
             }
             return record;
         });
     }
 
     private void showById(long idnum) {
-        costRepo.findById(new Cost.Identifier(idnum, (short) 1)).ifPresent(System.out::println);
+        costRepo.findById(new PrigCost.Identifier(idnum, (short) 1)).ifPresent(System.out::println);
         mainRepo.findById(idnum).ifPresent(System.out::println);
     }
 
@@ -96,12 +94,12 @@ public class Level2Data {
     @Setter
     @Builder
     static public class Record{
-        public Main main;
-        public List<Cost> cost;
-        public Adi adi;
+        public PrigMain prigMain;
+        public List<PrigCost> prigCost;
+        public PrigAdi prigAdi;
 
         public String toString() {
-            return "cost:\t" + cost + "\nmain\t" + main;
+            return "cost:\t" + prigCost + "\nmain\t" + prigMain;
         }
     }
 }

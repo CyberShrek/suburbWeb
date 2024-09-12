@@ -1,15 +1,11 @@
-package org.vniizht.suburbsweb.model.transformation.level2.tables;
+package org.vniizht.suburbsweb.model.transformation.level2;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 
 @Entity
 @Table(schema = "zzz_rawdl2",
@@ -17,7 +13,7 @@ import java.sql.Timestamp;
 @ToString(callSuper=true)
 @Getter
 @Setter
-public class Main extends L2Common {
+public class PassMain extends L2Common {
     private Long        id;
     private Short       request_subtype;
     private Character   oper;
@@ -46,8 +42,9 @@ public class Main extends L2Common {
 //    private Character   flg_fee_onboard; не нужен
 //    private Short       seatstick_limit; не нужен
     private Character   carriage_class;
-    private String      benefit_code;
 ////    private String      benefitgroup_code; первые 2 знака lgot_info из l2_pass_ex
+    //    private String      benefit_code; вторые 2 знака lgot_info из l2_pass_ex
+    // Потом один знак после минуса -- категория пассажира, потом третий знак после следующего минуса - номер билетной группы
 
 //    private Long        tariff_sum;       sum_nde из cost при payment_type == 1, 6, 8
 //    private Long        department_sum;   sum_nde из cost при payment_type != 1, 6, 8

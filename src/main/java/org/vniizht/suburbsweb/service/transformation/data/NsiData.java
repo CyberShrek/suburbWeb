@@ -8,14 +8,14 @@ import java.util.Date;
 import java.util.Optional;
 
 @Service
-public class ReferenceData {
+public class NsiData {
 
     @Autowired private DorRepository    dorRepo;
     @Autowired private StanvRepository  stanvRepo;
     @Autowired private SiteRepository   siteRepo;
     @Autowired private PlagnRepository  plagnRepo;
     @Autowired private SfRepository     sfRepo;
-    @Autowired private SublxRepository lgotsRepo;
+    @Autowired private SublxRepository  sublxRepo;
 
     public String getRoad(String stationCode, Date date) {
         Stanv stanv = findStanv(stationCode, date);
@@ -59,7 +59,6 @@ public class ReferenceData {
         return String.valueOf(sublx.getGvc());
     }
 
-
     /* Accessors */
 
     private Dor findDor(Character roadCode, String countryCode){
@@ -91,7 +90,7 @@ public class ReferenceData {
     }
 
     private Sublx findSublx(String benefitGroupCode, String benefitCode, Date date){
-        return lgotsRepo
+        return sublxRepo
                 .findFirstByLgAndDatanLessThanEqualAndDatakGreaterThanEqual(benefitGroupCode + benefitCode, date, date);
     }
 }

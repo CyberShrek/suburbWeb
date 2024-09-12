@@ -1,9 +1,8 @@
-package org.vniizht.suburbsweb.model.transformation.level2.tables;
+package org.vniizht.suburbsweb.model.transformation.level2;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -14,7 +13,7 @@ import javax.persistence.Table;
 @ToString(callSuper=true)
 @Getter
 @Setter
-public class Adi extends L2Common {
+public class PrigAdi extends L2Common {
     private Character   employee_cat;
     private String      bilgroup_code;
 }

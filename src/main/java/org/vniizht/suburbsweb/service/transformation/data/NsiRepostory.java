@@ -19,7 +19,7 @@ interface DorRepository extends ReferenceRepository<Dor, Integer> {
 
 @Repository
 interface StanvRepository extends ReferenceRepository<Stanv, Integer> {
-    Stanv findFirstByStanAndDataniLessThanEqualAndDatakdGreaterThanEqual(String stan, Date date1, Date date2);
+    Stanv findFirstByStanAndDataniLessThanEqualAndDatakdGreaterThanEqual(String stan, Date datani, Date datakd);
 }
 
 @Repository

@@ -1,10 +1,9 @@
-package org.vniizht.suburbsweb.model.transformation.level2.tables;
+package org.vniizht.suburbsweb.model.transformation.level2;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,11 +11,11 @@ import java.io.Serializable;
 @Entity
 @Table(schema = "zzz_rawdl2",
         name = "l2_pass_cost")
-@IdClass(Cost.Identifier.class)
+@IdClass(PassCost.Identifier.class)
 @Getter
 @Setter
 @ToString(callSuper=true)
-public class Cost extends L2Common {
+public class PassCost extends L2Common {
     @Id
     private Short       doc_reg;
     private Short       route_num;

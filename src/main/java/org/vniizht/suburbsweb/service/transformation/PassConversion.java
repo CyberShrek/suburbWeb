@@ -6,23 +6,23 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.level2.tables.Cost;
+import org.vniizht.suburbsweb.model.transformation.level2.PrigCost;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.*;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Reestr;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Stat;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
-import org.vniizht.suburbsweb.service.transformation.data.ReferenceData;
+import org.vniizht.suburbsweb.service.transformation.data.NsiData;
 
 import java.util.Date;
 import java.util.stream.Collectors;
 
 @Service
 @Scope("singleton")
-public class Conversion {
+public class PassConversion {
 
     @Autowired private Logger     logger;
-    @Autowired private ReferenceData referenceData;
+    @Autowired private NsiData nsiData;
 
     public Converted convert(Level2Data.Record l2Record) {
 //        logger.log("\tЦО22");
@@ -55,9 +55,9 @@ public class Conversion {
              ticketEndDate = new Date();//l2.main.getTicket_enddate();
 
         // Субъекты
-        String operationStation = l2.main.getSale_station(),
-                     depStation = l2.main.getDeparture_station(),
-                     arrStation = l2.main.getArrival_station(),
+        String operationStation = l2.prigMain.getSale_station(),
+                     depStation = l2.prigMain.getDeparture_station(),
+                     arrStation = l2.prigMain.getArrival_station(),
                operationCountry = operationStation.substring(0, 2);
 
         // Флаги
@@ -69,15 +69,15 @@ public class Conversion {
 
 
         // Прочее
-        String   benefitCode = l2.main.getBenefit_code(),
+        String   benefitCode = "",//l2.main.getBenefit_code(),
                 benefitGroupCode = "",//l2.main.getBenefitgroup_code(),
                         webId = "",//l2.main.getWeb_id(),
                    payagentId = "";//l2.main.getPayagent_id();
-        Character paymentType = l2.main.getPaymenttype(),
+        Character paymentType = l2.prigMain.getPaymenttype(),
                 abonementType = ' ',//l2.main.getAbonement_type().charAt(0),
                   carrionType = ' ',//l2.main.getCarryon_type(),
                 trainCategory = ' ',//l2.main.getTrain_category(),
-                carriageClass = l2.main.getCarriage_class();
+                carriageClass = l2.prigMain.getCarriage_class();
 
         // Конвертировано
         Character convertedTicketType = Converter.convertTicketType(abonementType, carrion, onboard, twoWay);
@@ -88,73 +88,76 @@ public class Conversion {
                 .p2(serial)
                 .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
                 .p5("17")
-                .p6(referenceData.getRoad(operationStation, operationDate))
-                .p7(referenceData.getRoad(operationStation, operationDate))
+                .p6(nsiData.getRoad(operationStation, operationDate))
+                .p7(nsiData.getRoad(operationStation, operationDate))
                 .p8(operationStation)
                 .p9(Converter.convertCarriageCode(
                         (short) 0//l2.main.getCarriage_code()
                 ))
                 .p10("00")
-                .p11(Converter.convertOkato(referenceData.getOkato(operationStation, operationDate)))
-                .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.main.getYyyymm()))
+                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
+                .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.prigMain.getYyyymm()))
                 .p13("ждёт функции")
                 .p14("ждёт функции")
                 .p15(depStation)
                 .p16("ждёт функции")
-                .p17(Converter.convertOkato(referenceData.getOkato(depStation, operationDate)))
-                .p18(referenceData.getArea(depStation, operationDate))
+                .p17(Converter.convertOkato(nsiData.getOkato(depStation, operationDate)))
+                .p18(nsiData.getArea(depStation, operationDate))
                 .p19(Converter.convertTrainCategory(trainCategory))
                 .p20(Converter.convertCarriageClass(carriageClass))
                 .p21(convertedTicketType)
                 .p22(Converter.convertPassengerCategory(bsp, child, benefitCode))
                 .p23('3')
                 .p24(benefitCode)
-                .p25(Converter.convertPaymentType(paymentType, referenceData.getTSite(webId, operationCountry, operationDate), referenceData.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26(referenceData.getGvc(benefitGroupCode, l2.main.getBenefit_code(), operationDate))
+                .p25(Converter.convertPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
+                .p26(nsiData.getGvc(benefitGroupCode, benefitCode, operationDate))
                 .p27("ждёт функции")
                 .p28("ждёт функции")
                 .p29("ждёт функции")
-                .p30(Converter.convertOkato(referenceData.getOkato(arrStation, operationDate)))
-                .p31(referenceData.getArea(arrStation, operationDate))
-                .p32((short) l2.cost.stream().mapToInt(Cost::getRoute_distance).sum())
+                .p30(Converter.convertOkato(nsiData.getOkato(arrStation, operationDate)))
+                .p31(nsiData.getArea(arrStation, operationDate))
+                .p32((short) l2.prigCost.stream().mapToInt(PrigCost::getRoute_distance).sum())
                 .p33(Converter.convertPassengersCount(convertedTicketType,
                         (short) 0,// l2.main.getPass_qty(),
                         (short) 0// l2.main.getCarryon_weight()
                 ))
                 .p34(0L)
                 .p35(0L)
-//                .p36(l2.main.getTariff_sum())
+//                .p36(l2.main.getTariff_sum()) // sum_nde сумм cost.sum_code 116 + 101 и cnt_code == 20
                 .p37(0L)
                 .p38(0L)
-                .p39(0L) // Используется в 800: tarriff_sum либо department_sum при cost.sum_code == 104, 105, 106, иначе 0
-                .p40(0L)
+
+                //Если paymenttype == 9, В, Ж то sum_nde считается выпадающим
+
+                .p39(0L) // Используется в 800: tarriff_sum либо department_sum при cost.sum_code == 104, 105, 106 и cnt_code == 20, иначе 0
+                .p40(0L) // sum_nde при cost.sum_code == 101 и cnt_code == 20
                 .p41(0L)
                 .p42(0L)
                 .p43(0L)
-//                .p44(l2.main.getDepartment_sum())
+//                .p44(l2.main.getDepartment_sum()) // sum_nde сумм cost.sum_code 116 + 101 и cnt_code == 20
                 .p45(0L)
                 .p46(0L)
                 .p47(0L)
                 .p48(0L)
                 .p49(0L)
                 .p50(0L)
-                .p51(Converter.convertDocumentsCount(l2.main.getOper(), l2.main.getOper_g(), (short) 0//l2.main.getPass_qty()
+                .p51(Converter.convertDocumentsCount(l2.prigMain.getOper(), l2.prigMain.getOper_g(), (short) 0//l2.main.getPass_qty()
                          ))
-                .p52(Converter.convertDocRegistration(referenceData.getTSite(webId, operationCountry, operationDate), l2.main.getRequest_subtype()))
-                .p53(String.valueOf(l2.main.getAgent_code()))
+                .p52(Converter.convertDocRegistration(nsiData.getTSite(webId, operationCountry, operationDate), l2.prigMain.getRequest_subtype()))
+                .p53(String.valueOf(l2.prigMain.getAgent_code()))
                 .p54(arrStation)
                 .p55(Converter.convertAbonementType(abonementType))
                 .p56(Converter.convertSeatStickLimit( // в дальнем не нужен. Всегда 000
                         (short) 0,//l2.main.getSeatstick_limit(),
                         abonementType))
                 .p57(Converter.convertCarrionType(carrionType))
-                .p58(Converter.convert58(benefitGroupCode, l2.adi.getBilgroup_code()))
-                .p59(Converter.convert59(benefitGroupCode, l2.adi.getEmployee_cat()))
+                .p58(Converter.convert58(benefitGroupCode, l2.prigAdi.getBilgroup_code()))
+                .p59(Converter.convert59(benefitGroupCode, l2.prigAdi.getEmployee_cat()))
                 .p60("000")
-                .p61(Converter.covertMCD(l2.main.getTrain_num()))
+                .p61(Converter.covertMCD(l2.prigMain.getTrain_num()))
                 .p62((short) -1)
                 .p63('?')
-                .routes(l2.cost.stream().map(Cost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
+                .routes(l2.prigCost.stream().map(PrigCost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
                 .build();
     }
 
