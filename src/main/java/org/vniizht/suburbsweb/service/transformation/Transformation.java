@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
-import org.vniizht.suburbsweb.service.transformation.data.Procedures;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -20,7 +19,6 @@ public class Transformation {
     @Autowired private Logger logger;
     @Autowired private Level2Data level2Data;
     @Autowired private Level3Data level3Data;
-    @Autowired private Procedures procedures;
 
     public void run() {
         logger.log("Запуск трансформации данных по пригороду со второго уровня в третий");
@@ -46,28 +44,27 @@ public class Transformation {
 
     @PostConstruct
     public void speedCheck() {
-        procedures.chTripsPerMes("20", 9, 120, "2024-02-19", "2024-02-19");
-        Date startDate = new Date();
-        int yyyy = 2024, mm = 2, dd = 19;
-        Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
-        logger.log("Проверка скорости выполнения трансформации записей за 2024-02-19");
-        logger.log("Загружаю записи...");
-        Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
-        logger.log("Загружено записей: " + records.size());
-        logger.log("Затрачено времени: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
-        if(!records.isEmpty()) {
-            logger.log("Конвертирую записи...");
-
-            List<PrigConversion.Converted> convertedList = new ArrayList<>();
-            records.forEach((idnum, record) -> convertedList.add(prigConversion.convert(record)));
-            logger.log("Записи успешно конвертированы.");
-
-            logger.log("Ищу поездки по месяцам...");
-            convertedList.forEach(converted -> {
-                procedures.chTripsPerMes("20", 9, 120, "2024-09-27", "2024-09-28");
-            });
-            logger.log("Поездки по месяцам успешно найдены.");
-        }
-        logger.log("Итоговое время трансформации: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+//        Date startDate = new Date();
+//        int yyyy = 2024, mm = 2, dd = 19;
+//        Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
+//        logger.log("Проверка скорости выполнения трансформации записей за 2024-02-19");
+//        logger.log("Загружаю записи...");
+//        Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
+//        logger.log("Загружено записей: " + records.size());
+//        logger.log("Затрачено времени: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+//        if(!records.isEmpty()) {
+//            logger.log("Конвертирую записи...");
+//
+//            List<PrigConversion.Converted> convertedList = new ArrayList<>();
+//            records.forEach((idnum, record) -> convertedList.add(prigConversion.convert(record)));
+//            logger.log("Записи успешно конвертированы.");
+//
+//            logger.log("Ищу поездки по месяцам...");
+//
+//            // TODO
+//
+//            logger.log("Поездки по месяцам успешно найдены.");
+//        }
+//        logger.log("Итоговое время трансформации: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
     }
 }

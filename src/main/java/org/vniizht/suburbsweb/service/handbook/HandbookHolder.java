@@ -1,17 +1,17 @@
-package org.vniizht.suburbsweb.service.transformation.data;
+package org.vniizht.suburbsweb.service.handbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.reference.*;
+import org.springframework.web.context.annotation.SessionScope;
+import org.vniizht.suburbsweb.model.handbook.*;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.*;
 
 @Service
-@Scope("singleton")
-public class NsiHolder {
+//@SessionScope
+public class HandbookHolder {
 
     public Dor findDor(Character kodd, String kodg) {
         return dorMap.get(kodd + kodg);
@@ -27,8 +27,9 @@ public class NsiHolder {
     }
 
     public Site findSite(String idsite, String gos, Date date) {
-        if (date != null && siteMap.containsKey(idsite + gos))
-            for(Site site : siteMap.get(idsite + gos))
+        String key = idsite + gos;
+        if (date != null && siteMap.containsKey(key))
+            for(Site site : siteMap.get(key))
                 if (site != null && date.compareTo(site.getDatan()) >= 0 && date.compareTo(site.getDatak()) <= 0)
                     return site;
 
@@ -36,8 +37,9 @@ public class NsiHolder {
     }
 
     public Plagn findPlagn(String idplagn, String gos, Date date) {
-        if(date != null && plagnMap.containsKey(idplagn + gos))
-            for(Plagn plagn : plagnMap.get(idplagn + gos))
+        String key = idplagn + gos;
+        if(date != null && plagnMap.containsKey(key))
+            for(Plagn plagn : plagnMap.get(key))
                 if (plagn != null && date.compareTo(plagn.getDatan()) >= 0 && date.compareTo(plagn.getDatak()) <= 0)
                     return plagn;
 
@@ -62,14 +64,25 @@ public class NsiHolder {
         return null;
     }
 
+    public Trip findTrip(String gos, Short season_tick_code, Short period, Date date) {
+        String key = gos + season_tick_code + period;
+        if (date != null && tripsMap.containsKey(key))
+            for(Trip trip : tripsMap.get(key))
+                if (trip != null && date.compareTo(trip.getDateStart()) >= 0 && date.compareTo(trip.getDateEnd()) <= 0)
+                    return trip;
+
+        return null;
+    }
+
     // Key is used for codes. Multiple codes will be concatenated
-    private Map<String, Dor>    dorMap           = new HashMap<>();
+    private final Map<String, Dor>    dorMap           = new HashMap<>();
     // List is used to hold range of days as indices to provide quick access by date in the range
-    private Map<String,  List<Stanv>> stanvMap = new HashMap<>();
-    private Map<String,  List<Site>>  siteMap  = new HashMap<>();
-    private Map<String,  List<Plagn>> plagnMap = new HashMap<>();
-    private Map<String,  List<Sublx>> sublxMap = new HashMap<>();
-    private Map<Integer, List<Sf>>    sfMap    = new HashMap<>();
+    private final Map<String,  List<Stanv>> stanvMap = new HashMap<>();
+    private final Map<String,  List<Site>>  siteMap  = new HashMap<>();
+    private final Map<String,  List<Plagn>> plagnMap = new HashMap<>();
+    private final Map<String,  List<Sublx>> sublxMap = new HashMap<>();
+    private final Map<Integer, List<Sf>>    sfMap    = new HashMap<>();
+    private final Map<String,  List<Trip>>  tripsMap = new HashMap<>();
 
     @Autowired private DorRepository    dorRepo;
     @Autowired private StanvRepository  stanvRepo;
@@ -77,6 +90,7 @@ public class NsiHolder {
     @Autowired private PlagnRepository  plagnRepo;
     @Autowired private SfRepository     sfRepo;
     @Autowired private SublxRepository  sublxRepo;
+    @Autowired private TripsRepository  tripsRepo;
 
     @PostConstruct
     private void init() {
@@ -90,6 +104,7 @@ public class NsiHolder {
         List<Plagn> plagnList = plagnRepo.findAllByOrderByDatanDesc();
         List<Sublx> sublxList = sublxRepo.findAllByOrderByDatanDesc();
         List<Sf>    sfList    = sfRepo   .findAllByOrderByDatanDesc();
+        List<Trip>  tripsList = tripsRepo.findAllByOrderByDateStartDesc();
 
         System.out.println("Получены списки справочников. Заполняю память...");
 
@@ -126,6 +141,14 @@ public class NsiHolder {
             list.add(sf);
             sfMap.put(sf.getVid(), list);
         });
+        System.out.println("Загружено " + sfMap.size() + " множеств sf");
+        tripsList.forEach(trip  -> {
+            String key = trip.getGos() + trip.getSeason_tick_code() + trip.getPeriod();
+            List<Trip> list = Optional.ofNullable(tripsMap.get(key)).orElse(new ArrayList<>());
+            list.add(trip);
+            tripsMap.put(key, list);
+        });
+        System.out.println("Загружено " + tripsMap.size() + " множеств trips");
 
         System.out.println("Загрузка справочников завершена. Время загрузки: " + (new java.util.Date().getTime() - startDate.getTime()) + " мс.");
     }

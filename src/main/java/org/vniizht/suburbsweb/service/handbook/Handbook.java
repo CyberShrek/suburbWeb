@@ -1,16 +1,16 @@
-package org.vniizht.suburbsweb.service.transformation.data;
+package org.vniizht.suburbsweb.service.handbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.reference.*;
+import org.vniizht.suburbsweb.model.handbook.*;
 
 import java.util.Date;
 import java.util.Optional;
 
 @Service
-public class NsiData {
+public class Handbook {
 
-    @Autowired private NsiHolder holder;
+    @Autowired private HandbookHolder holder;
 
     public String getRoad(String stationCode, Date date) {
         Stanv stanv = holder.findStanv(stationCode, date);

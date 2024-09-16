@@ -12,10 +12,9 @@ import org.vniizht.suburbsweb.model.transformation.level3.lgot.Reestr;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Stat;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
-import org.vniizht.suburbsweb.service.transformation.data.NsiData;
-import org.vniizht.suburbsweb.service.transformation.data.Procedures;
+import org.vniizht.suburbsweb.service.handbook.Handbook;
 
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,20 +22,14 @@ import java.util.stream.Collectors;
 public class PrigConversion {
 
     @Autowired private Logger     logger;
-    @Autowired private NsiData nsiData;
-    @Autowired private Procedures procedures;
+    @Autowired private Handbook handbook;
+    @Autowired private Trips       trips;
 
     public Converted convert(Level2Data.Record l2Record) {
-        T1 t1 = createT1(l2Record, 1);
-//        T2 t2 = createT2(l2Record,(short)1, t1);
-//        T3 t3 = createT3(l2Record,(short)1, t1);
-//        T4 t4 = createT4(l2Record,(short)1, t1);
-//        T5 t5 = createT5(l2Record,          t1, t2, t3);
-//        T6 t6 = createT6(l2Record,(short)1, t1);
-//        Stat   stat   = createStat  (l2Record);
-//        Reestr reestr = createReestr(l2Record);
+        T1 t1 = createT1(l2Record);
+
         return Converted.builder()
-                .t1(t1)
+                .t1(trips.multiplyT1(t1, l2Record.prigMain))
 //                .t2(t2)
 //                .t3(t3)
 //                .t4(t4)
@@ -47,7 +40,7 @@ public class PrigConversion {
                 .build();
     }
 
-    private T1 createT1(Level2Data.Record l2, int serial) {
+    private T1 createT1(Level2Data.Record l2) {
 
         // Даты
         Date operationDate = l2.prigMain.getOperation_date(),
@@ -85,35 +78,35 @@ public class PrigConversion {
         // Игнорировать если действие билета истекло
         return T1.builder()
                 .p1("tab1")
-                .p2(serial)
+                .p2(1)
                 .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
                 .p5("17")
-                .p6(nsiData.getRoad(operationStation, operationDate))
-                .p7(nsiData.getRoad(operationStation, operationDate))
+                .p6(handbook.getRoad(operationStation, operationDate))
+                .p7(handbook.getRoad(operationStation, operationDate))
                 .p8(operationStation)
                 .p9(Converter.convertCarriageCode(l2.prigMain.getCarriage_code()))
                 .p10("00")
-                .p11(Converter.convertOkato(nsiData.getOkato(operationStation, operationDate)))
+                .p11(Converter.convertOkato(handbook.getOkato(operationStation, operationDate)))
                 .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.prigMain.getYyyymm()))
                 .p13("ждёт функции")
                 .p14("ждёт функции")
                 .p15(depStation)
                 .p16("ждёт функции")
-                .p17(Converter.convertOkato(nsiData.getOkato(depStation, operationDate)))
-                .p18(nsiData.getArea(depStation, operationDate))
+                .p17(Converter.convertOkato(handbook.getOkato(depStation, operationDate)))
+                .p18(handbook.getArea(depStation, operationDate))
                 .p19(Converter.convertTrainCategory(trainCategory))
                 .p20(Converter.convertCarriageClass(carriageClass))
                 .p21(convertedTicketType)
                 .p22(Converter.convertPassengerCategory(bsp, child, benefitCode))
                 .p23('3')
                 .p24(benefitCode)
-                .p25(Converter.convertPaymentType(paymentType, nsiData.getTSite(webId, operationCountry, operationDate), nsiData.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26(nsiData.getGvc(benefitGroupCode, l2.prigMain.getBenefit_code(), operationDate))
+                .p25(Converter.convertPaymentType(paymentType, handbook.getTSite(webId, operationCountry, operationDate), handbook.getPlagnVr(payagentId, operationCountry, operationDate)))
+                .p26(handbook.getGvc(benefitGroupCode, l2.prigMain.getBenefit_code(), operationDate))
                 .p27("ждёт функции")
                 .p28("ждёт функции")
                 .p29("ждёт функции")
-                .p30(Converter.convertOkato(nsiData.getOkato(arrStation, operationDate)))
-                .p31(nsiData.getArea(arrStation, operationDate))
+                .p30(Converter.convertOkato(handbook.getOkato(arrStation, operationDate)))
+                .p31(handbook.getArea(arrStation, operationDate))
                 .p32((short) l2.prigCost.stream().mapToInt(PrigCost::getRoute_distance).sum())
                 .p33(Converter.convertPassengersCount(convertedTicketType, l2.prigMain.getPass_qty(), l2.prigMain.getCarryon_weight()))
                 .p34(0L)
@@ -134,7 +127,7 @@ public class PrigConversion {
                 .p49(0L)
                 .p50(0L)
                 .p51(Converter.convertDocumentsCount(l2.prigMain.getOper(), l2.prigMain.getOper_g(), l2.prigMain.getPass_qty()))
-                .p52(Converter.convertDocRegistration(nsiData.getTSite(webId, operationCountry, operationDate), l2.prigMain.getRequest_subtype()))
+                .p52(Converter.convertDocRegistration(handbook.getTSite(webId, operationCountry, operationDate), l2.prigMain.getRequest_subtype()))
                 .p53(String.valueOf(l2.prigMain.getAgent_code()))
                 .p54(arrStation)
                 .p55(Converter.convertAbonementType(abonementType))
@@ -230,7 +223,7 @@ public class PrigConversion {
     @Setter
     @Builder
     static public class Converted {
-        private T1 t1;
+        private Set<T1> t1;
         private T2 t2;
         private T3 t3;
         private T4 t4;

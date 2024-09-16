@@ -1,10 +1,9 @@
-package org.vniizht.suburbsweb.service.transformation.data;
+package org.vniizht.suburbsweb.service.handbook;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
-import org.vniizht.suburbsweb.model.transformation.reference.*;
-
+import org.vniizht.suburbsweb.model.handbook.*;
 import java.util.Date;
 import java.util.List;
 
@@ -46,5 +45,10 @@ interface SfRepository extends ReferenceRepository<Sf, Integer> {
 interface SublxRepository extends ReferenceRepository<Sublx, Integer> {
     List<Sublx> findAllByOrderByDatanDesc();
     Sublx findFirstByLgAndDatanLessThanEqualAndDatakGreaterThanEqual(String lg, Date datan, Date datak);
+}
+
+@Repository
+interface TripsRepository extends JpaRepository<Trip, Integer> {
+    List<Trip> findAllByOrderByDateStartDesc();
 }
 

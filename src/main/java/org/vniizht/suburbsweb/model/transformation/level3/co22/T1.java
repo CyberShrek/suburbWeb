@@ -22,6 +22,9 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 public class T1 {
+    @Id private String          routes;
+    @Id private String          yyyymm;
+    @Id private Date            request_date;
     @Id private String          p1;
     @Id private Integer         p2;
     @Id private String          p3;
@@ -85,17 +88,20 @@ public class T1 {
     @Id private Character       p61;
     @Id private Short           p62;
     @Id private Character       p63;
-    @Id private String       routes;
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {
-        private String p1;
-        private Integer p2;
-        private String p3;
-        private String p4;
-        private String p5;
-        private String p6;
-        private String p7;
+
+        private String          routes;
+        private String          yyyymm;
+        private Date            request_date;
+        private String          p1;
+        private Integer         p2;
+        private String          p3;
+        private String          p4;
+        private String          p5;
+        private String          p6;
+        private String          p7;
         private String          p8;
         private String          p9;
         private String          p10;
@@ -103,10 +109,10 @@ public class T1 {
         private String          p12;
         private String          p14;
         private String          p15;
-        private String      p16;
-        private String      p17;
-        private String      p18;
-        private Character   p19;
+        private String          p16;
+        private String          p17;
+        private String          p18;
+        private Character       p19;
         private String          p20;
         private Character       p21;
         private Character       p22;
@@ -131,6 +137,5 @@ public class T1 {
         private Character       p61;
         private Short           p62;
         private Character       p63;
-        private String          routes;
     }
 }
