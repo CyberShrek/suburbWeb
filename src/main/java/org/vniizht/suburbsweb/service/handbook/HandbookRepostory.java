@@ -48,7 +48,7 @@ interface SublxRepository extends ReferenceRepository<Sublx, Integer> {
 }
 
 @Repository
-interface TripsRepository extends JpaRepository<Trip, Integer> {
-    List<Trip> findAllByOrderByDateStartDesc();
+interface TripsRepository extends JpaRepository<SeasonTrip, Integer> {
+    List<SeasonTrip> findAllByOrderByDateStartDesc();
 }
 

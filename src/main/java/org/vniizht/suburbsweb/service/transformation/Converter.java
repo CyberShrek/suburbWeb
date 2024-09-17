@@ -157,7 +157,21 @@ public class Converter {
             case '7':
             case '8': return '3'; // билет «рабочего дня»
         }
-        return abonementType;
+        return 0;
+    }
+
+    public static Short convertSeasonTicketCode(Character abonementType){
+        switch (abonementType){
+            case '1': return 9; // билет на количество поездок
+            case '2': return 7; // билет на определенные даты
+            case '3': return 1; // билет «ежедневно» (помесячный)
+            case '4': return 2; // билет «ежедневно» (посуточный)
+            case '5':
+            case '6': return 8; // билет «выходного дня»
+            case '7': return 3; // билет «рабочего дня» (помесячный)
+            case '8': return 4; // билет «рабочего дня» (посуточный)
+        }
+        return 0;
     }
 
     public static String convertDepartureDate2yymm(Character interpretedTicketType,
@@ -171,11 +185,6 @@ public class Converter {
         }
         // Во всем остальном - yymm
         return String.valueOf(yyyymm2yymm(yyyymm));
-    }
-
-    public static String convertDocRegistrationType(Character ruch){
-        // web_id
-        return "";
     }
 
     public static Character convertCarrionType(Character carrionType){

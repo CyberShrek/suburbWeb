@@ -2,6 +2,7 @@ package org.vniizht.suburbsweb.service.transformation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
@@ -42,29 +43,24 @@ public class Transformation {
         return prigConversion.convert(level2Data.getRecordByIdnum(idnum));
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void speedCheck() {
-//        Date startDate = new Date();
-//        int yyyy = 2024, mm = 2, dd = 19;
-//        Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
-//        logger.log("Проверка скорости выполнения трансформации записей за 2024-02-19");
-//        logger.log("Загружаю записи...");
-//        Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
-//        logger.log("Загружено записей: " + records.size());
-//        logger.log("Затрачено времени: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
-//        if(!records.isEmpty()) {
-//            logger.log("Конвертирую записи...");
-//
-//            List<PrigConversion.Converted> convertedList = new ArrayList<>();
-//            records.forEach((idnum, record) -> convertedList.add(prigConversion.convert(record)));
-//            logger.log("Записи успешно конвертированы.");
-//
-//            logger.log("Ищу поездки по месяцам...");
-//
-//            // TODO
-//
-//            logger.log("Поездки по месяцам успешно найдены.");
-//        }
-//        logger.log("Итоговое время трансформации: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+        Date startDate = new Date();
+        int yyyy = 2024, mm = 4, dd = 11;
+        Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
+        logger.log("Проверка скорости выполнения трансформации записей за 2024-04-11");
+        logger.log("Загружаю записи...");
+        Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
+        logger.log("Загружено записей: " + records.size());
+        logger.log("Затрачено времени: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
+        if(!records.isEmpty()) {
+            logger.log("трансформирую записи...");
+
+            List<PrigConversion.Converted> convertedList = new ArrayList<>();
+            records.forEach((idnum, record) -> convertedList.add(prigConversion.convert(record)));
+            logger.log("Записи успешно конвертированы.");
+
+        }
+        logger.log("Итоговое время трансформации: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
     }
 }

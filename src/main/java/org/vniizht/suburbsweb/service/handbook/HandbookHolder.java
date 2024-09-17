@@ -2,7 +2,6 @@ package org.vniizht.suburbsweb.service.handbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.annotation.SessionScope;
 import org.vniizht.suburbsweb.model.handbook.*;
 
 import javax.annotation.PostConstruct;
@@ -64,12 +63,12 @@ public class HandbookHolder {
         return null;
     }
 
-    public Trip findTrip(String gos, Short season_tick_code, Short period, Date date) {
-        String key = gos + season_tick_code + period;
+    public SeasonTrip findTrip(Short season_tick_code, Short period, Date date) {
+        String key = "20" + season_tick_code + period;
         if (date != null && tripsMap.containsKey(key))
-            for(Trip trip : tripsMap.get(key))
-                if (trip != null && date.compareTo(trip.getDateStart()) >= 0 && date.compareTo(trip.getDateEnd()) <= 0)
-                    return trip;
+            for(SeasonTrip seasonTrip : tripsMap.get(key))
+                if (seasonTrip != null && date.compareTo(seasonTrip.getDateStart()) >= 0 && date.compareTo(seasonTrip.getDateEnd()) <= 0)
+                    return seasonTrip;
 
         return null;
     }
@@ -82,7 +81,7 @@ public class HandbookHolder {
     private final Map<String,  List<Plagn>> plagnMap = new HashMap<>();
     private final Map<String,  List<Sublx>> sublxMap = new HashMap<>();
     private final Map<Integer, List<Sf>>    sfMap    = new HashMap<>();
-    private final Map<String,  List<Trip>>  tripsMap = new HashMap<>();
+    private final Map<String,  List<SeasonTrip>>  tripsMap = new HashMap<>();
 
     @Autowired private DorRepository    dorRepo;
     @Autowired private StanvRepository  stanvRepo;
@@ -104,7 +103,7 @@ public class HandbookHolder {
         List<Plagn> plagnList = plagnRepo.findAllByOrderByDatanDesc();
         List<Sublx> sublxList = sublxRepo.findAllByOrderByDatanDesc();
         List<Sf>    sfList    = sfRepo   .findAllByOrderByDatanDesc();
-        List<Trip>  tripsList = tripsRepo.findAllByOrderByDateStartDesc();
+        List<SeasonTrip>  tripsList = tripsRepo.findAllByOrderByDateStartDesc();
 
         System.out.println("Получены списки справочников. Заполняю память...");
 
@@ -142,10 +141,10 @@ public class HandbookHolder {
             sfMap.put(sf.getVid(), list);
         });
         System.out.println("Загружено " + sfMap.size() + " множеств sf");
-        tripsList.forEach(trip  -> {
-            String key = trip.getGos() + trip.getSeason_tick_code() + trip.getPeriod();
-            List<Trip> list = Optional.ofNullable(tripsMap.get(key)).orElse(new ArrayList<>());
-            list.add(trip);
+        tripsList.forEach(seasonTrip -> {
+            String key = seasonTrip.getGos() + seasonTrip.getSeason_tick_code() + seasonTrip.getPeriod();
+            List<SeasonTrip> list = Optional.ofNullable(tripsMap.get(key)).orElse(new ArrayList<>());
+            list.add(seasonTrip);
             tripsMap.put(key, list);
         });
         System.out.println("Загружено " + tripsMap.size() + " множеств trips");

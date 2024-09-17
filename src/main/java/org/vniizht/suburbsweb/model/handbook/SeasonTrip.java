@@ -16,7 +16,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
-public class Trip {
+public class SeasonTrip {
 
     @Id
     private Integer trip_code_id;
@@ -24,6 +24,7 @@ public class Trip {
     private Short season_tick_code;
     private Short period;
     private Short kol_trips;
+    private Short kol__round_trips;
     private Character pr_period;
 
     @Column(name = "date_ni")
