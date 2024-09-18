@@ -43,12 +43,12 @@ public class Transformation {
         return prigConversion.convert(level2Data.getRecordByIdnum(idnum));
     }
 
-//    @PostConstruct
+    @PostConstruct
     public void speedCheck() {
         Date startDate = new Date();
-        int yyyy = 2024, mm = 4, dd = 11;
+        int yyyy = 2024, mm = 3, dd = 14;
         Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
-        logger.log("Проверка скорости выполнения трансформации записей за 2024-04-11");
+        logger.log("Проверка скорости выполнения трансформации записей за 2024-03-14");
         logger.log("Загружаю записи...");
         Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
         logger.log("Загружено записей: " + records.size());

@@ -25,7 +25,6 @@ public class SeasonTrip {
     private Short period;
     private Short kol_trips;
     private Short kol__round_trips;
-    private Character pr_period;
 
     @Column(name = "date_ni")
     private Date dateStart;

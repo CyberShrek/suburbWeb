@@ -18,7 +18,7 @@ import java.util.Set;
 @IdClass(T1.Identifier.class)
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder=true)
 @ToString
 @NoArgsConstructor
 public class T1 {

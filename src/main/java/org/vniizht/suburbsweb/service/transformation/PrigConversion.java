@@ -29,7 +29,7 @@ public class PrigConversion {
         T1 t1 = createT1(l2Record);
 
         return Converted.builder()
-                .t1(trips.multiplyT1(t1, l2Record.prigMain))
+                .t1(trips.multiplyByTrips(t1, l2Record.prigMain))
 //                .t2(t2)
 //                .t3(t3)
 //                .t4(t4)
