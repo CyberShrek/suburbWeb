@@ -43,7 +43,7 @@ public class Transformation {
         return prigConversion.convert(level2Data.getRecordByIdnum(idnum));
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void speedCheck() {
         Date startDate = new Date();
         int yyyy = 2024, mm = 3, dd = 14;
