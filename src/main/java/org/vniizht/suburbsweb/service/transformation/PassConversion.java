@@ -84,165 +84,83 @@ public class PassConversion {
 
         // Игнорировать если действие билета истекло
         return T1.builder()
-                .p1("tab1")
-                .p2(serial)
-                .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
-                .p5("17")
-                .p6(handbook.getRoad(operationStation, operationDate))
-                .p7(handbook.getRoad(operationStation, operationDate))
-                .p8(operationStation)
-                .p9(Converter.convertCarriageCode(
-                        (short) 0//l2.main.getCarriage_code()
-                ))
-                .p10("00")
-                .p11(Converter.convertOkato(handbook.getOkato(operationStation, operationDate)))
-                .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.prigMain.getYyyymm()))
-                .p13("ждёт функции")
-                .p14("ждёт функции")
-                .p15(depStation)
-                .p16("ждёт функции")
-                .p17(Converter.convertOkato(handbook.getOkato(depStation, operationDate)))
-                .p18(handbook.getArea(depStation, operationDate))
-                .p19(Converter.convertTrainCategory(trainCategory))
-                .p20(Converter.convertCarriageClass(carriageClass))
-                .p21(convertedTicketType)
-                .p22(Converter.convertPassengerCategory(bsp, child, benefitCode))
-                .p23('3')
-                .p24(benefitCode)
-                .p25(Converter.convertPaymentType(paymentType, handbook.getTSite(webId, operationCountry, operationDate), handbook.getPlagnVr(payagentId, operationCountry, operationDate)))
-                .p26(handbook.getGvc(benefitGroupCode, benefitCode, operationDate))
-                .p27("ждёт функции")
-                .p28("ждёт функции")
-                .p29("ждёт функции")
-                .p30(Converter.convertOkato(handbook.getOkato(arrStation, operationDate)))
-                .p31(handbook.getArea(arrStation, operationDate))
-                .p32((short) l2.prigCost.stream().mapToInt(PrigCost::getRoute_distance).sum())
-                .p33(Converter.convertPassengersCount(convertedTicketType,
-                        (short) 0,// l2.main.getPass_qty(),
-                        (short) 0// l2.main.getCarryon_weight()
-                ))
-                .p34(0L)
-                .p35(0L)
-//                .p36(l2.main.getTariff_sum()) // sum_nde сумм cost.sum_code 116 + 101 и cnt_code == 20
-                .p37(0L)
-                .p38(0L)
-
-                //Если paymenttype == 9, В, Ж то sum_nde считается выпадающим
-
-                .p39(0L) // Используется в 800: tarriff_sum либо department_sum при cost.sum_code == 104, 105, 106 и cnt_code == 20, иначе 0
-                .p40(0L) // sum_nde при cost.sum_code == 101 и cnt_code == 20
-                .p41(0L)
-                .p42(0L)
-                .p43(0L)
-//                .p44(l2.main.getDepartment_sum()) // sum_nde сумм cost.sum_code 116 + 101 и cnt_code == 20
-                .p45(0L)
-                .p46(0L)
-                .p47(0L)
-                .p48(0L)
-                .p49(0L)
-                .p50(0L)
-                .p51(Converter.convertDocumentsCount(l2.prigMain.getOper(), l2.prigMain.getOper_g(), (short) 0//l2.main.getPass_qty()
-                         ))
-                .p52(Converter.convertDocRegistration(handbook.getTSite(webId, operationCountry, operationDate), l2.prigMain.getRequest_subtype()))
-                .p53(String.valueOf(l2.prigMain.getAgent_code()))
-                .p54(arrStation)
-                .p55(Converter.convertAbonementType(abonementType))
-                .p56(Converter.convertSeatStickLimit( // в дальнем не нужен. Всегда 000
-                        (short) 0,//l2.main.getSeatstick_limit(),
-                        abonementType))
-                .p57(Converter.convertCarrionType(carrionType))
-                .p58(Converter.convert58(benefitGroupCode, l2.prigAdi.getBilgroup_code()))
-                .p59(Converter.convert59(benefitGroupCode, l2.prigAdi.getEmployee_cat()))
-                .p60("000")
-                .p61(Converter.covertMCD(l2.prigMain.getTrain_num()))
-                .p62((short) -1)
-                .p63('?')
-                .routes(l2.prigCost.stream().map(PrigCost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
+//                .p1("tab1")
+//                .p2(serial)
+//                .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
+//                .p5("17")
+//                .p6(handbook.getRoad(operationStation, operationDate))
+//                .p7(handbook.getRoad(operationStation, operationDate))
+//                .p8(operationStation)
+//                .p9(Converter.convertCarriageCode(
+//                        (short) 0//l2.main.getCarriage_code()
+//                ))
+//                .p10("00")
+//                .p11(Converter.convertOkato(handbook.getOkato(operationStation, operationDate)))
+//                .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.prigMain.getYyyymm()))
+//                .p13("ждёт функции")
+//                .p14("ждёт функции")
+//                .p15(depStation)
+//                .p16("ждёт функции")
+//                .p17(Converter.convertOkato(handbook.getOkato(depStation, operationDate)))
+//                .p18(handbook.getArea(depStation, operationDate))
+//                .p19(Converter.convertTrainCategory(trainCategory))
+//                .p20(Converter.convertCarriageClass(carriageClass))
+//                .p21(convertedTicketType)
+//                .p22(Converter.convertPassengerCategory(bsp, child, benefitCode))
+//                .p23('3')
+//                .p24(benefitCode)
+//                .p25(Converter.convertPaymentType(paymentType, handbook.getTSite(webId, operationCountry, operationDate), handbook.getPlagnVr(payagentId, operationCountry, operationDate)))
+//                .p26(handbook.getGvc(benefitGroupCode, benefitCode, operationDate))
+//                .p27("ждёт функции")
+//                .p28("ждёт функции")
+//                .p29("ждёт функции")
+//                .p30(Converter.convertOkato(handbook.getOkato(arrStation, operationDate)))
+//                .p31(handbook.getArea(arrStation, operationDate))
+//                .p32((short) l2.prigCost.stream().mapToInt(PrigCost::getRoute_distance).sum())
+//                .p33(Converter.convertPassengersCount(convertedTicketType,
+//                        (short) 0,// l2.main.getPass_qty(),
+//                        (short) 0// l2.main.getCarryon_weight()
+//                ))
+//                .p34(0L)
+//                .p35(0L)
+////                .p36(l2.main.getTariff_sum()) // sum_nde сумм cost.sum_code 116 + 101 и cnt_code == 20
+//                .p37(0L)
+//                .p38(0L)
+//
+//                //Если paymenttype == 9, В, Ж то sum_nde считается выпадающим
+//
+//                .p39(0L) // Используется в 800: tarriff_sum либо department_sum при cost.sum_code == 104, 105, 106 и cnt_code == 20, иначе 0
+//                .p40(0L) // sum_nde при cost.sum_code == 101 и cnt_code == 20
+//                .p41(0L)
+//                .p42(0L)
+//                .p43(0L)
+////                .p44(l2.main.getDepartment_sum()) // sum_nde сумм cost.sum_code 116 + 101 и cnt_code == 20
+//                .p45(0L)
+//                .p46(0L)
+//                .p47(0L)
+//                .p48(0L)
+//                .p49(0L)
+//                .p50(0L)
+//                .p51(Converter.convertDocumentsCount(l2.prigMain.getOper(), l2.prigMain.getOper_g(), (short) 0//l2.main.getPass_qty()
+//                         ))
+//                .p52(Converter.convertDocRegistration(handbook.getTSite(webId, operationCountry, operationDate), l2.prigMain.getRequest_subtype()))
+//                .p53(String.valueOf(l2.prigMain.getAgent_code()))
+//                .p54(arrStation)
+//                .p55(Converter.convertAbonementType(abonementType))
+//                .p56(Converter.convertSeatStickLimit( // в дальнем не нужен. Всегда 000
+//                        (short) 0,//l2.main.getSeatstick_limit(),
+//                        abonementType))
+//                .p57(Converter.convertCarrionType(carrionType))
+//                .p58(Converter.convert58(benefitGroupCode, l2.prigAdi.getBilgroup_code()))
+//                .p59(Converter.convert59(benefitGroupCode, l2.prigAdi.getEmployee_cat()))
+//                .p60("000")
+//                .p61(Converter.covertMCD(l2.prigMain.getTrain_num()))
+//                .p62((short) -1)
+//                .p63('?')
+//                .routes(l2.prigCost.stream().map(PrigCost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
                 .build();
     }
 
-    private T2 createT2(Level2Data.Record l2, short serial, T1 t1) {
-//        logger.log("\t\tprig_co22_t2");
-        return T2.builder()
-                .p1("tab2")
-                .p2(t1.getP5())
-                .p3(t1.getP2())
-                .p4(serial)
-                .p5("ждёт функции")
-                .p6("ждёт функции")
-                .p7((short) -1)
-                .build();
-    }
-
-    private T3 createT3(Level2Data.Record l2, short serial, T1 t1) {
-//        logger.log("\t\tprig_co22_t3");
-        return T3.builder()
-                .p1("tab3")
-                .p2(t1.getP5())
-                .p3(t1.getP2())
-                .p4(serial)
-                .p5("ждёт функции")
-                .p6("ждёт функции")
-                .p7((short) -1)
-                .build();
-    }
-
-    private T4 createT4(Level2Data.Record l2, short serial, T1 t1) {
-//        logger.log("\t\tprig_co22_t4");
-        return T4.builder()
-                .p1("tab4")
-                .p2(t1.getP5())
-                .p3(t1.getP2())
-                .p4(serial)
-                .p5("ждёт функции")
-                .p6("ждёт функции")
-                .p7(-1L)
-                .p8(-1L)
-                .p9((short) -1)
-                .build();
-    }
-
-    private T5 createT5(Level2Data.Record l2, T1 t1, T2 t2, T3 t3) {
-//        logger.log("\t\tprig_co22_t5");
-        return T5.builder()
-                .p1("tab5")
-                .p2(t1.getP5())
-                .p3(1)
-                .p4(1)
-                .p5(1)
-                .p6(t1.getP33())
-                .p7(0L) // ??
-                .p8(0L) // ??
-                .p9(t1.getP36())
-                .p10(t1.getP44())
-                .build();
-    }
-
-    private T6 createT6(Level2Data.Record l2, short serial, T1 t1) {
-//        logger.log("\t\tprig_co22_t6");
-        return T6.builder()
-                .p1("tab6")
-                .p2(t1.getP5())
-                .p3(t1.getP2())
-                .p4(serial)
-                .p5("ждёт функции")  // берётся из функции
-                .p6(-1)  // берётся из функции
-                .p7((short) -1)  // берётся из функции
-                .build();
-    }
-    
-    private Reestr createReestr(Level2Data.Record l2, T1 t1) {
-//        logger.log("\t\tprig_lgot_reestr");
-        return Reestr.builder()
-                .build();
-    }
-    
-    private Stat createStat(Level2Data.Record l2, T1 t1) {
-//        logger.log("\t\tprig_lgot_stat");
-        return Stat.builder()
-                .list("Имя файла - ?")
-                .build();
-    }
 
     @Getter
     @Setter

@@ -3,34 +3,40 @@ package org.vniizht.suburbsweb.service.transformation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.transformation.level3.co22.*;
 import org.vniizht.suburbsweb.service.Logger;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Scope("singleton")
 public class PrigAggregation {
 
     @Autowired private Logger logger;
-    @Autowired private PrigConversion prigConversion;
 
-    public Set<PrigConversion.Converted> aggregate(List<PrigConversion.Converted> raws) {
-        Set<PrigConversion.Converted> converted = new HashSet<>();
+    public Set<T1> aggregate(List<T1> t1List) {
+        Map<T1.Key, T1> t1Map = new HashMap<>();
 
-        logger.log("Агрегация");
-        for (PrigConversion.Converted raw : raws) {
-            converted.add(raw);
+        for (T1 t1 : t1List) {
+            T1.Key key = t1.getKey();
+            if(t1Map.containsKey(key))
+                t1Map.get(key).add(t1);
+            else
+                t1Map.put(key, t1);
         }
 
-        return converted;
+        return new HashSet<>(t1Map.values());
     }
-
+//
 //    @Getter
 //    @Setter
 //    @Builder
-//    static public class Aggregated{
-//        private Set<Transformation.Transformed> set = new HashSet<>();
+//    static public class Aggregated {
+//        private Set<T1> t1;
+//        private T2 t2;
+//        private T3 t3;
+//        private T4 t4;
+//        private T5 t5;
+//        private T6 t6;
 //    }
 }

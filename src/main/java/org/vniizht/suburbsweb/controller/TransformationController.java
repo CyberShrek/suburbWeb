@@ -25,9 +25,9 @@ public class TransformationController {
 
     }
 
-    @GetMapping("/transformation/co22/{idnum}")
-    @ResponseBody
-    public PrigConversion.Converted getCO22Tables(@PathVariable Long idnum) {
-        return transformation.getConvertedByIdnum(idnum);
-    }
+//    @GetMapping("/transformation/co22/{idnum}")
+//    @ResponseBody
+//    public PrigConversion.Converted getCO22Tables(@PathVariable Long idnum) {
+//        return transformation.getConvertedByIdnum(idnum);
+//    }
 }

@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.transformation;
+package org.vniizht.suburbsweb.service.transformation.data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -6,8 +6,8 @@ import org.vniizht.suburbsweb.model.handbook.SeasonTrip;
 import org.vniizht.suburbsweb.model.transformation.level2.PrigMain;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
 import org.vniizht.suburbsweb.service.handbook.HandbookHolder;
+import org.vniizht.suburbsweb.service.transformation.Converter;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -31,9 +31,14 @@ public class Trips {
                     prigMain.getTicket_begdate(),
                     prigMain.getTicket_enddate())
                     .forEach((month, trips) -> t1Set.add(t1.toBuilder()
-                            .yyyymm(month)
-                            .p33(Long.valueOf(trips)).build()));
-        else
+                            .key(t1.getKey().toBuilder()
+                                    .yyyymm(month)
+                                    .p2(t1.getKey().getP2() + 1)
+                                    .build())
+                            .p33(Long.valueOf(trips))
+                            .build()));
+
+        if(t1Set.isEmpty())
             t1Set.add(t1);
 
         return t1Set;
@@ -61,7 +66,6 @@ public class Trips {
         }
         calendar.setTime(begDate);
         int totalTrips = 0;
-//        while ()
         while (calendar.getTime().getTime() <= endDate.getTime()) {
             int     day           = calendar.get(Calendar.DAY_OF_MONTH);
             int     month         = calendar.get(Calendar.MONTH);
@@ -85,7 +89,7 @@ public class Trips {
         return collector;
     }
 
-    @PostConstruct
+//    @PostConstruct
     private void test(){
 //        calculateTripsPerMonth(
 //                (short) 9,
