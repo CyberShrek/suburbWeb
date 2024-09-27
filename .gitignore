@@ -1,6 +1,6 @@
 HELP.md
-target/
-!target/suburbWeb-SNAPSHOT.war
+target/*
+!target/*.war
 #!.mvn/wrapper/maven-wrapper.jar
 #!**/src/prigMain/**/target/
 #!**/src/test/**/target/
