@@ -22,7 +22,10 @@ public class Routes {
 //            jdbcTemplate.queryForList(prigQuery, stationFrom, stationTo, date);
             jdbcTemplate.queryForList(passQuery, date, stationFrom, stationTo);
             cache.put(key, "yes");
-            System.out.println(cache.size());
         }
+    }
+
+    public void clearCache() {
+        cache.clear();
     }
 }

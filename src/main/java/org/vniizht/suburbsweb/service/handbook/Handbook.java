@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class Handbook {
 
-    @Autowired private HandbookHolder holder;
+    @Autowired private HandbookCache holder;
 
     public String getRoad(String stationCode, Date date) {
         Stanv stanv = holder.findStanv(stationCode, date);

@@ -29,7 +29,7 @@ public class Handler {
         } else if (ex instanceof HttpMessageNotReadableException || ex instanceof MissingRequestHeaderException) {
             return HttpStatus.UNPROCESSABLE_ENTITY;
         } else {
-            throw ex;
+            return HttpStatus.I_AM_A_TEAPOT;
         }
     }
 }

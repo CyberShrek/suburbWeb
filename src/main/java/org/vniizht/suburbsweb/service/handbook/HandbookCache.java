@@ -4,13 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.handbook.*;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.*;
 
 @Service
 //@SessionScope
-public class HandbookHolder {
+public class HandbookCache {
 
     public Dor findDor(Character kodd, String kodg) {
         return dorMap.get(kodd + kodg);
@@ -91,8 +90,8 @@ public class HandbookHolder {
     @Autowired private SublxRepository  sublxRepo;
     @Autowired private TripsRepository  tripsRepo;
 
-    @PostConstruct
-    private void init() {
+//    @PostConstruct
+    public void init() {
         java.util.Date startDate = new java.util.Date();
 
         System.out.println("Загружаю справочники в память...");
@@ -150,5 +149,15 @@ public class HandbookHolder {
         System.out.println("Загружено " + tripsMap.size() + " множеств trips");
 
         System.out.println("Загрузка справочников завершена. Время загрузки: " + (new java.util.Date().getTime() - startDate.getTime()) + " мс.");
+    }
+
+    public void clear() {
+        dorMap.clear();
+        stanvMap.clear();
+        siteMap.clear();
+        plagnMap.clear();
+        sublxMap.clear();
+        sfMap.clear();
+        tripsMap.clear();
     }
 }

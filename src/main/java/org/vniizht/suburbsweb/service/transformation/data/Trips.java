@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.handbook.SeasonTrip;
 import org.vniizht.suburbsweb.model.transformation.level2.PrigMain;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
-import org.vniizht.suburbsweb.service.handbook.HandbookHolder;
+import org.vniizht.suburbsweb.service.handbook.HandbookCache;
 import org.vniizht.suburbsweb.service.transformation.Converter;
 
 import java.text.SimpleDateFormat;
@@ -15,7 +15,7 @@ import java.util.*;
 public class Trips {
 
     @Autowired
-    private HandbookHolder handbookHolder;
+    private HandbookCache handbookCache;
 
     private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMM");
 
@@ -50,7 +50,7 @@ public class Trips {
                                                         Date begDate,
                                                         Date endDate) {
 
-        SeasonTrip seasonTrip = handbookHolder.findTrip(ticketCode, period, begDate);
+        SeasonTrip seasonTrip = handbookCache.findTrip(ticketCode, period, begDate);
         if (seasonTrip == null) return new HashMap<>();
 
         int   saleMonth = saleDate.getMonth(), saleYear = saleDate.getYear();

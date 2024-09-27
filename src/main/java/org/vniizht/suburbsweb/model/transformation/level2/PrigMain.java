@@ -28,6 +28,7 @@ public class PrigMain extends L2Common {
     private Short       carriage_code;
     private Character   paymenttype;
     private String      sale_station;
+    private String      region_code;
     private String      payagent_id;
     private String      web_id;
     private String      departure_station;
