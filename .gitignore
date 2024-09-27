@@ -1,5 +1,5 @@
 HELP.md
-#target/
+target/
 !target/*.war
 #!.mvn/wrapper/maven-wrapper.jar
 #!**/src/prigMain/**/target/
