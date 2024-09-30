@@ -82,10 +82,10 @@ public class Transformation {
         return log.collect();
     }
 
-//    @PostConstruct
+    @PostConstruct
     public String check() {
         Date startDate = new Date();
-        int yyyy = 2024, mm = 4, dd = 3;
+        int yyyy = 2024, mm = 2, dd = 19;
         Date requestDate = new Date(yyyy - 1900, mm - 1, dd);
         return tryPrig(requestDate);
     }
