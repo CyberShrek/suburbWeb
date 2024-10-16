@@ -6,13 +6,14 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
+import org.vniizht.suburbsweb.service.transformation.aggregation.PrigAggregation;
+import org.vniizht.suburbsweb.service.transformation.conversion.PrigConversion;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
 import org.vniizht.suburbsweb.service.transformation.data.Routes;
 import org.vniizht.suburbsweb.service.transformation.data.Trips;
 import org.vniizht.suburbsweb.util.Log;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -30,19 +31,10 @@ public class Transformation {
     @Autowired private Logger logger;
 
     public void run() {
-        logger.log("Запуск трансформации данных по пригороду со второго уровня в третий");
-        Long lastLevel3Id = level3Data.getLastId();
 
-        logger.log("Последний индекс третьего уровня: " + lastLevel3Id + "; ищу записи второго уровня с индексом больше этого значения");
-        Map<Long, Level2Data.Record> records = level2Data.getRecordsByIdGreaterThan(lastLevel3Id);
-
-        logger.log("Найдено записей: " + records.size());
-//        records.forEach(this::transform);
-
-        logger.log("Конец трансформации");
     }
 
-    public void transform(Long id, Level2Data.Record l2Record) {
+    public void transform(Long id, Level2Data.PrigRecord l2PrigRecord) {
         logger.log("\t" + id);
 //        level3Data.addRecord(conversion.convert(l2Record));
     }
@@ -58,13 +50,13 @@ public class Transformation {
         handbookCache.init();
         log.log("Справочники загружены.");
         log.log("Загружаю записи второго уровня...");
-        Map<Long, Level2Data.Record> records = level2Data.getRecordsByRequestDate(requestDate);
+        Map<Long, Level2Data.PrigRecord> records = level2Data.findPrigRecords(requestDate);
         log.log("Загружено записей: " + records.size());
         log.log("Итого затрачено времени на загрузку: " + (((new Date()).getTime() - startDate.getTime()) / 1000) + "c.");
         if(!records.isEmpty()) {
             log.log("Конвертирую записи...");
             List<T1> convertedList = new ArrayList<>();
-            records.forEach((idnum, record) -> convertedList.addAll(trips.multiplyByTrips(prigConversion.convert(record), record.prigMain)));
+            records.forEach((idnum, prigRecord) -> convertedList.addAll(trips.multiplyByTrips(prigConversion.getT1(prigRecord), prigRecord.main)));
             log.log("Записи успешно конвертированы. Количество (включая абонементные поездки): " + convertedList.size());
             log.log("Агрегирую записи...");
             Set<T1> aggregatedSet = prigAggregation.aggregate(convertedList);
@@ -82,7 +74,7 @@ public class Transformation {
         return log.collect();
     }
 
-    @PostConstruct
+//    @PostConstruct
     public String check() {
         Date startDate = new Date();
         int yyyy = 2024, mm = 2, dd = 19;

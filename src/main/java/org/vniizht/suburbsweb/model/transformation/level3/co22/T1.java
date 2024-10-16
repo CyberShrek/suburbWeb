@@ -72,6 +72,7 @@ public class T1 {
         private String          routes;
         private String          yyyymm;
         private Date            request_date;
+        private String          list;
         private String          p1;
         private Integer         p2;
         private String          p3;

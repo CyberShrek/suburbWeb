@@ -14,7 +14,7 @@ interface ReferenceRepository<ENTITY, PK> extends JpaRepository<ENTITY, PK> {
 
 @Repository
 interface DorRepository extends ReferenceRepository<Dor, Integer> {
-    Dor findFirstByKoddAndKodg(Character kodd, String kodg);
+    Dor findFirstByKod(Character kod);
 }
 
 @Repository

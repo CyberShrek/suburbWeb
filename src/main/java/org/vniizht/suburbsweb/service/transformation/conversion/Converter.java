@@ -1,8 +1,13 @@
-package org.vniizht.suburbsweb.service.transformation;
+package org.vniizht.suburbsweb.service.transformation.conversion;
 
 import java.util.Date;
+import java.util.List;
 
 public class Converter {
+
+    public static String p1() {
+        return "tab1";
+    }
 
     public static Integer yyyymm2yymm(Integer yyyymm) {
         return yyyymm - (yyyymm/10000*10000);
@@ -26,9 +31,14 @@ public class Converter {
         return (month < 10 ? "0" : "") + month;
     }
 
+    public static String convertSaleStation(String saleStation) {
+        // Начало строки заполняется двумя нулями (00). Затем sale_station.
+        return "00" + saleStation;
+    }
+
     public static String convertCarriageCode(Short carriageCode) {
-        // Числовой тип исходного поля приводится к строковому. Остаток строки заполняется нулями до длины строки 9
-        return String.format("%-9d", carriageCode).replace(' ', '0');
+        // Числовой тип исходного поля приводится к строковому. Начало строки заполняется нулями до общей длины 9 символов.
+        return String.format("%09d", carriageCode);
     }
 
     public static String convertDepartment(String department) {
@@ -91,6 +101,30 @@ public class Converter {
                 : '3';                          // Льготный
     }
 
+    public static Character convertPassengerCategory(List<Boolean> fTick,
+                                                     String benefitCode) {
+        return    fTick.get(2) ? '2'                               // Детский
+                : !benefitCode.equals("000") || fTick.get(4) ? '3' // Льготный
+                : fTick.get(1) ? '1'                               // Полный
+                : '4';                                             // Бесплатный
+    }
+
+    public static Character convertPaymentType(Character  paymentType) {
+
+        switch (paymentType){
+            case '8': return '3'; // Банковские карты
+            case '9':
+            case 'В':
+            case 'Б':return '1'; // Льготные
+            case '1':
+            case '3': return '2'; // Наличные
+            case '6': return '5'; // Безнал для юр. лиц
+        }
+
+        // Электронный кошелёк
+        return '4';
+    }
+
     public static Character convertPaymentType(Character  paymentType,
                                                String     siteType,
                                                String     plagnVr) {
@@ -146,10 +180,15 @@ public class Converter {
         return  '5';
     }
 
-    public static Character convertAbonementType(Character abonementType) {
+    public static Character convertAbonementType(Character abonementType, Character abonementSubtype) {
         switch (abonementType){
             case '1': return '5'; // билет на количество поездок
-            case '2': return '4'; // билет на определенные даты
+            case '2':
+                switch (abonementSubtype){
+                    case '0': return '4'; // билет на определенные даты
+                    case '1': return '6'; // билет на определенные нечетные даты
+                    case '2': return '7'; // билет на определенные четные даты
+                }
             case '3':
             case '4': return '1'; // билет «ежедневно»
             case '5':
@@ -158,6 +197,16 @@ public class Converter {
             case '8': return '3'; // билет «рабочего дня»
         }
         return 0;
+    }
+
+    public static String convertBenefitCode(String benefitCode, Character paymenttype, Short militaryCode, String lgot_info) {
+        if(paymenttype == 'В')
+            return "21" + String.format("%02d", militaryCode);
+
+        if(lgot_info != null && !benefitCode.equals("000") && !benefitCode.equals("013"))
+            return lgot_info.substring(1, 4);
+
+        return null;
     }
 
     public static Short convertSeasonTicketCode(Character abonementType){
@@ -196,6 +245,69 @@ public class Converter {
         return carrionType;
     }
 
+    public static Long convert39(Character oper, Long feeSum, Long refundfeeSum) {
+        switch (oper) {
+            case 'O': return feeSum;
+            case 'V': return refundfeeSum;
+            default: return 0L;
+        }
+    }
+
+    public static Long convert39(Float sumNde, Short sumCode) {
+        switch (sumCode) {
+            case 104:
+            case 105:
+            case 106: return (long) Math.round(sumNde);
+            default: return 0L;
+        }
+    }
+
+    public static Long convert40(Float sumNde, Short sumCode) {
+        if (sumCode == 101)
+            return (long) Math.round(sumNde);
+        else
+            return 0L;
+    }
+
+    public static Long convert44(Float sumNde, Short sumCode, Character paymentType) {
+        switch (sumCode) {
+            case 101:
+            case 116: switch (paymentType) {
+                case 'Б':
+                case 'В':
+                case 'Ж':
+                case '9': return (long) Math.round(sumNde);
+            }
+        }
+        return 0L;
+    }
+
+    public static Long convert47(Float sumNde, Short sumCode, Character paymentType) {
+        switch (sumCode) {
+            case 104:
+            case 105:
+            case 106: switch (paymentType) {
+                case 'Б':
+                case 'В':
+                case 'Ж':
+                case '9': return (long) Math.round(sumNde);
+            }
+        }
+        return 0L;
+    }
+
+    public static Long convert48(Float sumNde, Short sumCode, Character paymentType) {
+        if (sumCode == 101) {
+            switch (paymentType) {
+                case 'Б':
+                case 'В':
+                case 'Ж':
+                case '9': return (long) Math.round(sumNde);
+            }
+        }
+        return 0L;
+    }
+
     public static Character convert58(String benefitGroupCode, String bilGroupCode){
         if(!benefitGroupCode.equals("22"))
             return null;
@@ -206,6 +318,22 @@ public class Converter {
         return '0';
     }
 
+    public static Character convert58(String lgotInfo){
+        switch (lgotInfo.charAt(10)){
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4': return '0';
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9': return '1';
+        }
+        return null;
+    }
+
     public static Character convert59(String benefitGroupCode, Character employeeCategory){
         if(!benefitGroupCode.equals("22"))
             return null;
@@ -213,6 +341,15 @@ public class Converter {
         if(employeeCategory == 'Ф')
             return '1';
 
+        return '0';
+    }
+
+    public static Character convert59(Character paymentType, String lgotInfo){
+        if(paymentType == 'Ж' && lgotInfo.startsWith("22"))
+            switch (lgotInfo.charAt(5)){
+                case 'Ф':
+                case 'Д': return '1';
+        }
         return '0';
     }
 
@@ -238,13 +375,18 @@ public class Converter {
     public static long convertDocumentsCount(Character operType,
                                              Character operCancelType,
                                              short passengersQuantity) {
-        // Гашение = -pass_qty, Возврат = 0, остальное = +pass_qty
-        if (operType == 'V')
-            return 0;
+        if(operCancelType == 'N') switch (operType) {
+            case 'O': return passengersQuantity;
+            case 'V': return -passengersQuantity;
+        }
+        return 0;
+    }
 
-        if (operCancelType == 'G')
-            return -passengersQuantity;
+    public static String convertPrigList(String benefitGroupCode) {
+        return "R064" + (benefitGroupCode.equals("22") ? 'Z' : 'G');
+    }
 
-        return passengersQuantity;
+    public static String convertPassList(Character paymentType, String lgotInfo) {
+        return "R800" + (paymentType == 'Ж' && lgotInfo.startsWith("22") ? 'Z' : 'G');
     }
 }

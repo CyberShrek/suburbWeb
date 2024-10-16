@@ -106,7 +106,9 @@ public class HandbookCache {
 
         System.out.println("Получены списки справочников. Заполняю память...");
 
-        dorList  .forEach(dor   -> dorMap  .put(dor.getKodd() + dor.getKodg(),       dor));
+        dorList  .forEach(dor   -> dorMap  .put(dor.getKod() +
+                "20"//dor.getKodg()
+                ,       dor));
         System.out.println("Загружено " + dorMap.size() + " множеств dor");
         stanvList.forEach(stanv -> {
             List<Stanv> list = Optional.ofNullable(stanvMap.get(stanv.getStan())).orElse(new ArrayList<>());

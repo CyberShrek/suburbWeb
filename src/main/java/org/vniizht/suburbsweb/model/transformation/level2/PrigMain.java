@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import java.sql.Date;
 
 @Entity
-@Table(schema = "zzz_rawdl2",
+@Table(schema = "rawdl2",
         name = "l2_prig_main")
 @ToString(callSuper=true)
 @Getter
@@ -35,6 +35,7 @@ public class PrigMain extends L2Common {
     private String      arrival_station;
     private Short       pass_qty;
     private String      abonement_type;
+    private Character   abonement_subtype;
     private Character   carryon_type  ;
     private Short       carryon_weight;
     private Character   flg_2wayticket;
@@ -44,8 +45,11 @@ public class PrigMain extends L2Common {
     private Character   flg_fee_onboard;
     private Short       seatstick_limit;
     private Character   carriage_class;
+    private String      benefit_region;
     private String      benefit_code;
     private String      benefitgroup_code;
+    private Long        fee_sum;
+    private Long        refundfee_sum;
     private Long        tariff_sum;
     private Long        department_sum;
 }

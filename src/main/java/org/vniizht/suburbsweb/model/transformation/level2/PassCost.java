@@ -9,28 +9,26 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "zzz_rawdl2",
+@Table(schema = "rawdl2",
         name = "l2_pass_cost")
 @IdClass(PassCost.Identifier.class)
 @Getter
 @Setter
 @ToString(callSuper=true)
 public class PassCost extends L2Common {
-    @Id
-    private Short       doc_reg;
-    private Short       route_num;
-    private Short       route_distance;
-    private Long        tariff_sum;
-    private Long        department_sum;
-    private String      departure_station;
-    private String      arrival_station;
-    private String      region_code;
-    private Character   tarif_type;
+    @Id private Short       sum_code;
+    @Id private String      cnt_code;
+    @Id private String      dor_code;
+    @Id private Character   paymenttype;
+    private Float           sum_nde;
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {
-        private Long    idnum;
-        private Short   doc_reg;
+        private Long        idnum;
+        private Short       sum_code;
+        private String      cnt_code;
+        private String      dor_code;
+        private Character   paymenttype;
 
         public Identifier() {}
     }

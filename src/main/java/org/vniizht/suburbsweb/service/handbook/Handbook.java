@@ -12,24 +12,38 @@ public class Handbook {
 
     @Autowired private HandbookCache holder;
 
-    public String getRoad(String stationCode, Date date) {
+    public String getRoad2(String stationCode, Date date) {
         Stanv stanv = holder.findStanv(stationCode, date);
         return holder.findDor(stanv.getDor(), stanv.getGos())
-                .getNomd3();
+                .getNom2();
+    }
+
+    public String getRoad3(String stationCode, Date date) {
+        Stanv stanv = holder.findStanv(stationCode, date);
+        return holder.findDor(stanv.getDor(), stanv.getGos())
+                .getNom3();
     }
 
     public String getRegion(String stationCode, Date date) {
         return Optional.ofNullable(holder.findStanv(stationCode, date).getSf()).orElse("00");
     }
 
-    public String getOkato(String stationCode, Date date) {
-        Sf sf = holder.findSf(Integer.valueOf(getRegion(stationCode, date)), date);
+    public String getDepartment(String stationCode, Date date) {
+        return Optional.ofNullable(holder.findStanv(stationCode, date).getOtd()).orElse("000").substring(1);
+    }
+
+    public String getOkatoByRegion(String regionCode, Date date) {
+        Sf sf = holder.findSf(Integer.valueOf(regionCode), date);
         if (sf == null) {
             return "00000";
         }
         return Optional.ofNullable(
                 sf.getOkato()
-                ).orElse("00000");
+        ).orElse("00000");
+    }
+
+    public String getOkatoByStation(String stationCode, Date date) {
+        return getOkatoByRegion(getRegion(stationCode, date), date);
     }
 
     public String getArea(String stationCode, Date date) {

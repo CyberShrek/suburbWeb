@@ -12,7 +12,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "zzz_rawdl2",
+@Table(schema = "rawdl2",
         name = "l2_prig_cost")
 @IdClass(PrigCost.Identifier.class)
 @Getter

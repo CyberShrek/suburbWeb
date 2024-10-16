@@ -5,13 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.transformation.level2.L2Common;
-import org.vniizht.suburbsweb.model.transformation.level2.PrigAdi;
-import org.vniizht.suburbsweb.model.transformation.level2.PrigCost;
-import org.vniizht.suburbsweb.model.transformation.level2.PrigMain;
+import org.vniizht.suburbsweb.model.transformation.level2.*;
 import org.vniizht.suburbsweb.service.Logger;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,83 +19,76 @@ public class Level2Data {
 
     @Autowired private Logger logger;
 
-    @Autowired private CostRepository costRepo;
-    @Autowired private MainRepository mainRepo;
-    @Autowired private AdiRepository  adiRepo;
+    @Autowired private PrigMainRepository prigMainRepo;
+    @Autowired private PrigCostRepository prigCostRepo;
+    @Autowired private PrigAdiRepository  prigAdiRepo;
+    @Autowired private PassMainRepository passMainRepo;
+    @Autowired private PassCostRepository passCostRepo;
+    @Autowired private PassExRepository  passExRepo;
 
-    public Map<Long,Record> getRecordsByRequestDate(Date requestDate) {
-        Map<Long, Record> result = new LinkedHashMap<>();
-        List<PrigMain> prigMainList = mainRepo.findAllByRequestDate(requestDate);
-        List<PrigCost> prigCostList = costRepo.findAllByRequestDate(requestDate);
-        List<PrigAdi> prigAdiList = adiRepo.findAllByRequestDate(requestDate);
+    public Map<Long, PrigRecord> findPrigRecords(Date requestDate) {
+        Map<Long, PrigRecord> result = new LinkedHashMap<>();
+        List<PrigMain> mainList = prigMainRepo.findAllByRequestDate(requestDate);
+        List<PrigCost> costList = prigCostRepo.findAllByRequestDate(requestDate);
+        List<PrigAdi> adiList = prigAdiRepo.findAllByRequestDate(requestDate);
 
-        prigMainList.forEach(prigMain -> result.put(prigMain.getIdnum(), new Record(prigMain, new ArrayList<>(), null)));
-        prigCostList.forEach(cost -> {
-            Record record = result.get(cost.getIdnum());
+        mainList.forEach(main -> result.put(main.getIdnum(), new PrigRecord(main, new ArrayList<>(), null)));
+        costList.forEach(cost -> {
+            PrigRecord record = result.get(cost.getIdnum());
             if (record != null)
-                record.getPrigCost().add(cost);
+                record.getCost().add(cost);
         });
-        prigAdiList.forEach(prigAdi -> {
-            Record record = result.get(prigAdi.getIdnum());
+        adiList.forEach(adi -> {
+            PrigRecord record = result.get(adi.getIdnum());
             if (record != null)
-                record.setPrigAdi(prigAdi);
+                record.setAdi(adi);
         });
         return result;
     }
 
-    @Transactional
-    public Map<Long, Record> getRecordsByIdGreaterThan(Long id) {
-        Map<Long, Record> result = new LinkedHashMap<>();
-        addEntityByIdGreaterThan(id, PrigCost.class, result);
-        addEntityByIdGreaterThan(id, PrigMain.class, result);
-        return result;
-    }
+    public Map<Long, PassRecord> findPassRecords(Date requestDate) {
+        Map<Long, PassRecord> result = new LinkedHashMap<>();
+        List<PassMain> mainList = passMainRepo.findAllByRequestDate(requestDate);
+        List<PassCost> costList = passCostRepo.findAllByRequestDate(requestDate);
+        List<PassEx> exList     = passExRepo.findAllByRequestDate(requestDate);
 
-    @Transactional
-    public Record getRecordByIdnum(Long idnum) {
-        return Record.builder()
-                .prigMain(mainRepo.findById(idnum).orElse(null))
-                .prigCost(costRepo.findAllByIdnum(idnum))
-                .build();
-    }
-
-    private void addEntityByIdGreaterThan(Long id,
-                                          Class<? extends L2Common> itemClass,
-                                          Map<Long, Record> targetMap){
-        (itemClass == PrigCost.class ? costRepo : mainRepo)
-                .findAllByIdnumGreaterThan(id)
-                .forEach(item -> processRecordAdd(itemClass, item, targetMap));
-    }
-
-    private void processRecordAdd(Class<? extends L2Common> itemClass,
-                                  L2Common recordItem,
-                                  Map<Long, Record> targetMap) {
-        targetMap.compute(recordItem.getIdnum(), (key, record) -> {
-            if      (record == null)          record = new Record(null, null, null);
-            else if (itemClass == PrigMain.class) record.setPrigMain((PrigMain) recordItem);
-            else if (itemClass == PrigCost.class) {
-                 if (record.getPrigCost() == null) record.setPrigCost(new ArrayList<>());
-                 record.getPrigCost().add((PrigCost) recordItem);
-            }
-            return record;
+        mainList.forEach(passMain -> result.put(passMain.getIdnum(), new PassRecord(passMain, new ArrayList<>(), new ArrayList<>())));
+        costList.forEach(cost -> {
+            PassRecord record = result.get(cost.getIdnum());
+            if (record != null)
+                record.getCost().add(cost);
         });
-    }
-
-    private void showById(long idnum) {
-        costRepo.findById(new PrigCost.Identifier(idnum, (short) 1)).ifPresent(System.out::println);
-        mainRepo.findById(idnum).ifPresent(System.out::println);
+        exList.forEach(ex -> {
+            PassRecord record = result.get(ex.getIdnum());
+            if (record != null)
+                record.getEx().add(ex);
+        });
+        return result;
     }
 
     @Getter
     @Setter
     @Builder
-    static public class Record{
-        public PrigMain prigMain;
-        public List<PrigCost> prigCost;
-        public PrigAdi prigAdi;
+    static public class PrigRecord {
+        public PrigMain main;
+        public List<PrigCost> cost;
+        public PrigAdi adi;
 
         public String toString() {
-            return "cost:\t" + prigCost + "\nmain\t" + prigMain;
+            return "cost:\t" + cost + "\nmain\t" + main;
+        }
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    static public class PassRecord {
+        public PassMain main;
+        public List<PassCost> cost;
+        public List<PassEx> ex;
+
+        public String toString() {
+            return "cost:\t" + cost + "\nmain\t" + main;
         }
     }
 }

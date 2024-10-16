@@ -8,12 +8,14 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(schema = "zzz_rawdl2",
+@Table(schema = "rawdl2",
         name = "l2_prig_adi")
 @ToString(callSuper=true)
 @Getter
 @Setter
 public class PrigAdi extends L2Common {
     private Character   employee_cat;
+    private Character   bilgroup_secur;
     private String      bilgroup_code;
+    private String      benefit_doc;
 }

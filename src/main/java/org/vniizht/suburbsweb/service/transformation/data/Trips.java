@@ -6,7 +6,7 @@ import org.vniizht.suburbsweb.model.handbook.SeasonTrip;
 import org.vniizht.suburbsweb.model.transformation.level2.PrigMain;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
-import org.vniizht.suburbsweb.service.transformation.Converter;
+import org.vniizht.suburbsweb.service.transformation.conversion.Converter;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

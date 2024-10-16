@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,8 +29,10 @@ public class Handler {
             return HttpStatus.UNSUPPORTED_MEDIA_TYPE;
         } else if (ex instanceof HttpMessageNotReadableException || ex instanceof MissingRequestHeaderException) {
             return HttpStatus.UNPROCESSABLE_ENTITY;
+        } else if (ex instanceof HttpRequestMethodNotSupportedException) {
+            return HttpStatus.METHOD_NOT_ALLOWED;
         } else {
-            return HttpStatus.I_AM_A_TEAPOT;
+            return HttpStatus.INTERNAL_SERVER_ERROR;
         }
     }
 }
