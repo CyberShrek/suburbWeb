@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.sql.Date;
 
 @Entity
-@Table(schema = "l3_prig",
+@Table(schema = "prigl3",
         name = "co22_t1")
 @Getter
 @Setter

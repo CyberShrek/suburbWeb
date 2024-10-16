@@ -13,7 +13,7 @@ import java.sql.Date;
 @Getter
 @Setter
 @Entity
-@Table(schema = "l3_prig",
+@Table(schema = "prigl3",
         name = "lgot")
 @SuperBuilder(toBuilder=true)
 @ToString
@@ -50,12 +50,12 @@ public class Lgot {
         private Character   p13;
         private String      p14;
         private String      p15;
-        private String      p16;
+        private Byte        p16;
         private Boolean     p17;
-        private String      p18;
+        private Byte        p18;
 
         private Character   p20;
-        private String      p21;
+        private Short       p21;
         private Date        p22;
         private Date        p23;
         private String      p24;
@@ -63,7 +63,7 @@ public class Lgot {
         private String      p26;
 
         private String      p29;
-        private Date        p30;
+        private String      p30;
         private Integer     p31;
         private String      p32;
     }

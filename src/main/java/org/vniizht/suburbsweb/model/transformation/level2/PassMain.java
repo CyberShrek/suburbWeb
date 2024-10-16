@@ -6,7 +6,7 @@ import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -20,7 +20,6 @@ public class PassMain extends L2Common {
     private Short       request_subtype;
     private Character   oper;
     private Character   oper_g;
-    private Date        request_date;
     private Date        oper_date;
     private Date        departure_date;
     private Date        arrival_date;
@@ -33,9 +32,10 @@ public class PassMain extends L2Common {
     private String      sale_station;
     private String      departure_station;
     private String      arrival_station;
-    private List<Boolean> f_tick;
+    private Boolean[]   f_tick;
     private Character   carriage_class;
     private String      benefit_code;
+    private String      benefitcnt_code;
     private Short       military_code;
 
     private Short       distance;

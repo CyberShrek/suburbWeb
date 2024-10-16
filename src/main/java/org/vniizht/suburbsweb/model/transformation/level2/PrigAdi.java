@@ -18,4 +18,10 @@ public class PrigAdi extends L2Common {
     private Character   bilgroup_secur;
     private String      bilgroup_code;
     private String      benefit_doc;
+    private String      employee_unit;
+    private String      surname;
+    private String      initials;
+    private String      dependent_surname;
+    private String      dependent_initials;
+    private String      snils;
 }

@@ -24,7 +24,7 @@ public class TransformationController {
 
     @PostMapping("/transform/{requestDate}")
     public String runTransformation(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") Date requestDate) {
-        return transformation.tryPrig(requestDate);
+        return transformation.run(requestDate);
     }
 
     @PostMapping("/transform")

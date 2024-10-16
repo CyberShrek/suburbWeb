@@ -22,6 +22,8 @@ public class PrigMain extends L2Common {
     private Date        operation_date;
     private Date        ticket_begdate;
     private Date        ticket_enddate;
+    private String      ticket_ser;
+    private Integer     ticket_num;
     private Character   train_category;
     private String      train_num;
     private Short       agent_code;
@@ -52,4 +54,7 @@ public class PrigMain extends L2Common {
     private Long        refundfee_sum;
     private Long        tariff_sum;
     private Long        department_sum;
+
+    private String      server_datetime;
+    private Integer     server_reqnum;
 }

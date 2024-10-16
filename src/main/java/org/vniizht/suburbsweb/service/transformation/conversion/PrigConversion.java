@@ -123,7 +123,7 @@ public class PrigConversion {
                 .build();
     }
 
-    private Lgot getLgot(Level2Data.PrigRecord l2, T1 t1) {
+    public Lgot getLgot(Level2Data.PrigRecord l2, T1 t1) {
         return Lgot.builder()
                 .key(Lgot.Key.builder()
                         .p1(1)
@@ -146,11 +146,62 @@ public class PrigConversion {
                         .p8(String.valueOf(l2.main.getCarriage_code()))
                         .p9(handbook.getOkatoByRegion(l2.main.getBenefit_region(), l2.main.getOperation_date()))
                         .p10(l2.adi.getBenefit_doc())
-                        .p11(l2.main.getBenefit_code().equals("22")
+                        .p11(l2.main.getBenefitgroup_code().equals("22")
                                 ? l2.adi.getBilgroup_secur() + l2.adi.getBilgroup_code()
                                 : l2.main.getBenefit_region())
-                        .p12()
+                        .p12(l2.adi.getEmployee_unit())
+                        .p13(l2.main.getBenefitgroup_code().equals("22")
+                                ? l2.adi.getEmployee_cat()
+                                : null)
+                        .p14(l2.adi.getSurname() + ' ' + l2.adi.getInitials())
+                        .p15(l2.adi.getDependent_surname() + ' ' + l2.adi.getDependent_initials())
+                        .p16((byte) (
+                                l2.main.getAbonement_type().equals("0 ")
+                                        ?
+                                        (l2.main.getOper_g() == 'G'
+                                                ? -1 :
+                                                (l2.main.getOper() == 'V'
+                                                        ? 0 : 1
+                                                ))
+                                        : 0
+                        ))
+                        .p17(l2.main.getFlg_2wayticket() == '1')
+                        // Такой же, как p16?
+                        .p18((byte) (
+                                l2.main.getAbonement_type().equals("0 ")
+                                        ?
+                                        (l2.main.getOper_g() == 'G'
+                                                ? -1 :
+                                                (l2.main.getOper() == 'V'
+                                                        ? 0 : 1
+                                                ))
+                                        : 0
+                        ))
+                        .p20(switch(l2.main.getAbonement_type().trim()){
+                            case "1" -> '9';
+                            case "2" -> '7';
+                            case "3" -> '0';
+                            case "4" -> '1';
+                            case "5" -> '2';
+                            case "7" -> '4';
+                            case "8" -> '5';
+                            default -> null;
+                        })
+                        .p21(l2.main.getSeatstick_limit())
+                        .p22(l2.main.getOperation_date())
+                        .p23(l2.main.getTicket_begdate())
+                        .p24(l2.main.getTicket_ser().substring(0, 2) + l2.main.getTicket_num())
+                        .p25(l2.main.getDeparture_station())
+                        .p26(l2.main.getArrival_station())
+                        .p29(null)
+                        .p30(l2.main.getServer_datetime()) // ??
+                        .p31(l2.main.getServer_reqnum())
+                        .p32(l2.adi.getSnils())
                         .build())
+                .p19(l2.main.getPass_qty())
+                .p27((int) (l2.main.getTariff_sum() * 10))
+                .p28((int) (l2.main.getTariff_sum() - l2.main.getDepartment_sum()))
+                .p33(l2.main.getCarryon_weight())
                 .build();
     }
 

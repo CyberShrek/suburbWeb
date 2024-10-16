@@ -94,8 +94,6 @@ public class HandbookCache {
     public void init() {
         java.util.Date startDate = new java.util.Date();
 
-        System.out.println("Загружаю справочники в память...");
-
         List<Dor>   dorList   = dorRepo  .findAll();
         List<Stanv> stanvList = stanvRepo.findAllByOrderByDatandDesc();
         List<Site>  siteList  = siteRepo .findAllByOrderByDatanDesc();
@@ -104,53 +102,42 @@ public class HandbookCache {
         List<Sf>    sfList    = sfRepo   .findAllByOrderByDatanDesc();
         List<SeasonTrip>  tripsList = tripsRepo.findAllByOrderByDateStartDesc();
 
-        System.out.println("Получены списки справочников. Заполняю память...");
-
         dorList  .forEach(dor   -> dorMap  .put(dor.getKod() +
                 "20"//dor.getKodg()
                 ,       dor));
-        System.out.println("Загружено " + dorMap.size() + " множеств dor");
         stanvList.forEach(stanv -> {
             List<Stanv> list = Optional.ofNullable(stanvMap.get(stanv.getStan())).orElse(new ArrayList<>());
             list.add(stanv);
             stanvMap.put(stanv.getStan(), list);
         });
-        System.out.println("Загружено " + stanvMap.size() + " множеств stanv");
-        siteList.forEach(site  -> {
+        siteList.forEach(site  -> { 
             String key = site.getIdsite() + site.getGos();
             List<Site> list = Optional.ofNullable(siteMap.get(site.getIdsite() + site.getGos())).orElse(new ArrayList<>());
             list.add(site);
             siteMap.put(key, list);
         });
-        System.out.println("Загружено " + siteMap.size() + " множеств site");
         plagnList.forEach(plagn -> {
             String key = plagn.getIdplagn() + plagn.getGos();
             List<Plagn> list = Optional.ofNullable(plagnMap.get(plagn.getIdplagn() + plagn.getGos())).orElse(new ArrayList<>());
             list.add(plagn);
             plagnMap.put(key, list);
         });
-        System.out.println("Загружено " + plagnMap.size() + " множеств plagn");
         sublxList.forEach(sublx -> {
             List<Sublx> list = Optional.ofNullable(sublxMap.get(sublx.getLg())).orElse(new ArrayList<>());
             list.add(sublx);
             sublxMap.put(sublx.getLg(), list);
         });
-        System.out.println("Загружено " + sublxMap.size() + " множеств sublx");
         sfList   .forEach(sf    -> {
             List<Sf> list = Optional.ofNullable(sfMap.get(sf.getVid())).orElse(new ArrayList<>());
             list.add(sf);
             sfMap.put(sf.getVid(), list);
         });
-        System.out.println("Загружено " + sfMap.size() + " множеств sf");
         tripsList.forEach(seasonTrip -> {
             String key = seasonTrip.getGos() + seasonTrip.getSeason_tick_code() + seasonTrip.getPeriod();
             List<SeasonTrip> list = Optional.ofNullable(tripsMap.get(key)).orElse(new ArrayList<>());
             list.add(seasonTrip);
             tripsMap.put(key, list);
         });
-        System.out.println("Загружено " + tripsMap.size() + " множеств trips");
-
-        System.out.println("Загрузка справочников завершена. Время загрузки: " + (new java.util.Date().getTime() - startDate.getTime()) + " мс.");
     }
 
     public void clear() {

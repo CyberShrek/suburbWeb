@@ -20,11 +20,20 @@ import java.io.Serializable;
 @Setter
 public class PassEx extends L2Common {
     @Id
-    private Short   npp;
-    private String  lgot_info;
+    private Short       npp;
+    private String      ticket_ser;
+    private Short       ticket_num;
+    private String      lgot_info;
+    private String      nomlgud;
+    private String      last_name;
+    private String      first_name;
+    private String      patronymic;
+    private String      snils;
+//    private Character   trip_direction; // отсутствует
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {
+        private Long  idnum;
         private Short npp;
 
         public Identifier() {}

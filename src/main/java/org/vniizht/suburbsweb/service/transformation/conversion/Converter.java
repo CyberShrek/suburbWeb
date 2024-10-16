@@ -133,16 +133,14 @@ public class Converter {
         if(siteType.equals("09") && plagnVr.equals("6 "))
             return '4';
 
-        switch (paymentType){
-            case '8': return '3'; // Банковские карты
-            case '9': return '1'; // Льготные
-            case '1':
-            case '3': return '2'; // Наличные
-            case '6': return '5'; // Безнал для юр. лиц
-        }
+        return switch (paymentType) {
+            case '8'      -> '3';   // Банковские карты
+            case '9'      -> '1';   // Льготные
+            case '1', '3' -> '2';   // Наличные
+            case '6'      -> '5';   // Безнал для юр. лиц
+            default       -> '6';   // Интернет
+        };
 
-        // Интернет
-        return '6';
     }
 
     public static String convertSeatStickLimit(Short seatStickLimit, Character abonementType) {
