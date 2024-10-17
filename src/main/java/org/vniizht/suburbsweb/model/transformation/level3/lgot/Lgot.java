@@ -35,6 +35,7 @@ public class Lgot {
     @ToString
     @NoArgsConstructor
     static public class Key implements Serializable {
+        private String      list;
         private Integer     p1;
         private String      p2;
         private String      p3;

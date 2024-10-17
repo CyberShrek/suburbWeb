@@ -86,7 +86,6 @@ public class PassConversion {
                                     .p61(null)
                                     .p62(null)
                                     .p63(null)
-                                    .list(Converter.convertPassList(paymentType, lgotInfo))
                                     .build()
                     )
                     .p33(Long.valueOf(l2.main.getSeats_qty()))
@@ -117,12 +116,14 @@ public class PassConversion {
     public Lgot getLgot(Level2Data.PassRecord l2, T1 t1) {
         PassMain main = l2.main;
         PassCost cost = l2.cost.get(0); // ??
-        PassEx ex     = l2.ex.get(t1.getKey().getP2() - 1);
+        PassEx   ex   = l2.ex.get(t1.getKey().getP2() - 1);
 
         String benefitGroupCode = ex.getLgot_info().substring(0, 2); // !!!
+        Character paymentType = l2.main.getPaymenttype();
 
         return Lgot.builder()
                 .key(Lgot.Key.builder()
+                        .list(Converter.convertPassList(paymentType, ex.getLgot_info()))
                         .p1(t1.getKey().getP2())
                         .p2(handbook.getRoad2(main.getSale_station(), main.getOper_date()))
                         .p3(handbook.getDepartment(main.getSale_station(), main.getOper_date()))

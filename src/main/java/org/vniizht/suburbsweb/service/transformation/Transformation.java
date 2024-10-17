@@ -3,9 +3,9 @@ package org.vniizht.suburbsweb.service.transformation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.misc.Route;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Lgot;
-import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
 import org.vniizht.suburbsweb.service.transformation.conversion.PassConversion;
 import org.vniizht.suburbsweb.service.transformation.conversion.PrigConversion;
@@ -60,8 +60,42 @@ public class Transformation {
                 if(t1.getKey().getP25() == '1')
                     lgotList.add(prigConversion.getLgot(prigRecord, t1));
             });
-            transformConverted(t1List, lgotList, requestDate, log);
+            log.log("Записи l2_prig успешно конвертированы");
+            log.log("Количество T1 (включая абонементные): " + t1List.size());
+            log.log("Количество Lgot: " + lgotList.size());
+            Set<T1> t1Aggregates = applyPrigRoutes(aggregate(t1List, log), requestDate, log);
+
         }
+    }
+
+    private Set<T1> applyPrigRoutes(Set<T1> t1Aggregates, Date requestDate, Log log) {
+        log.log("Ищу и записываю маршруты для l2_prig...");
+        t1Aggregates.forEach(t1 -> {
+            String stationBeg = t1.getKey().getP15();
+            String stationEnd = t1.getKey().getP54();
+            routes.findPrigRoutes(stationBeg, stationEnd, requestDate).forEach(route -> {
+                T1.Key t1Key = t1.getKey();
+                if (route.getStationBeg().equals(stationBeg)) {
+                    switch (route.getType()) {
+                        case 1 -> t1Key.setP16(route.getValue());
+                        case 2 -> t1Key.setP13(route.getValue());
+                        case 3 -> t1Key.setP14(route.getValue());
+                    }
+                }
+                if (route.getStationEnd().equals(stationEnd)) {
+                    switch (route.getType()) {
+                        case 1 -> t1Key.setP29(route.getValue());
+                        case 2 -> t1Key.setP27(route.getValue());
+                        case 3 -> t1Key.setP28(route.getValue());
+                    }
+                }
+                if(route.getType() == 5) {
+                    t1Key.setP62((short) (route.getType() == 5 ? route.getDistance() : 0));
+                }
+            });
+        });
+        log.log("Маршруты добавлены");
+        return t1Aggregates;
     }
 
     private void transformPass(Map<Long, Level2Data.PassRecord> passRecords, Date requestDate, Log log) {
@@ -77,23 +111,26 @@ public class Transformation {
                         lgotList.add(passConversion.getLgot(passRecord, t1));
                 });
             });
-            transformConverted(t1List, lgotList, requestDate, log);
+            log.log("Записи l2_pass успешно конвертированы");
+            log.log("Количество T1 (включая абонементные): " + t1List.size());
+            log.log("Количество Lgot: " + lgotList.size());
+            Set<T1> t1Aggregates = aggregate(t1List, log);
+            log.log("Ищу и записываю маршруты для этих станций...");
+            t1Aggregates.forEach(t1 -> {
+                routes.findPrigRoutes(t1.getKey().getP15(), t1.getKey().getP54(), requestDate);
+            });
+            log.log("Маршруты добавлены");
         }
     }
 
-    private void transformConverted(List<T1> t1List, List<Lgot> lgotList, Date requestDate, Log log) {
-        log.log("Записи успешно конвертированы");
-        log.log("Количество T1 (включая абонементные): " + t1List.size());
-        log.log("Количество Lgot: " + lgotList.size());
+    private Set<T1> aggregate(List<T1> t1List, Log log) {
         log.log("Агрегирую записи T1...");
         Set<T1> aggregates = aggregate(t1List);
         log.log("Записи успешно агрегированы. Получено агрегатов: " + aggregates.size());
         Set<String> uniqueStationsSet = new HashSet<>();
         aggregates.forEach(t1 -> uniqueStationsSet.add(t1.getKey().getP15() + " " + t1.getKey().getP54()));
         log.log("Уникальных пар станций назначения и отправления: " + uniqueStationsSet.size());
-        log.log("Ищу маршруты для этих станций...");
-        aggregates.forEach(t1 -> routes.findRoutes(t1.getKey().getP15(), t1.getKey().getP54(), requestDate));
-        log.log("Маршруты найдены");
+        return aggregates;
     }
 
     private Set<T1> aggregate(List<T1> t1List) {

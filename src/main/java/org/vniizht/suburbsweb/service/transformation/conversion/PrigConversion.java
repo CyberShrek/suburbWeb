@@ -97,7 +97,6 @@ public class PrigConversion {
                         .p61(Converter.covertMCD(l2.main.getTrain_num()))
                         .p62((short) 0)
                         .p63(' ')
-                        .list(Converter.convertPrigList(benefitGroupCode))
                         .routes(l2.cost.stream().map(PrigCost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
                         .build()
                 )
@@ -126,6 +125,7 @@ public class PrigConversion {
     public Lgot getLgot(Level2Data.PrigRecord l2, T1 t1) {
         return Lgot.builder()
                 .key(Lgot.Key.builder()
+                        .list(Converter.convertPrigList(l2.main.getBenefitgroup_code()))
                         .p1(1)
                         .p2(handbook.getRoad2(l2.main.getSale_station(), l2.main.getOperation_date()))
                         .p3(handbook.getDepartment(l2.main.getSale_station(), l2.main.getOperation_date()))
