@@ -7,7 +7,7 @@ import lombok.ToString;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.sql.Date;
-import java.util.List;
+import java.sql.Time;
 
 @Entity
 @Table(schema = "rawdl2",
@@ -18,6 +18,8 @@ import java.util.List;
 public class PassMain extends L2Common {
     private Long        id;
     private Short       request_subtype;
+    private Date        request_date;
+    private Time        request_time;
     private Character   oper;
     private Character   oper_g;
     private Date        oper_date;
@@ -37,6 +39,7 @@ public class PassMain extends L2Common {
     private String      benefit_code;
     private String      benefitcnt_code;
     private Short       military_code;
+    private Character   trip_direction;
 
     private Short       distance;
     private Short       seats_qty;

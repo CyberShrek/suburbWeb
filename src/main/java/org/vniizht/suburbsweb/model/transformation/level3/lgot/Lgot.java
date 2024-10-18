@@ -65,7 +65,7 @@ public class Lgot {
 
         private String      p29;
         private String      p30;
-        private Integer     p31;
+        private String      p31;
         private String      p32;
     }
 }

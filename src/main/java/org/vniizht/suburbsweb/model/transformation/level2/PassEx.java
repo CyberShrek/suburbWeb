@@ -29,7 +29,6 @@ public class PassEx extends L2Common {
     private String      first_name;
     private String      patronymic;
     private String      snils;
-//    private Character   trip_direction; // отсутствует
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {

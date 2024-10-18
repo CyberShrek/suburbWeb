@@ -3,7 +3,6 @@ package org.vniizht.suburbsweb.service.transformation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.misc.Route;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
@@ -77,20 +76,25 @@ public class Transformation {
                 T1.Key t1Key = t1.getKey();
                 if (route.getStationBeg().equals(stationBeg)) {
                     switch (route.getType()) {
-                        case 1 -> t1Key.setP16(route.getValue());
-                        case 2 -> t1Key.setP13(route.getValue());
-                        case 3 -> t1Key.setP14(route.getValue());
+                        case 1 -> t1Key.setP16(route.getMatterStr());
+                        case 2 -> t1Key.setP13(route.getMatterStr());
+                        case 3 -> t1Key.setP14(route.getMatterStr());
                     }
                 }
                 if (route.getStationEnd().equals(stationEnd)) {
                     switch (route.getType()) {
-                        case 1 -> t1Key.setP29(route.getValue());
-                        case 2 -> t1Key.setP27(route.getValue());
-                        case 3 -> t1Key.setP28(route.getValue());
+                        case 1 -> t1Key.setP29(route.getMatterStr());
+                        case 2 -> t1Key.setP27(route.getMatterStr());
+                        case 3 -> t1Key.setP28(route.getMatterStr());
                     }
                 }
                 if(route.getType() == 5) {
-                    t1Key.setP62((short) (route.getType() == 5 ? route.getDistance() : 0));
+                    t1Key.setP62((short) (route.getMatterStr().trim().equals("1") && route.getMcd() == 2
+                            ? route.getDistance()
+                            : 0));
+                    t1Key.setP63((route.getMcd() == 2
+                                    ? '1'
+                                    : '0'));
                 }
             });
         });

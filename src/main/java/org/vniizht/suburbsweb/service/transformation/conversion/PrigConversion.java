@@ -10,7 +10,7 @@ import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 
-import java.util.*;
+import java.sql.Date;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,7 +62,8 @@ public class PrigConversion {
                         .request_date(l2.main.getRequestDate())
                         .p1("tab1")
                         .p2(1)
-                        .p3(Converter.date2yyyy(operationDate)).p4(Converter.date2mm(operationDate))
+                        .p3(Converter.formatDate(operationDate, "yyyy"))
+                        .p4(Converter.formatDate(operationDate, "mm"))
                         .p5("17")
                         .p6(handbook.getRoad3(operationStation, operationDate))
                         .p7(handbook.getRoad3(operationStation, operationDate))
@@ -194,8 +195,8 @@ public class PrigConversion {
                         .p25(l2.main.getDeparture_station())
                         .p26(l2.main.getArrival_station())
                         .p29(null)
-                        .p30(l2.main.getServer_datetime()) // ??
-                        .p31(l2.main.getServer_reqnum())
+                        .p30(l2.main.getServer_datetime())
+                        .p31(String.valueOf(l2.main.getServer_reqnum()))
                         .p32(l2.adi.getSnils())
                         .build())
                 .p19(l2.main.getPass_qty())

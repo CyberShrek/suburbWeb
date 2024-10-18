@@ -13,6 +13,8 @@ public class Route {
     Integer type;
     String  stationBeg;
     String  stationEnd;
-    String  value;
+    String  matterStr;
+    Integer matterInt;
+    Integer mcd;
     Integer distance;
 }

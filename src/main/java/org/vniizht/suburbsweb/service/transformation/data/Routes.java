@@ -42,7 +42,9 @@ public class Routes {
                     .type(rs.getInt("narr"))
                     .stationBeg(rs.getString("st1"))
                     .stationEnd(rs.getString("st2"))
-                    .value(rs.getString("est_obj_chr"))
+                    .matterStr(rs.getString("est_obj_chr"))
+                    .matterInt(rs.getInt("est_obj_int"))
+                    .mcd(rs.getInt("pr_mcd"))
                     .distance(rs.getInt("rst"))
                     .build();
         }

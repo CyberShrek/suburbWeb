@@ -13,7 +13,7 @@ import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 
 @Service
@@ -50,8 +50,8 @@ public class PassConversion {
                             T1.Key.builder()
                                     .p1("tab1")
                                     .p2(i + 1)
-                                    .p3(Converter.date2yyyy(operationDate))
-                                    .p4(Converter.date2mm(operationDate))
+                                    .p3(Converter.formatDate(operationDate, "yyyy"))
+                                    .p4(Converter.formatDate(operationDate, "mm"))
                                     .p5("17")
                                     .p6(handbook.getRoad3(operationStation, operationDate))
                                     .p7(handbook.getRoad3(operationStation, operationDate))
@@ -59,7 +59,7 @@ public class PassConversion {
                                     .p9(Converter.convertCarriageCode(l2.main.getCarrier_code()))
                                     .p10(l2.main.getSaleregion_code())
                                     .p11(Converter.convertOkato(handbook.getOkatoByStation(operationStation, operationDate)))
-                                    .p12(Converter.date2yymm(departureDate))
+                                    .p12(Converter.formatDate(departureDate, "yymm"))
                                     .p15(depStation)
                                     .p17(Converter.convertOkato(handbook.getOkatoByStation(depStation, departureDate)))
                                     .p18(handbook.getArea(depStation, operationDate))
@@ -158,7 +158,7 @@ public class PassConversion {
                                         ? 0 : 1
                                 ))
                         )
-//                        .p17(ex.getTrip_direction() == '3')
+                        .p17(main.getTrip_direction() == '3')
                         .p18(null)
                         .p20(null)
                         .p21(null)
@@ -168,7 +168,7 @@ public class PassConversion {
                         .p25(main.getDeparture_station())
                         .p26(main.getArrival_station())
                         .p29(null)
-//                        .p30(main.getRequest_date()) ??
+                        .p30(Converter.formatDate(main.getRequest_date(), main.getRequest_time(), "ddMMyyHHmm"))
                         .p31(null)
                         .p32(ex.getSnils())
                         .build())

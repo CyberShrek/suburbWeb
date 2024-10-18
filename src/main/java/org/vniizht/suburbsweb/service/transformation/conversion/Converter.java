@@ -1,6 +1,8 @@
 package org.vniizht.suburbsweb.service.transformation.conversion;
 
-import java.util.Date;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.sql.Date;
 import java.util.List;
 
 public class Converter {
@@ -13,22 +15,12 @@ public class Converter {
         return yyyymm - (yyyymm/10000*10000);
     }
 
-    public static String date2yyyy(Date date) {
-        return Integer.toString(date.getYear());
+    public static String formatDate(Date date, String format) {
+        return new SimpleDateFormat(format).format(date);
     }
 
-    public static String date2yy(Date date) {
-        int year = date.getYear() % 100;
-        return (year < 10 ? "0" : "") + year;
-    }
-
-    public static String date2yymm(Date date) {
-        return date2yy(date) + date2mm(date);
-    }
-
-    public static String date2mm(Date date) {
-        int month = date.getMonth() + 1;
-        return (month < 10 ? "0" : "") + month;
+    public static String formatDate(Date date, Time time, String format) {
+        return new SimpleDateFormat(format).format(new Date(date.getTime() + time.getTime()));
     }
 
     public static String convertSaleStation(String saleStation) {
@@ -227,7 +219,7 @@ public class Converter {
         switch (interpretedTicketType){
             case '2':
             case '3':
-            case '5': return date2yymm(ticketBegDate);
+            case '5': return formatDate(ticketBegDate, "yyMM");
         }
         // Во всем остальном - yymm
         return String.valueOf(yyyymm2yymm(yyyymm));
