@@ -309,7 +309,7 @@ public class Converter {
     }
 
     public static Character convert58(String lgotInfo){
-        switch (lgotInfo.charAt(10)){
+        switch (lgotInfo.charAt(9)){
             case '0':
             case '1':
             case '2':

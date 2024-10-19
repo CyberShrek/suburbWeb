@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.transformation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.misc.Route;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
@@ -17,6 +18,7 @@ import org.vniizht.suburbsweb.util.Log;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Scope("singleton")
@@ -72,8 +74,9 @@ public class Transformation {
         t1Aggregates.forEach(t1 -> {
             String stationBeg = t1.getKey().getP15();
             String stationEnd = t1.getKey().getP54();
-            routes.findPrigRoutes(stationBeg, stationEnd, requestDate).forEach(route -> {
-                T1.Key t1Key = t1.getKey();
+            List<Route> routesList = routes.findPrigRoutes(stationBeg, stationEnd, requestDate);
+            T1.Key t1Key = t1.getKey();
+            routesList.forEach(route -> {
                 if (route.getStationBeg().equals(stationBeg)) {
                     switch (route.getType()) {
                         case 1 -> t1Key.setP16(route.getMatterStr());
@@ -92,10 +95,16 @@ public class Transformation {
                     t1Key.setP62((short) (route.getMatterStr().trim().equals("1") && route.getMcd() == 2
                             ? route.getDistance()
                             : 0));
-                    t1Key.setP63((route.getMcd() == 2
-                                    ? '1'
-                                    : '0'));
                 }
+            });
+            Set<Integer> mcdSet = routesList.stream()
+                    .map(Route::getMcd)
+                    .collect(Collectors.toSet());
+            t1Key.setP63(switch (mcdSet.size()) {
+                case 1 -> mcdSet.contains(1) ? '0' : '1';
+                case 2 -> mcdSet.contains(1) && mcdSet.contains(2) ? '2' : '3';
+                case 3 -> mcdSet.contains(1) && mcdSet.contains(2) && mcdSet.contains(3) ? '4' : null;
+                default -> null;
             });
         });
         log.log("Маршруты добавлены");

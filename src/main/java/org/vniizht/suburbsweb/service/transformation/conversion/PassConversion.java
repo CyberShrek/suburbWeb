@@ -118,7 +118,7 @@ public class PassConversion {
         PassCost cost = l2.cost.get(0); // ??
         PassEx   ex   = l2.ex.get(t1.getKey().getP2() - 1);
 
-        String benefitGroupCode = ex.getLgot_info().substring(0, 2); // !!!
+        String benefitGroupCode = ex.getLgot_info().substring(0, 2);
         Character paymentType = l2.main.getPaymenttype();
 
         return Lgot.builder()
@@ -142,13 +142,13 @@ public class PassConversion {
                         .p9(handbook.getOkatoByRegion(main.getBenefitcnt_code(), main.getOper_date())) // Точно код государства??
                         .p10(ex.getNomlgud())
                         .p11(benefitGroupCode.equals("22")
-                                ? ex.getLgot_info().substring(8, 13)
+                                ? ex.getLgot_info().substring(7, 12)
                                 : main.getSaleregion_code())
                         .p12(benefitGroupCode.equals("22")
-                                ? ex.getLgot_info().substring(14, 24)
+                                ? ex.getLgot_info().substring(13, 23)
                                 : null)
                         .p13(benefitGroupCode.equals("22")
-                                ? ex.getLgot_info().charAt(6)
+                                ? ex.getLgot_info().charAt(5)
                                 : null)
                         .p14(ex.getLast_name() + ' ' + ex.getFirst_name().charAt(0) + ex.getPatronymic().charAt(0))
                         .p15(null)
