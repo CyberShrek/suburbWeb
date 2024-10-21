@@ -26,6 +26,7 @@ public class PassMain extends L2Common {
     private Date        departure_date;
     private Date        arrival_date;
     private String      train_num;
+    private Character   train_thread;
     private Short       agent_code;
     private Short       subagent_code;
     private Short       carrier_code;

@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.model.misc;
+package org.vniizht.suburbsweb.model.route;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Route {
+public class PrigRouteOld {
     Integer type;
     String  stationBeg;
     String  stationEnd;
