@@ -12,23 +12,21 @@ import java.io.Serializable;
 @Table(schema = "rawdl2",
         name = "l2_pass_cost")
 @IdClass(PassCost.Identifier.class)
-@Getter
-@Setter
 @ToString(callSuper=true)
 public class PassCost extends L2Common {
-    @Id private Short       sum_code;
-    @Id private String      cnt_code;
-    @Id private String      dor_code;
-    @Id private Character   paymenttype;
-    private Float           sum_nde;
+    @Id public Short       sum_code;
+    @Id public String      cnt_code;
+    @Id public String      dor_code;
+    @Id public Character   paymenttype;
+    public Float           sum_nde;
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {
-        private Long        idnum;
-        private Short       sum_code;
-        private String      cnt_code;
-        private String      dor_code;
-        private Character   paymenttype;
+        public Long        idnum;
+        public Short       sum_code;
+        public String      cnt_code;
+        public String      dor_code;
+        public Character   paymenttype;
 
         public Identifier() {}
     }

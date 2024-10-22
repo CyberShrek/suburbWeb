@@ -17,7 +17,7 @@ public class Trips {
     @Autowired
     private HandbookCache handbookCache;
 
-    private SimpleDateFormat formatter = new SimpleDateFormat("yyyyMM");
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMM");
 
     public Set<T1> multiplyByTrips(T1 t1, PrigMain prigMain) {
 
@@ -32,7 +32,7 @@ public class Trips {
                     prigMain.getTicket_enddate())
                     .forEach((month, trips) -> t1Set.add(t1.toBuilder()
                             .key(t1.getKey().toBuilder()
-                                    .yyyymm(month)
+                                    .report_yyyymm(month)
                                     .p2(t1.getKey().getP2() + 1)
                                     .build())
                             .p33(Long.valueOf(trips))

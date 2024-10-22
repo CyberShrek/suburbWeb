@@ -16,25 +16,23 @@ import java.io.Serializable;
 @Table(schema = "rawdl2",
         name = "l2_prig_cost")
 @IdClass(PrigCost.Identifier.class)
-@Getter
-@Setter
 @ToString(callSuper=true)
 public class PrigCost extends L2Common {
     @Id
-    private Short       doc_reg;
-    private Short       route_num;
-    private Short       route_distance;
-    private Long        tariff_sum;
-    private Long        department_sum;
-    private String      departure_station;
-    private String      arrival_station;
-    private String      region_code;
-    private Character   tarif_type;
+    public Short       doc_reg;
+    public Short       route_num;
+    public Short       route_distance;
+    public Long        tariff_sum;
+    public Long        department_sum;
+    public String      departure_station;
+    public String      arrival_station;
+    public String      region_code;
+    public Character   tarif_type;
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {
-        private Long    idnum;
-        private Short   doc_reg;
+        public Long    idnum;
+        public Short   doc_reg;
 
         public Identifier() {}
     }

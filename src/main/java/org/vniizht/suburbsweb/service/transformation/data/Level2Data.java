@@ -32,14 +32,14 @@ public class Level2Data {
         List<PrigCost> costList = prigCostRepo.findAllByRequestDate(requestDate);
         List<PrigAdi> adiList = prigAdiRepo.findAllByRequestDate(requestDate);
 
-        mainList.forEach(main -> result.put(main.getIdnum(), new PrigRecord(main, new ArrayList<>(), null)));
+        mainList.forEach(main -> result.put(main.idnum, new PrigRecord(main, new ArrayList<>(), null)));
         costList.forEach(cost -> {
-            PrigRecord record = result.get(cost.getIdnum());
+            PrigRecord record = result.get(cost.idnum);
             if (record != null)
                 record.getCost().add(cost);
         });
         adiList.forEach(adi -> {
-            PrigRecord record = result.get(adi.getIdnum());
+            PrigRecord record = result.get(adi.idnum);
             if (record != null)
                 record.setAdi(adi);
         });
@@ -52,14 +52,14 @@ public class Level2Data {
         List<PassCost> costList = passCostRepo.findAllByRequestDate(requestDate);
         List<PassEx> exList     = passExRepo.findAllByRequestDate(requestDate);
 
-        mainList.forEach(passMain -> result.put(passMain.getIdnum(), new PassRecord(passMain, new ArrayList<>(), new ArrayList<>())));
+        mainList.forEach(passMain -> result.put(passMain.idnum, new PassRecord(passMain, new ArrayList<>(), new ArrayList<>())));
         costList.forEach(cost -> {
-            PassRecord record = result.get(cost.getIdnum());
+            PassRecord record = result.get(cost.idnum);
             if (record != null)
                 record.getCost().add(cost);
         });
         exList.forEach(ex -> {
-            PassRecord record = result.get(ex.getIdnum());
+            PassRecord record = result.get(ex.idnum);
             if (record != null)
                 record.getEx().add(ex);
         });
@@ -69,10 +69,10 @@ public class Level2Data {
     @Getter
     @Setter
     @Builder
-    static public class PrigRecord {
-        public PrigMain main;
-        public List<PrigCost> cost;
-        public PrigAdi adi;
+    static public class PrigRecord implements Record {
+        private PrigMain main;
+        private List<PrigCost> cost;
+        private PrigAdi adi;
 
         public String toString() {
             return "cost:\t" + cost + "\nmain\t" + main;
@@ -82,13 +82,17 @@ public class Level2Data {
     @Getter
     @Setter
     @Builder
-    static public class PassRecord {
-        public PassMain main;
-        public List<PassCost> cost;
-        public List<PassEx> ex;
+    static public class PassRecord implements Record {
+        private PassMain main;
+        private List<PassCost> cost;
+        private List<PassEx> ex;
 
         public String toString() {
             return "cost:\t" + cost + "\nmain\t" + main;
         }
+    }
+
+    static public interface Record {
+
     }
 }

@@ -69,9 +69,8 @@ public class T1 {
     @ToString
     @NoArgsConstructor
     static public class Key implements Serializable {
-        private String          routes;
-        private String          yyyymm;
         private Date            request_date;
+        private String          report_yyyymm;
         private String          p1;
         private Integer         p2;
         private String          p3;

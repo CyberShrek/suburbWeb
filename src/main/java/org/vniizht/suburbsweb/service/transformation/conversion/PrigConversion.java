@@ -3,22 +3,29 @@ package org.vniizht.suburbsweb.service.transformation.conversion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.route.PrigRoute;
 import org.vniizht.suburbsweb.model.transformation.level2.PrigCost;
 import org.vniizht.suburbsweb.model.transformation.level3.co22.*;
 import org.vniizht.suburbsweb.model.transformation.level3.lgot.Lgot;
-import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
+import org.vniizht.suburbsweb.service.transformation.data.Routes;
+import org.vniizht.suburbsweb.service.transformation.data.Trips;
 
 import java.sql.Date;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 @Scope("singleton")
-public class PrigConversion {
+public class PrigConversion extends Conversion {
 
-    @Autowired private Logger     logger;
     @Autowired private Handbook handbook;
+    @Autowired private Routes   routes;
+    @Autowired private Trips    trips;
+
+    public Set<T1> getT1multipliedByTrips(Level2Data.PrigRecord prigRecord) {
+        return trips.multiplyByTrips(getT1(prigRecord), prigRecord.main);
+    }
 
     public T1 getT1(Level2Data.PrigRecord l2) {
 
@@ -53,13 +60,14 @@ public class PrigConversion {
                 trainCategory = l2.main.getTrain_category(),
                 carriageClass = l2.main.getCarriage_class();
 
-        // Конвертировано
+        // Вычислено
         Character convertedTicketType = Converter.convertTicketType(abonementType, carrion, onboard, twoWay);
+        PrigRoute route = routes.getPrigRoute(depStation, arrStation, operationDate);
 
-        // Игнорировать если действие билета истекло
         return T1.builder().key(
                 T1.Key.builder()
-                        .request_date(l2.main.getRequestDate())
+                        .request_date(l2.main.getRequest_date())
+                        .report_yyyymm(Converter.formatDate(operationDate, "yyyyMM"))
                         .p1("tab1")
                         .p2(1)
                         .p3(Converter.formatDate(operationDate, "yyyy"))
@@ -72,7 +80,10 @@ public class PrigConversion {
                         .p10(l2.main.getRegion_code())
                         .p11(Converter.convertOkato(handbook.getOkatoByStation(operationStation, operationDate)))
                         .p12(Converter.convertDepartureDate2yymm(convertedTicketType, ticketBegDate, l2.main.getYyyymm()))
+                        .p13(route.getRoadStart())
+                        .p14(route.getDepartmentStart())
                         .p15(depStation)
+                        .p16(route.getRegionStart())
                         .p17(Converter.convertOkato(handbook.getOkatoByStation(depStation, operationDate)))
                         .p18(handbook.getArea(depStation, operationDate))
                         .p19(Converter.convertTrainCategory(trainCategory))
@@ -83,6 +94,9 @@ public class PrigConversion {
                         .p24(benefitGroupCode + benefitCode)
                         .p25(Converter.convertPaymentType(paymentType, handbook.getTSite(webId, operationCountry, operationDate), handbook.getPlagnVr(payagentId, operationCountry, operationDate)))
                         .p26(handbook.getGvc(benefitGroupCode, l2.main.getBenefit_code(), operationDate))
+                        .p27(route.getRoadEnd())
+                        .p28(route.getDepartmentEnd())
+                        .p29(route.getRegionEnd())
                         .p30(Converter.convertOkato(handbook.getOkatoByStation(arrStation, operationDate)))
                         .p31(handbook.getArea(arrStation, operationDate))
                         .p32((short) l2.cost.stream().mapToInt(PrigCost::getRoute_distance).sum())
@@ -96,9 +110,8 @@ public class PrigConversion {
                         .p59(Converter.convert59(benefitGroupCode, l2.adi.getEmployee_cat()))
                         .p60("000")
                         .p61(Converter.covertMCD(l2.main.getTrain_num()))
-                        .p62((short) 0)
-                        .p63(' ')
-                        .routes(l2.cost.stream().map(PrigCost::getRoute_num).sorted().map(String::valueOf).collect(Collectors.joining(" ")))
+                        .p62(route.getMcdDistance())
+                        .p63(route.getMcdType())
                         .build()
                 )
                 .p33(Converter.convertPassengersCount(convertedTicketType, l2.main.getPass_qty(), l2.main.getCarryon_weight()))

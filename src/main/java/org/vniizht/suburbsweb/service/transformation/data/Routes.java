@@ -20,13 +20,13 @@ public class Routes {
     private final Map<String, PrigRoute> prigCache = new HashMap<>();
     private final Map<String, PassRoute> passCache = new HashMap<>();
 
-    public PrigRoute getPrigRoute(String stationFrom, String stationTo, Date date){
-        String key = stationFrom + stationTo + date;
+    public PrigRoute getPrigRoute(String depStation, String arrStation, Date date){
+        String key = depStation + arrStation + date;
         if (!prigCache.containsKey(key)) {
             PrigRoute prigRoute = new PrigRoute();
 
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?)",
-                    stationFrom, stationTo, date);
+                    depStation, arrStation, date);
 
             Set <Integer> mcdSet = new HashSet<>();
 
@@ -38,14 +38,14 @@ public class Routes {
                 int pr_mcd = prigRS.getInt("pr_mcd");
                 short rst = prigRS.getShort("rst");
 
-                if(st1 != null && st1.equals(stationFrom)){
+                if(st1 != null && st1.equals(depStation)){
                     switch (narr) {
                         case 1 -> prigRoute.setRegionStart(est_obj_chr);
                         case 2 -> prigRoute.setRoadStart(est_obj_chr);
                         case 3 -> prigRoute.setDepartmentStart(est_obj_chr);
                     }
                 }
-                else if (st2 != null && st2.equals(stationFrom)) {
+                else if (st2 != null && st2.equals(depStation)) {
                     switch (narr) {
                         case 1 -> prigRoute.setRegionEnd(est_obj_chr);
                         case 2 -> prigRoute.setRoadEnd(est_obj_chr);
@@ -71,8 +71,8 @@ public class Routes {
     }
 
     public PassRoute getPassRoute(String trainId, Character trainThread, Date trainDepartureDate,
-                                  String stationStart, String stationEnd) {
-        String key = trainId + trainThread + trainDepartureDate + stationStart + stationEnd;
+                                  String depStation, String arrStation) {
+        String key = trainId + trainThread + trainDepartureDate + depStation + arrStation;
         if (!passCache.containsKey(key)) {
             PassRoute passRoute = new PassRoute();
 
@@ -80,9 +80,9 @@ public class Routes {
             String queryForDepartments = "SELECT * FROM nsi.passkm_estimate_for_otd(?, ?, ?, ?, ?)";
             String queryForRegions     = "SELECT * FROM nsi.passkm_estimate_for_stan_dcs_sf(?, ?, ?, 5, ?, ?)";
 
-            SqlRowSet roadsRS       = jdbcTemplate.queryForRowSet(queryForRoads,       trainId, trainThread, trainDepartureDate, stationStart, stationEnd);
-            SqlRowSet departmentsRS = jdbcTemplate.queryForRowSet(queryForDepartments, trainId, trainThread, trainDepartureDate, stationStart, stationEnd);
-            SqlRowSet regionsRS     = jdbcTemplate.queryForRowSet(queryForRegions,     trainId, trainThread, trainDepartureDate, stationStart, stationEnd);
+            SqlRowSet roadsRS       = jdbcTemplate.queryForRowSet(queryForRoads,       trainId, trainThread, trainDepartureDate, depStation, arrStation);
+            SqlRowSet departmentsRS = jdbcTemplate.queryForRowSet(queryForDepartments, trainId, trainThread, trainDepartureDate, depStation, arrStation);
+            SqlRowSet regionsRS     = jdbcTemplate.queryForRowSet(queryForRegions,     trainId, trainThread, trainDepartureDate, depStation, arrStation);
 
             while (roadsRS.next()) {
                 String dor3 = roadsRS.getString("dor3");

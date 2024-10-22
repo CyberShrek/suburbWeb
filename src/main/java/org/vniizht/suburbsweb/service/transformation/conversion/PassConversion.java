@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.transformation.conversion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.vniizht.suburbsweb.model.route.Route;
 import org.vniizht.suburbsweb.model.transformation.level2.PassCost;
 import org.vniizht.suburbsweb.model.transformation.level2.PassEx;
 import org.vniizht.suburbsweb.model.transformation.level2.PassMain;
@@ -11,6 +12,8 @@ import org.vniizht.suburbsweb.model.transformation.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.Logger;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
+import org.vniizht.suburbsweb.service.transformation.data.Routes;
+import org.vniizht.suburbsweb.service.transformation.data.Trips;
 
 import java.util.ArrayList;
 import java.sql.Date;
@@ -20,8 +23,9 @@ import java.util.List;
 @Scope("singleton")
 public class PassConversion {
 
-    @Autowired private Logger     logger;
     @Autowired private Handbook handbook;
+    @Autowired private Routes   routes;
+    @Autowired private Trips    trips;
 
     public List<T1> getT1(Level2Data.PassRecord l2) {
 
@@ -48,6 +52,7 @@ public class PassConversion {
                     benefitGroupCode = l2.ex.get(i).getLgot_info().substring(0, 2); // !!!
             t1List.add(T1.builder().key(
                             T1.Key.builder()
+                                    .request_date(l2.main.getRequest_date())
                                     .p1("tab1")
                                     .p2(i + 1)
                                     .p3(Converter.formatDate(operationDate, "yyyy"))

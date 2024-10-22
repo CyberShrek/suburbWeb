@@ -22,15 +22,15 @@ public class TransformationController {
 //        return "transformation.html";
 //    }
 
-    @PostMapping("/transform/{requestDate}")
-    public String runTransformation(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") Date requestDate) {
-        return transformation.run(requestDate);
-    }
-
-    @PostMapping("/transform")
-    public String runTransformation() {
-        return transformation.check();
-    }
+//    @PostMapping("/transform/{requestDate}")
+//    public String runTransformation(@PathVariable @DateTimeFormat(pattern = "yyyyMMdd") Date requestDate) {
+//        return transformation.run(requestDate);
+//    }
+//
+//    @PostMapping("/transform")
+//    public String runTransformation() {
+//        return transformation.check();
+//    }
 
 //    @GetMapping("/transformation/co22/{idnum}")
 //    @ResponseBody

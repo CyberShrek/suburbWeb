@@ -12,12 +12,9 @@ import java.sql.Date;
 
 @MappedSuperclass
 @ToString
-@Getter
-@Setter
 abstract public class L2Common implements Serializable {
     @Id
-    private Long        idnum;
-    private Integer     yyyymm;
-    @Column(name = "request_date")
-    private Date        requestDate;
+    public Long        idnum;
+    public Integer     yyyymm;
+    public Date request_date;
 }
