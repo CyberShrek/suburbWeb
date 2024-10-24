@@ -1,28 +1,37 @@
-import java.util.Arrays;
-import java.util.Date;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Playground {
     public static void main(String[] args) {
-        Date date = new Date();
-        System.out.println(date);
-        run(100000000);
-        System.out.println(new Date().getTime() - date.getTime());
-    }
 
-    private static void run(int times){
-        for (int i = 0; i < times; i++) {
-            measure(() -> {
-//                List<String> list = new ArrayList<>();
-//                list.add("4");
-            });
-        }
-    }
+        SomeClass some = SomeClass.builder()
+                .name("some1")
+                .number(10)
+                .list(new ArrayList<>(List.of("1", "2", "3")))
+                .build();
 
-    private static void measure(Runnable task) {
-        Date date = new Date();
-        task.run();
-//        return (new Date().getTime() - date.getTime()) / 1000f;
+        SomeClass some2 = some.toBuilder()
+                .name("some2")
+                .number(20)
+                .build();
+
+        some2.getList().add("4");
+
+        System.out.println(some);
+        System.out.println(some2);
     }
+}
+
+@SuperBuilder(toBuilder=true)
+@ToString
+@Getter
+class SomeClass {
+    private String name;
+    private int number;
+    private List<String> list;
 }

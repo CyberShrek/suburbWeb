@@ -1,25 +1,7 @@
 package org.vniizht.suburbsweb.service.transformation;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.route.PassRoute;
-import org.vniizht.suburbsweb.model.route.PrigRoute;
-import org.vniizht.suburbsweb.model.route.Route;
-import org.vniizht.suburbsweb.model.transformation.level3.co22.T1;
-import org.vniizht.suburbsweb.model.transformation.level3.lgot.Lgot;
-import org.vniizht.suburbsweb.service.handbook.HandbookCache;
-import org.vniizht.suburbsweb.service.transformation.conversion.PassConversion;
-import org.vniizht.suburbsweb.service.transformation.conversion.PrigConversion;
-import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
-import org.vniizht.suburbsweb.service.transformation.data.Level3Data;
-import org.vniizht.suburbsweb.service.transformation.data.Routes;
-import org.vniizht.suburbsweb.service.transformation.data.Trips;
-import org.vniizht.suburbsweb.util.Log;
-
-import javax.annotation.PostConstruct;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 @Service
 @Scope("singleton")

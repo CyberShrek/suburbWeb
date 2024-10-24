@@ -203,22 +203,20 @@ public final class Level3Prig extends Level3 <Level2Data.PrigRecord> {
         PrigMain main = record.getMain();
         PrigRoute route = this.routes.getPrigRoute(main.departure_station, main.arrival_station, main.operation_date);
 
-        t1.toBuilder()
-                .key(t1.getKey().toBuilder()
-                        .p13(route.getRoadStart())
-                        .p14(route.getDepartmentStart())
-                        .p16(route.getRegionStart())
+        t1.setKey(t1.getKey().toBuilder()
+                .p13(route.getRoadStart())
+                .p14(route.getDepartmentStart())
+                .p16(route.getRegionStart())
 
-                        .p27(route.getRoadEnd())
-                        .p28(route.getDepartmentEnd())
-                        .p29(route.getRegionEnd())
+                .p27(route.getRoadEnd())
+                .p28(route.getDepartmentEnd())
+                .p29(route.getRegionEnd())
 
-                        .p62(route.getMcdDistance())
-                        .p63(route.getMcdType())
+                .p62(route.getMcdDistance())
+                .p63(route.getMcdType())
 
-                        .build()
-                )
-                .build();
+                .build()
+        );
     }
 
     @Override

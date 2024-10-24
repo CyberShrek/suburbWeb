@@ -18,6 +18,7 @@ public class PassCost extends L2Common {
     @Id public String      cnt_code;
     @Id public String      dor_code;
     @Id public Character   paymenttype;
+    public Float           department_sum;
     public Float           sum_nde;
 
     @AllArgsConstructor

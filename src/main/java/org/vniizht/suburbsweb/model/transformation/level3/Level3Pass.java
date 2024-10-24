@@ -11,6 +11,7 @@ import org.vniizht.suburbsweb.service.transformation.conversion.Converter;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Routes;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +26,6 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
 
     @Override
     protected T1 convertT1() {
-
         // Используемые данные
         PassMain        main = record.getMain();
         List<PassCost>  cost = record.getCost();
@@ -37,6 +37,7 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
         return T1.builder().key(
                         T1.Key.builder()
                                 .request_date(main.request_date)
+                                .report_yyyymm(Converter.formatDate(main.oper_date, "yyyyMM"))
                                 .p1("tab1")
                                 .p2(1)
                                 .p3(Converter.formatDate(main.oper_date, "yyyy"))
@@ -159,7 +160,7 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
                         .p32(ex.snils)
                         .build())
                 .p19(main.seats_qty)
-                .p27((int) (cost.sum_nde * 10))
+                .p27((int) (cost.department_sum * 10))
                 .p28((int) switch (cost.sum_code) {
                     case 101:
                     case 102:
@@ -177,28 +178,36 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
 
     @Override
     protected void addTrips(T1 t1) {
-
         // Используемые данные
         PassMain main = record.getMain();
         PassRoute route = this.routes.getPassRoute(main.train_num, main.train_thread, main.departure_date, main.departure_station, main.arrival_station);
         
-        t1.toBuilder()
-                .key(t1.getKey().toBuilder()
-                        .p13(route.getRoadStart())
-                        .p14(route.getDepartmentStart())
-                        .p16(route.getRegionStart())
+        t1.setKey(t1.getKey().toBuilder()
+                .p13(route.getRoadStart())
+                .p14(route.getDepartmentStart())
+                .p16(route.getRegionStart())
 
-                        .p27(route.getRoadEnd())
-                        .p28(route.getDepartmentEnd())
-                        .p29(route.getRegionEnd())
-                        
-                        .build()
-                )
-                .build();
+                .p27(route.getRoadEnd())
+                .p28(route.getDepartmentEnd())
+                .p29(route.getRegionEnd())
+
+                .build()
+        );
     }
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
-        return  null;
+        PassMain main = record.getMain();
+        Set<T1> result = new HashSet<>(Set.of(t1));
+        if (!main.oper_date.equals(main.departure_date)) {
+            result.add(t1.toBuilder()
+                    .key(t1.getKey().toBuilder()
+                            .report_yyyymm(Converter.formatDate(main.departure_date, "yyyyMM"))
+                            .build()
+                    )
+                    .build()
+            );
+        }
+        return result;
     }
 }

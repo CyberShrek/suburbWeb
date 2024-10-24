@@ -23,13 +23,13 @@ public class Trips {
 
         Set<T1> t1Set = new LinkedHashSet<>();
 
-        if (prigMain.getAbonement_type().charAt(0) != '0')
+        if (prigMain.abonement_type.charAt(0) != '0')
             calculateTripsPerMonth(
-                    Converter.convertSeasonTicketCode(prigMain.getAbonement_type().charAt(0)),
-                    prigMain.getSeatstick_limit(),
-                    prigMain.getOperation_date(),
-                    prigMain.getTicket_begdate(),
-                    prigMain.getTicket_enddate())
+                    Converter.convertSeasonTicketCode(prigMain.abonement_type.charAt(0)),
+                    prigMain.seatstick_limit,
+                    prigMain.operation_date,
+                    prigMain.ticket_begdate,
+                    prigMain.ticket_enddate)
                     .forEach((month, trips) -> t1Set.add(t1.toBuilder()
                             .key(t1.getKey().toBuilder()
                                     .report_yyyymm(month)
