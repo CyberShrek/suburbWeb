@@ -176,7 +176,11 @@ public final class Level3Prig extends Level3 <Level2Data.PrigRecord> {
                 .p36(main.tariff_sum)
                 .p37(0L)
                 .p38(0L)
-                .p39(Converter.convert39(main.oper, main.fee_sum, main.refundfee_sum))
+                .p39(switch (main.oper) {
+                    case 'O' -> main.fee_sum;
+                    case 'V' -> main.refundfee_sum;
+                    default -> 0L;
+                })
                 .p40(0L)
                 .p41(0L)
                 .p42(0L)
@@ -188,7 +192,11 @@ public final class Level3Prig extends Level3 <Level2Data.PrigRecord> {
                 .p48(0L)
                 .p49(0L)
                 .p50(0L)
-                .p51(Converter.convertDocumentsCount(main.oper, main.oper_g, main.pass_qty))
+                .p51(main.oper_g == 'N' ? (long) switch (main.oper) {
+                    case 'O' -> main.pass_qty;
+                    case 'V' -> -main.pass_qty;
+                    default -> 0;
+                } : 0)
                 .build();
     }
 
@@ -201,7 +209,7 @@ public final class Level3Prig extends Level3 <Level2Data.PrigRecord> {
         
         return Lgot.builder()
                 .key(Lgot.Key.builder()
-                        .list(Converter.convertPrigList(main.benefitgroup_code))
+                        .list("R064" + (main.benefitgroup_code.equals("22") ? 'Z' : 'G'))
                         .p1(1)
                         .p2(handbook.getRoad2(main.sale_station, main.operation_date))
                         .p3(handbook.getDepartment(main.sale_station, main.operation_date))

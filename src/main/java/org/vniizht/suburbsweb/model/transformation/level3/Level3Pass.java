@@ -10,6 +10,7 @@ import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.transformation.conversion.Converter;
 import org.vniizht.suburbsweb.service.transformation.data.Level2Data;
 import org.vniizht.suburbsweb.service.transformation.data.Routes;
+import org.vniizht.suburbsweb.util.Util;
 
 import java.util.HashSet;
 import java.util.List;
@@ -31,37 +32,49 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
         List<PassCost>  cost = record.getCost();
         PassEx          ex   = record.getEx().get(0);
         
-        // Прочее
-        String   lgotInfo = ex.lgot_info,
-                benefitGroupCode = ex.lgot_info.substring(0, 2); // !!!
         return T1.builder().key(
                         T1.Key.builder()
                                 .request_date(main.request_date)
-                                .report_yyyymm(Converter.formatDate(main.oper_date, "yyyyMM"))
+                                .report_yyyymm(Util.formatDate(main.oper_date, "yyyyMM"))
                                 .p1("tab1")
                                 .p2(1)
-                                .p3(Converter.formatDate(main.oper_date, "yyyy"))
-                                .p4(Converter.formatDate(main.oper_date, "mm"))
+                                .p3(Util.formatDate(main.oper_date, "yyyy"))
+                                .p4(Util.formatDate(main.oper_date, "mm"))
                                 .p5("17")
                                 .p6(handbook.getRoad3(main.sale_station, main.oper_date))
                                 .p7(handbook.getRoad3(main.sale_station, main.oper_date))
-                                .p8(Converter.convertSaleStation(main.sale_station))
-                                .p9(Converter.convertCarriageCode(main.carrier_code))
+                                .p8("00" + main.sale_station)
+                                .p9(String.format("%09d", main.carrier_code))
                                 .p10(main.saleregion_code)
-                                .p11(Converter.convertOkato(handbook.getOkatoByStation(main.sale_station, main.oper_date)))
-                                .p12(Converter.formatDate(main.departure_date, "yymm"))
+                                .p11(handbook.getOkatoByStation(main.sale_station, main.oper_date))
+                                .p12(Util.formatDate(main.departure_date, "yymm"))
                                 .p15(main.departure_station)
-                                .p17(Converter.convertOkato(handbook.getOkatoByStation(main.departure_station, main.departure_date)))
+                                .p17(handbook.getOkatoByStation(main.departure_station, main.departure_date))
                                 .p18(handbook.getArea(main.departure_station, main.oper_date))
                                 .p19('4')
-                                .p20(Converter.convertCarriageClass(main.carriage_class))
+                                .p20("0" + main.carriage_class)
                                 .p21('1')
-                                .p22(Converter.convertPassengerCategory(List.of(main.f_tick), main.benefit_code))
+                                .p22(
+                                        main.f_tick[2] ? '2'                                        // Детский
+                                        : !main.benefit_code.equals("000") || main.f_tick[4] ? '3'  // Льготный
+                                        :  main.f_tick[1] ? '1'                                     // Полный
+                                        : '4'                                                       // Бесплатный
+                                )                                           
                                 .p23('3')
-                                .p24(Converter.convertBenefitCode(main.benefit_code, main.paymenttype, main.military_code, lgotInfo))
-                                .p25(Converter.convertPaymentType(main.paymenttype))
-                                .p26(handbook.getGvc(benefitGroupCode, main.benefit_code, main.oper_date))
-                                .p30(Converter.convertOkato(handbook.getOkatoByStation(main.arrival_station, main.arrival_date)))
+                                .p24(main.paymenttype == 'В'
+                                        ? "21" + String.format("%02d", main.military_code)
+                                        : ex.lgot_info != null && !main.benefit_code.equals("000") && !main.benefit_code.equals("013")
+                                        ? ex.lgot_info.substring(1, 4)
+                                        : null)
+                                .p25(switch (main.paymenttype) {
+                                    case '8' -> '3';            // Банковские карты
+                                    case '9', 'В', 'Б' -> '1';  // Льготные
+                                    case '1', '3' -> '2';       // Наличные
+                                    case '6' -> '5';            // Безнал для юр. лиц
+                                    default -> '4';             // Электронный кошелёк
+                                })
+                                .p26(handbook.getGvc(ex.lgot_info.substring(0, 2), main.benefit_code, main.oper_date))
+                                .p30(handbook.getOkatoByStation(main.arrival_station, main.arrival_date))
                                 .p31(handbook.getArea(main.arrival_station, main.arrival_date))
                                 .p32(main.distance)
                                 .p52('1')
@@ -70,8 +83,12 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
                                 .p55(null)
                                 .p56("000")
                                 .p57(null)
-                                .p58(Converter.convert58(lgotInfo))
-                                .p59(Converter.convert59(main.paymenttype, lgotInfo))
+                                .p58(switch (ex.lgot_info.charAt(9)) {
+                                    case '0', '1', '2', '3', '4' -> '0';
+                                    case '5', '6', '7', '8', '9' -> '1';
+                                    default -> null;
+                                })
+                                .p59(Converter.convert59(main.paymenttype, ex.lgot_info))
                                 .p60(String.valueOf(main.subagent_code))
                                 .p61(null)
                                 .p62(null)
@@ -84,19 +101,41 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
                 .p36((long) (cost.stream().mapToDouble(costItem -> costItem.sum_nde).sum() / 10))
                 .p37(0L)
                 .p38(0L)
-                .p39(cost.stream().mapToLong(costItem -> Converter.convert39(costItem.sum_nde, costItem.sum_code)).sum())
-                .p40(cost.stream().mapToLong(costItem -> Converter.convert40(costItem.sum_nde, costItem.sum_code)).sum())
+                .p39(cost.stream().mapToLong(costItem -> switch (costItem.sum_code) {
+                    case 104, 105, 106 -> (long) Math.round(costItem.sum_nde);
+                    default -> 0L;
+                }).sum())
+                .p40(cost.stream().mapToLong(costItem -> costItem.sum_code == 101 ? (long) Math.round(costItem.sum_nde) : 0L).sum())
                 .p41(0L)
                 .p42(0L)
                 .p43(0L)
-                .p44(cost.stream().mapToLong(costItem -> Converter.convert44(costItem.sum_nde, costItem.sum_code, main.paymenttype)).sum())
+                .p44(cost.stream().mapToLong(costItem -> switch (costItem.sum_code) {
+                    case 101, 116 -> switch (main.paymenttype) {
+                        case 'Б', 'В', 'Ж', '9' -> (long) Math.round(costItem.sum_nde);
+                        default -> 0L;
+                    };
+                    default -> 0L;
+                }).sum())
                 .p45(0L)
                 .p46(0L)
-                .p47(cost.stream().mapToLong(costItem -> Converter.convert47(costItem.sum_nde, costItem.sum_code, main.paymenttype)).sum())
-                .p48(cost.stream().mapToLong(costItem -> Converter.convert48(costItem.sum_nde, costItem.sum_code, main.paymenttype)).sum())
+                .p47(cost.stream().mapToLong(costItem -> switch (costItem.sum_code) {
+                    case 104, 105, 106 -> switch (main.paymenttype) {
+                        case 'Б', 'В', 'Ж', '9' -> (long) Math.round(costItem.sum_nde);
+                        default -> 0L;
+                    };
+                    default -> 0L;
+                }).sum())
+                .p48(cost.stream().mapToLong(costItem -> costItem.sum_code == 101 ? switch (main.paymenttype) {
+                    case 'Б', 'В', 'Ж', '9' -> (long) Math.round(costItem.sum_nde);
+                    default -> 0L;
+                } : 0L).sum())
                 .p49(0L)
                 .p50(0L)
-                .p51(Converter.convertDocumentsCount(main.oper, main.oper_g, (short) 1))
+                .p51(main.oper_g == 'N' ? (long) switch (main.oper) {
+                    case 'O' -> 1;
+                    case 'V' -> -1;
+                    default -> 0;
+                } : 0)
                 .build();
         }
 
@@ -106,11 +145,9 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
         PassCost cost = record.getCost().get(0); // ??
         PassEx   ex   = record.getEx().get(0);
 
-        String benefitGroupCode = ex.lgot_info.substring(0, 2);
-
         return Lgot.builder()
                 .key(Lgot.Key.builder()
-                        .list(Converter.convertPassList(main.paymenttype, ex.lgot_info))
+                        .list( "R800" + (main.paymenttype == 'Ж' && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
                         .p1(t1.getKey().getP2())
                         .p2(handbook.getRoad2(main.sale_station, main.oper_date))
                         .p3(handbook.getDepartment(main.sale_station, main.oper_date))
@@ -128,13 +165,13 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
                         .p8(String.valueOf(main.carrier_code))
                         .p9(handbook.getOkatoByRegion(main.benefitcnt_code, main.oper_date)) // Точно код государства??
                         .p10(ex.nomlgud)
-                        .p11(benefitGroupCode.equals("22")
+                        .p11(ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.substring(7, 12)
                                 : main.saleregion_code)
-                        .p12(benefitGroupCode.equals("22")
+                        .p12(ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.substring(13, 23)
                                 : null)
-                        .p13(benefitGroupCode.equals("22")
+                        .p13(ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.charAt(5)
                                 : null)
                         .p14(ex.last_name + ' ' + ex.first_name.charAt(0) + ex.patronymic.charAt(0))
@@ -180,7 +217,12 @@ public final class Level3Pass extends Level3 <Level2Data.PassRecord> {
     protected void addTrips(T1 t1) {
         // Используемые данные
         PassMain main = record.getMain();
-        PassRoute route = this.routes.getPassRoute(main.train_num, main.train_thread, main.departure_date, main.departure_station, main.arrival_station);
+        PassRoute route = this.routes.getPassRoute(
+                main.train_num, 
+                main.train_thread, 
+                main.departure_date,
+                main.departure_station,
+                main.arrival_station);
         
         t1.setKey(t1.getKey().toBuilder()
                 .p13(route.getRoadStart())
