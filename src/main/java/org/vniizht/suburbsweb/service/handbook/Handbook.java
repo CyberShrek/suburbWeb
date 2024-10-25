@@ -39,7 +39,8 @@ public class Handbook {
         }
         return Optional.ofNullable(
                 sf.getOkato()
-        ).orElse("00000");
+        ).orElse("00000")
+                .substring(0, 5);
     }
 
     public String getOkatoByStation(String stationCode, Date date) {

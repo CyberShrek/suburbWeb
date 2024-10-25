@@ -13,6 +13,17 @@ import java.util.Set;
 
 abstract class Level3 <T_Record extends Level2Data.Record> {
 
+    // Конечные результаты
+    @Getter private Set<T1> t1;
+    @Getter private Lgot lgot;
+
+    // Подсчитанное время на каждую операцию (с)
+    @Getter private float t1ConversionTime;
+    @Getter private float lgotConversionTime;
+    @Getter private float tripsCalculationTime;
+    @Getter private float t1MultiplicationTime;
+    @Getter private float totalTime;
+
     // Базовая конвертация
     abstract protected T1   convertT1  ();
     abstract protected Lgot convertLgot(T1 t1);
@@ -22,17 +33,6 @@ abstract class Level3 <T_Record extends Level2Data.Record> {
 
     // Мультипликаторы
     abstract protected Set<T1> multiplyT1(T1 t1);
-
-    // Конечные результаты
-    @Getter private Set<T1> t1;
-    @Getter private Lgot lgot;
-
-    // Подсчитанное время на каждую операцию (мс)
-    @Getter private float t1ConversionTime;
-    @Getter private float lgotConversionTime;
-    @Getter private float tripsCalculationTime;
-    @Getter private float t1MultiplicationTime;
-    @Getter private float totalTime;
 
     protected final T_Record record;
     protected final Handbook handbook;
