@@ -91,9 +91,7 @@ public class HandbookCache {
     @Autowired private TripsRepository  tripsRepo;
 
 //    @PostConstruct
-    public void init() {
-        java.util.Date startDate = new java.util.Date();
-
+    public void load() {
         List<Dor>   dorList   = dorRepo  .findAll();
         List<Stanv> stanvList = stanvRepo.findAllByOrderByDatandDesc();
         List<Site>  siteList  = siteRepo .findAllByOrderByDatanDesc();

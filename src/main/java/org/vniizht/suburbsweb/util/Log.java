@@ -7,21 +7,17 @@ public class Log {
 
     private final StringBuilder logBuilder = new StringBuilder();
 
-    public void log(String message) {
+    public void addLine(String message) {
         message = new SimpleDateFormat("HH:mm:ss\t").format(new Date()) + message;
         System.out.println(message);
         logBuilder.append(message).append("\n");
     }
 
-    public String collect() {
-        return logBuilder.toString();
-    }
-
-    public String collect(String finalMessage) {
+    public String sumUp(String finalMessage) {
         return logBuilder
-                .append("-------------------------------------")
-                .append("\n")
+                .append("-------------------------------------\n")
                 .append(finalMessage)
+                .append("\n\n")
                 .toString();
     }
 }

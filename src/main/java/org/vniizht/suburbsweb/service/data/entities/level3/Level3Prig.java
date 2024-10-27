@@ -19,7 +19,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private final TripsDao trips;
 
-    Level3Prig(Level2Dao.PrigRecord record,
+    public Level3Prig(Level2Dao.PrigRecord record,
                Handbook handbook,
                RoutesDao routes,
                TripsDao trips) {

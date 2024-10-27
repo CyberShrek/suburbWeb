@@ -10,30 +10,32 @@ import java.util.Optional;
 @Service
 public class Handbook {
 
-    @Autowired private HandbookCache holder;
+    @Autowired private HandbookCache cache;
+    public void loadCache() {cache.load();}
+    public void clearCache() {cache.clear();}
 
     public String getRoad2(String stationCode, Date date) {
-        Stanv stanv = holder.findStanv(stationCode, date);
-        return holder.findDor(stanv.getDor(), stanv.getGos())
+        Stanv stanv = cache.findStanv(stationCode, date);
+        return cache.findDor(stanv.getDor(), stanv.getGos())
                 .getNom2();
     }
 
     public String getRoad3(String stationCode, Date date) {
-        Stanv stanv = holder.findStanv(stationCode, date);
-        return holder.findDor(stanv.getDor(), stanv.getGos())
+        Stanv stanv = cache.findStanv(stationCode, date);
+        return cache.findDor(stanv.getDor(), stanv.getGos())
                 .getNom3();
     }
 
     public String getRegion(String stationCode, Date date) {
-        return Optional.ofNullable(holder.findStanv(stationCode, date).getSf()).orElse("00");
+        return Optional.ofNullable(cache.findStanv(stationCode, date).getSf()).orElse("00");
     }
 
     public String getDepartment(String stationCode, Date date) {
-        return Optional.ofNullable(holder.findStanv(stationCode, date).getOtd()).orElse("000").substring(1);
+        return Optional.ofNullable(cache.findStanv(stationCode, date).getOtd()).orElse("000").substring(1);
     }
 
     public String getOkatoByRegion(String regionCode, Date date) {
-        Sf sf = holder.findSf(Integer.valueOf(regionCode), date);
+        Sf sf = cache.findSf(Integer.valueOf(regionCode), date);
         if (sf == null) {
             return "00000";
         }
@@ -48,21 +50,21 @@ public class Handbook {
     }
 
     public String getArea(String stationCode, Date date) {
-        return holder.findStanv(stationCode, date).getNopr(); // ??
+        return cache.findStanv(stationCode, date).getNopr(); // ??
     }
 
     public String getTSite(String siteId, String countryCode, Date date){
-        Site site = holder.findSite(siteId, countryCode, date);
+        Site site = cache.findSite(siteId, countryCode, date);
         return site == null ? "  " : site.getTsite();
     }
 
     public String getPlagnVr(String plagnId, String countryCode, Date date){
-        Plagn plagn = holder.findPlagn(plagnId, countryCode, date);
+        Plagn plagn = cache.findPlagn(plagnId, countryCode, date);
         return plagn == null ? "  " : plagn.getVr();
     }
 
     public String getGvc(String benefitGroupCode, String benefitCode, Date date){
-        Sublx sublx = holder.findSublx(benefitGroupCode + benefitCode, date);
+        Sublx sublx = cache.findSublx(benefitGroupCode + benefitCode, date);
         if (sublx == null || sublx.getGvc() == null) {
             return null;
         }

@@ -5,7 +5,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.TransformationOptions;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
-import org.vniizht.suburbsweb.service.handbook.HandbookCache;
+import org.vniizht.suburbsweb.service.data.dao.TripsDao;
+import org.vniizht.suburbsweb.service.data.entities.level3.Level3;
+import org.vniizht.suburbsweb.service.data.entities.level3.Level3Prig;
+import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.Level3Dao;
 import org.vniizht.suburbsweb.util.Log;
@@ -13,8 +16,10 @@ import org.vniizht.suburbsweb.util.Util;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Scope("singleton")
@@ -22,46 +27,69 @@ public class Transformation {
 
     @Autowired private Level2Dao level2;
     @Autowired private Level3Dao level3;
-    @Autowired private HandbookCache handbook;
+    @Autowired private Handbook handbook;
     @Autowired private RoutesDao routes;
+    @Autowired private TripsDao trips;
 
-    public String transform(TransformationOptions options) throws Exception {
+    public String transform(TransformationOptions options) {
         Log log = new Log();
-        return log.collect("Итоговое время: " + Util.measureTime(() -> {
-            log.log("Выполняю трансформацию записей за " + Util.formatDate(options.date, "dd-MM-yyyy"));
+        return log.sumUp("Итоговое время: " + Util.measureTime(() -> {
+            log.addLine("Выполняю трансформацию записей за " + Util.formatDate(options.date, "dd-MM-yyyy"));
 
-            log.log("Загружаю справочники...");
-            handbook.init();
-            log.log("Справочники загружены.");
-
-            if(options.prig) {
-                try {
-                    transformPrig(options.date, log);
-                    if(options.pass) transformPass(options.date, log);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    handbook.clear();
-                    routes.clearCache();
-                }
+            log.addLine("Загружаю справочники...");
+            handbook.loadCache();
+            log.addLine("Справочники загружены.");
+            try {
+                if(options.prig) transformPrig(options.date, log);
+                if(options.pass) transformPass(options.date, log);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                handbook.clearCache();
+                routes.clearCache();
             }
         }));
     }
 
     private void transformPrig(Date requestDate, Log log) throws Exception {
-        List<Level2Dao.PrigRecord> prigRecords = loadRecords(() -> level2.findPrigRecords(requestDate), log, "l2_prig");
+        Set<Level2Dao.PrigRecord> prigRecords = loadRecords(
+                () -> level2.findPrigRecords(requestDate), log, "l2_prig");
+
+        Set<Level3Prig> converted = convertRecords(prigRecords,
+                (record) -> new Level3Prig((Level2Dao.PrigRecord) record, handbook, routes, trips), log, "l3_prig");
+
     }
 
     private void transformPass(Date requestDate, Log log) throws Exception {
-        List<Level2Dao.PassRecord> passRecords = loadRecords(() -> level2.findPassRecords(requestDate), log, "l2_pass");
+        Set<Level2Dao.PassRecord> passRecords = loadRecords(
+                () -> level2.findPassRecords(requestDate), log, "l2_pass");
     }
 
-    private List loadRecords(Callable<Map> loader, Log log, String name) throws Exception {
-        log.log("Загружаю записи " + name + "...");
-        Map<Long, Level2Dao.Record> records = loader.call();
-        log.log("Загружено записей " + name + ": " + records.size());
-        return List.copyOf(records.values());
+    private void transform(Date requestDate,
+                           Log log,
+                           String name) throws Exception {
+
     }
+
+    private Set loadRecords(Callable<Set> loader, Log log, String name) throws Exception {
+        log.addLine("Загружаю записи " + name + "...");
+        Set<Level2Dao.Record> records = loader.call();
+        log.addLine("Записи" + name + " успешно загружены. Количество: " + records.size());
+
+        return records;
+    }
+
+    private Set convertRecords(Set records, Function<Level2Dao.Record, Level3> inMapConverter,
+                               Log log, String name) throws Exception {
+        log.addLine("Конвертирую записи " + name + "...");
+        Set converted = (Set) records.stream().map(record -> inMapConverter.apply((Level2Dao.Record) record))
+                .collect(Collectors.toSet());
+        log.addLine("Записи " + name + " успешно конвертированы. Количество: " + converted.size());
+
+        return converted;
+    }
+
+//    private
 //
 //    private Level3 transform(){
 //

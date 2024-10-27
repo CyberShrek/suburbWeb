@@ -1,6 +1,6 @@
 package org.vniizht.suburbsweb.service.data.dao;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,11 +8,7 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
 import org.vniizht.suburbsweb.service.data.repository.*;
 
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class Level2Dao {
@@ -24,73 +20,77 @@ public class Level2Dao {
     @Autowired private PassCostRepo passCostRepo;
     @Autowired private PassExRepo passExRepo;
 
-    public Map<Long, PrigRecord> findPrigRecords(Date requestDate) {
-        Map<Long, PrigRecord> result = new LinkedHashMap<>();
+    public Set<PrigRecord> findPrigRecords(Date requestDate) {
+        Map<Long, PrigRecord> collector = new LinkedHashMap<>();
         List<PrigMain> mainList = prigMainRepo.findAllByRequestDate(requestDate);
         List<PrigCost> costList = prigCostRepo.findAllByRequestDate(requestDate);
-        List<PrigAdi> adiList = prigAdiRepo.findAllByRequestDate(requestDate);
+        List<PrigAdi>   adiList = prigAdiRepo .findAllByRequestDate(requestDate);
 
-        mainList.forEach(main -> result.put(main.idnum, new PrigRecord(main, new ArrayList<>(), null)));
+        mainList.forEach(main -> collector.put(main.idnum, new PrigRecord(main)));
         costList.forEach(cost -> {
-            PrigRecord record = result.get(cost.idnum);
+            PrigRecord record = collector.get(cost.idnum);
             if (record != null)
                 record.getCost().add(cost);
         });
         adiList.forEach(adi -> {
-            PrigRecord record = result.get(adi.idnum);
+            PrigRecord record = collector.get(adi.idnum);
             if (record != null)
                 record.setAdi(adi);
         });
-        return result;
+        return new LinkedHashSet<>(collector.values());
     }
 
-    public Map<Long, PassRecord> findPassRecords(Date requestDate) {
-        Map<Long, PassRecord> result = new LinkedHashMap<>();
+    public Set<PassRecord> findPassRecords(Date requestDate) {
+        Map<Long, PassRecord> collector = new LinkedHashMap<>();
         List<PassMain> mainList = passMainRepo.findAllByRequestDate(requestDate);
         List<PassCost> costList = passCostRepo.findAllByRequestDate(requestDate);
-        List<PassEx> exList     = passExRepo.findAllByRequestDate(requestDate);
+        List<PassEx>     exList = passExRepo  .findAllByRequestDate(requestDate);
 
-        mainList.forEach(passMain -> result.put(passMain.idnum, new PassRecord(passMain, new ArrayList<>(), new ArrayList<>())));
+        mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));
         costList.forEach(cost -> {
-            PassRecord record = result.get(cost.idnum);
+            PassRecord record = collector.get(cost.idnum);
             if (record != null)
                 record.getCost().add(cost);
         });
         exList.forEach(ex -> {
-            PassRecord record = result.get(ex.idnum);
+            PassRecord record = collector.get(ex.idnum);
             if (record != null)
                 record.getEx().add(ex);
         });
-        return result;
+        return new LinkedHashSet<>(collector.values());
     }
 
     @Getter
     @Setter
-    @Builder
-    static public class PrigRecord implements Record {
+    static public class PrigRecord extends Record {
         private PrigMain main;
         private List<PrigCost> cost;
         private PrigAdi adi;
 
-        public String toString() {
-            return "cost:\t" + cost + "\nmain\t" + main;
+        PrigRecord(PrigMain main) {
+            super(main.idnum);
+            this.main = main;
+            this.cost = new ArrayList<>();
         }
     }
 
     @Getter
     @Setter
-    @Builder
-    static public class PassRecord implements Record {
+    static public class PassRecord extends Record {
         private PassMain main;
         private List<PassCost> cost;
         private List<PassEx> ex;
 
-        public String toString() {
-            return "cost:\t" + cost + "\nmain\t" + main;
+        PassRecord(PassMain main) {
+            super(main.idnum);
+            this.main = main;
+            this.cost = new ArrayList<>();
+            this.ex   = new ArrayList<>();
         }
     }
 
-    public interface Record {
-
+    @AllArgsConstructor
+    static public abstract class Record {
+        private Long idnum;
     }
 }
