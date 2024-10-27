@@ -16,4 +16,12 @@ public class Log {
     public String collect() {
         return logBuilder.toString();
     }
+
+    public String collect(String finalMessage) {
+        return logBuilder
+                .append("-------------------------------------")
+                .append("\n")
+                .append(finalMessage)
+                .toString();
+    }
 }

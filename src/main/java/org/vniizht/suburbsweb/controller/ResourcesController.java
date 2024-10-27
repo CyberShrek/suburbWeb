@@ -2,25 +2,9 @@ package org.vniizht.suburbsweb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.vniizht.suburbsweb.model.order.DeparturesFormStatementOrder;
-import org.vniizht.suburbsweb.model.order.FormStatementOrder;
-import org.vniizht.suburbsweb.model.order.SalesFormStatementOrder;
-import org.vniizht.suburbsweb.model.report.DeparturesReportModel;
-import org.vniizht.suburbsweb.model.report.ReportModel;
-import org.vniizht.suburbsweb.model.report.SalesReportModel;
-import org.vniizht.suburbsweb.service.DeparturesReportJdbc;
-import org.vniizht.suburbsweb.service.SalesReportJdbc;
-
-import java.util.Map;
 
 @RestController
 public class ResourcesController {
-
-    @Autowired
-    private SalesReportJdbc salesReportJdbc;
-
-    @Autowired
-    private DeparturesReportJdbc departuresReportJdbc;
 
 //    @PostMapping("/{formName}/form")
 //    public FormStatementOrder fetchFormStatement(

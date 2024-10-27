@@ -2,7 +2,7 @@ package org.vniizht.suburbsweb.service.handbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.handbook.*;
+import org.vniizht.suburbsweb.service.data.entities.handbook.*;
 
 import java.util.Date;
 import java.util.*;

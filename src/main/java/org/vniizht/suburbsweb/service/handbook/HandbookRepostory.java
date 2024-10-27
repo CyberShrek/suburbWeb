@@ -3,7 +3,8 @@ package org.vniizht.suburbsweb.service.handbook;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.stereotype.Repository;
-import org.vniizht.suburbsweb.model.handbook.*;
+import org.vniizht.suburbsweb.service.data.entities.handbook.*;
+
 import java.util.Date;
 import java.util.List;
 
