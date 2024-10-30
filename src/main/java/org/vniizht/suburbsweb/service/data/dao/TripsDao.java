@@ -6,6 +6,7 @@ import org.vniizht.suburbsweb.service.data.entities.handbook.SeasonTrip;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigMain;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
+import org.vniizht.suburbsweb.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -15,8 +16,6 @@ public class TripsDao {
 
     @Autowired
     private HandbookCache handbookCache;
-
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMM");
 
     public Set<T1> multiplyByTrips(T1 t1, PrigMain prigMain) {
 
@@ -39,9 +38,9 @@ public class TripsDao {
                     prigMain.operation_date,
                     prigMain.ticket_begdate,
                     prigMain.ticket_enddate)
-                    .forEach((month, trips) -> t1Set.add(t1.toBuilder()
+                    .forEach((yyyymm, trips) -> t1Set.add(t1.toBuilder()
                             .key(t1.getKey().toBuilder()
-                                    .report_yyyymm(month)
+                                    .yyyymm(Integer.parseInt(yyyymm))
                                     .p2(t1.getKey().getP2() + 1)
                                     .build())
                             .p33(Long.valueOf(trips))
@@ -70,7 +69,7 @@ public class TripsDao {
         Calendar calendar = new GregorianCalendar();
         calendar.setTime(saleDate);
         while (calendar.getTime().getTime() <= begDate.getTime()) {
-            collectorBefore.put(formatter.format(calendar.getTime()), 0);
+            collectorBefore.put(Util.formatDate(calendar.getTime(), "yyyyMM"), 0);
             calendar.add(Calendar.MONTH, 1);
         }
         calendar.setTime(begDate);
@@ -91,7 +90,7 @@ public class TripsDao {
 
             totalTrips += involvedTrips;
 
-            collector.put(formatter.format(calendar.getTime()), involvedTrips);
+            collector.put(Util.formatDate(calendar.getTime(), "yyyyMM"), involvedTrips);
             calendar.add(Calendar.MONTH, 1);
             calendar.set(Calendar.DAY_OF_MONTH, isEnd ? endDate.getDate() : 1);
         }

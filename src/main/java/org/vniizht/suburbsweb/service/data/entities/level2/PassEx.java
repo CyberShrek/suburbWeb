@@ -14,11 +14,11 @@ import java.io.Serializable;
         name = "l2_pass_ex")
 @IdClass(PassEx.Identifier.class)
 @ToString(callSuper=true)
-public class PassEx extends L2Common {
+public class PassEx extends L2Key {
     @Id
     public Short       npp;
     public String      ticket_ser;
-    public Short       ticket_num;
+    public Integer     ticket_num;
     public String      lgot_info;
     public String      nomlgud;
     public String      last_name;

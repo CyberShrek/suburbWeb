@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.data.entities.level3;
+package org.vniizht.suburbsweb.service.result;
 
 import org.vniizht.suburbsweb.service.data.entities.route.PrigRoute;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigAdi;
@@ -19,17 +19,17 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private final TripsDao trips;
 
-    public Level3Prig(Level2Dao.PrigRecord record,
-               Handbook handbook,
-               RoutesDao routes,
-               TripsDao trips) {
-        super(record, handbook, routes);
+    public Level3Prig(Set<Level2Dao.PrigRecord> records,
+                      Handbook handbook,
+                      RoutesDao routes,
+                      TripsDao trips) {
+        super(records, handbook, routes);
         this.trips = trips;
         transform();
     }
 
     @Override
-    protected T1 convertT1() {
+    protected T1 convertToT1(Level2Dao.PrigRecord record) {
 
         // Используемые данные
         PrigMain main = record.getMain();
@@ -52,8 +52,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
         return T1.builder().key(
                         T1.Key.builder()
-                                .request_date(main.request_date)
-                                .report_yyyymm(Util.formatDate(main.operation_date, "yyyyMM"))
+                                .request_date(main.requestDate)
+                                .yyyymm(Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM")))
                                 .p1("tab1")
                                 .p2(1)
                                 .p3(Util.formatDate(main.operation_date, "yyyy"))
@@ -153,10 +153,10 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                                     case 'Р' -> '4'; // излишний вес ручной клади
                                     default  -> main.carryon_type;
                                 })
-                                .p58(main.benefitgroup_code.equals("22")
+                                .p58(main.benefitgroup_code.equals("22") && adi != null
                                         ? (Integer.parseInt(adi.bilgroup_code) > 4 ? '1' : '0' )
                                         : null)
-                                .p59(main.benefitgroup_code.equals("22")
+                                .p59(main.benefitgroup_code.equals("22") && adi != null
                                         ? (adi.employee_cat == 'Ф' ? '1' : '0')
                                         : null)
                                 .p60("000")
@@ -200,7 +200,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected Lgot convertLgot(T1 t1) {
+    protected Lgot convertToLgot(Level2Dao.PrigRecord record, T1 t1) {
 
         // Используемые данные
         PrigMain main = record.getMain();
@@ -208,6 +208,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         
         return Lgot.builder()
                 .key(Lgot.Key.builder()
+                        .yyyymm(Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM")))
                         .list("R064" + (main.benefitgroup_code.equals("22") ? 'Z' : 'G'))
                         .p1(1)
                         .p2(handbook.getRoad2(main.sale_station, main.operation_date))
@@ -228,16 +229,16 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p7(t1.getKey().getP24())
                         .p8(String.valueOf(main.carriage_code))
                         .p9(handbook.getOkatoByRegion(main.benefit_region, main.operation_date))
-                        .p10(adi.benefit_doc)
-                        .p11(main.benefitgroup_code.equals("22")
+                        .p10(adi == null ? null : adi.benefit_doc)
+                        .p11(main.benefitgroup_code.equals("22") && adi != null
                                 ? adi.bilgroup_secur + adi.bilgroup_code
                                 : main.benefit_region)
-                        .p12(adi.employee_unit)
-                        .p13(main.benefitgroup_code.equals("22")
+                        .p12(adi == null ? null : adi.employee_unit)
+                        .p13(main.benefitgroup_code.equals("22") && adi != null
                                 ? adi.employee_cat
                                 : null)
-                        .p14(adi.surname + ' ' + adi.initials)
-                        .p15(adi.dependent_surname + ' ' + adi.dependent_initials)
+                        .p14(adi == null ? null : adi.surname + ' ' + adi.initials)
+                        .p15(adi == null ? null : adi.dependent_surname + ' ' + adi.dependent_initials)
                         .p16((byte) (
                                 main.abonement_type.equals("0 ")
                                         ?
@@ -279,7 +280,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p29(null)
                         .p30(main.server_datetime)
                         .p31(String.valueOf(main.server_reqnum))
-                        .p32(adi.snils)
+                        .p32(adi == null ? null : adi.snils)
                         .build())
                 .p19(main.pass_qty)
                 .p27((int) (main.tariff_sum * 10))
@@ -289,7 +290,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected void addTrips(T1 t1) {
+    protected void addT1Trips(Level2Dao.PrigRecord record, T1 t1) {
 
         // Используемые данные
         PrigMain main = record.getMain();
@@ -312,7 +313,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected Set<T1> multiplyT1(T1 t1) {
+    protected Set<T1> multiplyT1(Level2Dao.PrigRecord record, T1 t1) {
         return trips.multiplyByTrips(t1, record.getMain());
     }
 }

@@ -2,10 +2,10 @@ package org.vniizht.suburbsweb.service.data.entities.level3.co22;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.vniizht.suburbsweb.service.data.entities.level3.L3Key;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Date;
 
 @Entity
 @Table(schema = "prigl3",
@@ -65,12 +65,10 @@ public class T1 {
     @SuperBuilder(toBuilder=true)
     @Getter
     @Setter
-    @EqualsAndHashCode
+    @EqualsAndHashCode(callSuper = true)
     @ToString
     @NoArgsConstructor
-    static public class Key implements Serializable {
-        private Date            request_date;
-        private String          report_yyyymm;
+    static public class Key extends L3Key implements Serializable {
         private String          p1;
         private Integer         p2;
         private String          p3;

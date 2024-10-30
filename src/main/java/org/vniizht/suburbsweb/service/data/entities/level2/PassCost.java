@@ -11,12 +11,12 @@ import java.io.Serializable;
         name = "l2_pass_cost")
 @IdClass(PassCost.Identifier.class)
 @ToString(callSuper=true)
-public class PassCost extends L2Common {
+public class PassCost extends L2Key {
     @Id public Short       sum_code;
     @Id public String      cnt_code;
     @Id public String      dor_code;
     @Id public Character   paymenttype;
-    public Float           department_sum;
+    public Float           sum_te; // department_sum
     public Float           sum_nde;
 
     @AllArgsConstructor

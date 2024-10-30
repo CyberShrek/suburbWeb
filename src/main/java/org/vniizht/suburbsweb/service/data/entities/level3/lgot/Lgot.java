@@ -2,6 +2,7 @@ package org.vniizht.suburbsweb.service.data.entities.level3.lgot;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.vniizht.suburbsweb.service.data.entities.level3.L3Key;
 
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
@@ -31,10 +32,10 @@ public class Lgot {
     @SuperBuilder(toBuilder=true)
     @Getter
     @Setter
-    @EqualsAndHashCode
+    @EqualsAndHashCode(callSuper = true)
     @ToString
     @NoArgsConstructor
-    static public class Key implements Serializable {
+    static public class Key extends L3Key implements Serializable {
         private String      list;
         private Integer     p1;
         private String      p2;

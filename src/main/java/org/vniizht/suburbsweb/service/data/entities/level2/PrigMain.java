@@ -10,7 +10,7 @@ import java.sql.Date;
 @Table(schema = "rawdl2",
         name = "l2_prig_main")
 @ToString(callSuper=true)
-public class PrigMain extends L2Common {
+public class PrigMain extends L2Key {
     public Long        id;
     public Short       request_subtype;
     public Character   oper;

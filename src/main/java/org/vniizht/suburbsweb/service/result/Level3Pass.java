@@ -1,4 +1,4 @@
-package org.vniizht.suburbsweb.service.data.entities.level3;
+package org.vniizht.suburbsweb.service.result;
 
 import org.vniizht.suburbsweb.service.data.entities.route.PassRoute;
 import org.vniizht.suburbsweb.service.data.entities.level2.PassCost;
@@ -11,31 +11,28 @@ import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.util.Util;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     
-    Level3Pass(Level2Dao.PassRecord record,
-               Handbook handbook,
-               RoutesDao routes) {
-        super(record, handbook, routes);
+    public Level3Pass(Set<Level2Dao.PassRecord> records,
+                      Handbook handbook,
+                      RoutesDao routes) {
+        super(records, handbook, routes);
         transform();
     }
 
     @Override
-    protected T1 convertT1() {
+    protected T1 convertToT1(Level2Dao.PassRecord record) {
         // Используемые данные
         PassMain        main = record.getMain();
         List<PassCost>  cost = record.getCost();
-        PassEx          ex   = record.getEx().get(0);
+        PassEx          ex   = record.getEx().isEmpty() ? null : record.getEx().get(0);
         
         return T1.builder().key(
                         T1.Key.builder()
-                                .request_date(main.request_date)
-                                .report_yyyymm(Util.formatDate(main.oper_date, "yyyyMM"))
+                                .request_date(main.requestDate)
+                                .yyyymm(Integer.parseInt(Util.formatDate(main.oper_date, "yyyyMM")))
                                 .p1("tab1")
                                 .p2(1)
                                 .p3(Util.formatDate(main.oper_date, "yyyy"))
@@ -55,15 +52,15 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p20("0" + main.carriage_class)
                                 .p21('1')
                                 .p22(
-                                        main.f_tick[2] ? '2'                                        // Детский
-                                        : !main.benefit_code.equals("000") || main.f_tick[4] ? '3'  // Льготный
-                                        :  main.f_tick[1] ? '1'                                     // Полный
+                                        Objects.requireNonNull(main.f_tick).length > 2 && main.f_tick[2] == 1 ? '2'                                        // Детский
+                                        : !main.benefit_code.equals("000") || main.f_tick.length > 4 && main.f_tick[4] == 1 ? '3'  // Льготный
+                                        :  main.f_tick.length > 1 && main.f_tick[1] == 1 ? '1'                                     // Полный
                                         : '4'                                                       // Бесплатный
-                                )                                           
+                                )
                                 .p23('3')
                                 .p24(main.paymenttype == 'В'
                                         ? "21" + String.format("%02d", main.military_code)
-                                        : ex.lgot_info != null && !main.benefit_code.equals("000") && !main.benefit_code.equals("013")
+                                        : ex != null && ex.lgot_info != null && !main.benefit_code.equals("000") && !main.benefit_code.equals("013")
                                         ? ex.lgot_info.substring(1, 4)
                                         : null)
                                 .p25(switch (main.paymenttype) {
@@ -73,7 +70,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                     case '6' -> '5';            // Безнал для юр. лиц
                                     default -> '4';             // Электронный кошелёк
                                 })
-                                .p26(handbook.getGvc(ex.lgot_info.substring(0, 2), main.benefit_code, main.oper_date))
+                                .p26(ex == null ? null : handbook.getGvc(ex.lgot_info.substring(0, 2), main.benefit_code, main.oper_date))
                                 .p30(handbook.getOkatoByStation(main.arrival_station, main.arrival_date))
                                 .p31(handbook.getArea(main.arrival_station, main.arrival_date))
                                 .p32(main.distance)
@@ -83,12 +80,12 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p55(null)
                                 .p56("000")
                                 .p57(null)
-                                .p58(switch (ex.lgot_info.charAt(9)) {
+                                .p58(ex == null ? null : switch (ex.lgot_info.charAt(9)) {
                                     case '0', '1', '2', '3', '4' -> '0';
                                     case '5', '6', '7', '8', '9' -> '1';
                                     default -> null;
                                 })
-                                .p59(main.paymenttype == 'Ж' && ex.lgot_info.startsWith("22")
+                                .p59(main.paymenttype == 'Ж' && ex != null && ex.lgot_info.startsWith("22")
                                         ? switch (ex.lgot_info.charAt(5)){
                                             case 'Ф', 'Д' -> '1';
                                             default -> '0';
@@ -146,14 +143,15 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         }
 
     @Override
-    protected Lgot convertLgot(T1 t1) {
+    protected Lgot convertToLgot(Level2Dao.PassRecord record, T1 t1) {
         PassMain main = record.getMain();
-        PassCost cost = record.getCost().get(0); // ??
-        PassEx   ex   = record.getEx().get(0);
+        PassCost cost = record.getCost().isEmpty() ? null : record.getCost().get(0); // ??
+        PassEx   ex   = record.getEx().isEmpty() ? null : record.getEx().get(0);
 
         return Lgot.builder()
                 .key(Lgot.Key.builder()
-                        .list( "R800" + (main.paymenttype == 'Ж' && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
+                        .yyyymm(Integer.parseInt(Util.formatDate(main.oper_date, "yyyyMM")))
+                        .list( "R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
                         .p1(t1.getKey().getP2())
                         .p2(handbook.getRoad2(main.sale_station, main.oper_date))
                         .p3(handbook.getDepartment(main.sale_station, main.oper_date))
@@ -170,17 +168,17 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p7(t1.getKey().getP24())
                         .p8(String.valueOf(main.carrier_code))
                         .p9(handbook.getOkatoByRegion(main.benefitcnt_code, main.oper_date)) // Точно код государства??
-                        .p10(ex.nomlgud)
-                        .p11(ex.lgot_info.startsWith("22")
+                        .p10(ex == null ? null : ex.nomlgud)
+                        .p11(ex != null && ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.substring(7, 12)
                                 : main.saleregion_code)
-                        .p12(ex.lgot_info.startsWith("22")
+                        .p12(ex != null && ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.substring(13, 23)
                                 : null)
-                        .p13(ex.lgot_info.startsWith("22")
+                        .p13(ex != null && ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.charAt(5)
                                 : null)
-                        .p14(ex.last_name + ' ' + ex.first_name.charAt(0) + ex.patronymic.charAt(0))
+                        .p14(ex == null ? null : ex.last_name + ' ' + ex.first_name.charAt(0) + ex.patronymic.charAt(0))
                         .p15(null)
                         .p16((byte) (main.oper_g == 'G'
                                 ? -1 :
@@ -194,17 +192,17 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p21(null)
                         .p22(main.oper_date)
                         .p23(main.departure_date)
-                        .p24(ex.ticket_ser.substring(0, 2) + ex.ticket_num)
+                        .p24(ex == null ? null : ex.ticket_ser.substring(0, 2) + ex.ticket_num)
                         .p25(main.departure_station)
                         .p26(main.arrival_station)
                         .p29(null)
-                        .p30(Util.formatDate(new Date(main.request_date.getTime() + main.request_time.getTime()), "ddMMyyHHmm"))
+                        .p30(Util.formatDate(new Date(main.requestDate.getTime() + main.request_time.getTime()), "ddMMyyHHmm"))
                         .p31(null)
-                        .p32(ex.snils)
+                        .p32(ex == null ? null :ex.snils)
                         .build())
                 .p19(main.seats_qty)
-                .p27((int) (cost.department_sum * 10))
-                .p28((int) switch (cost.sum_code) {
+                .p27((int) (cost == null ? 0 : cost.sum_te * 10))
+                .p28((int) switch (cost == null ? 0 : cost.sum_code) {
                     case 101:
                     case 102:
                     case 116: yield switch (main.paymenttype) {
@@ -220,16 +218,16 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected void addTrips(T1 t1) {
+    protected void addT1Trips(Level2Dao.PassRecord record, T1 t1) {
         // Используемые данные
         PassMain main = record.getMain();
         PassRoute route = this.routes.getPassRoute(
-                main.train_num, 
-                main.train_thread, 
+                main.train_num,
+                main.train_thread,
                 main.departure_date,
                 main.departure_station,
                 main.arrival_station);
-        
+
         t1.setKey(t1.getKey().toBuilder()
                 .p13(route.getRoadStart())
                 .p14(route.getDepartmentStart())
@@ -244,13 +242,13 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected Set<T1> multiplyT1(T1 t1) {
+    protected Set<T1> multiplyT1(Level2Dao.PassRecord record, T1 t1) {
         PassMain main = record.getMain();
         Set<T1> result = new HashSet<>(Set.of(t1));
         if (!main.oper_date.equals(main.departure_date)) {
             result.add(t1.toBuilder()
                     .key(t1.getKey().toBuilder()
-                            .report_yyyymm(Util.formatDate(main.departure_date, "yyyyMM"))
+                            .yyyymm(Integer.parseInt(Util.formatDate(main.departure_date, "yyyyMM")))
                             .build()
                     )
                     .build()

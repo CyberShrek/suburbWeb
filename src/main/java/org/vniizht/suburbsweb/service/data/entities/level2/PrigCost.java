@@ -14,7 +14,7 @@ import java.io.Serializable;
         name = "l2_prig_cost")
 @IdClass(PrigCost.Identifier.class)
 @ToString(callSuper=true)
-public class PrigCost extends L2Common {
+public class PrigCost extends L2Key {
     @Id
     public Short       doc_reg;
     public Short       route_num;

@@ -7,17 +7,46 @@ public class Log {
 
     private final StringBuilder logBuilder = new StringBuilder();
 
-    public void addLine(String message) {
-        message = new SimpleDateFormat("HH:mm:ss\t").format(new Date()) + message;
-        System.out.println(message);
-        logBuilder.append(message).append("\n");
+    public void addLine(String... messages) {
+        for (String line : messages) {
+            System.out.println(line);
+            logBuilder
+                    .append(line)
+                    .append("\n");
+        }
     }
 
-    public String sumUp(String finalMessage) {
+    public void addTimeLine(String... messages) {
+        for (String line : messages) {
+            addLine(new SimpleDateFormat("HH:mm:ss\t").format(new Date()) + line);
+        }
+    }
+
+    public String sumUp() {
         return logBuilder
                 .append("-------------------------------------\n")
-                .append(finalMessage)
                 .append("\n\n")
                 .toString();
+    }
+
+    public String sumUp(String... finalMessages) {
+        logBuilder.append("-------------------------------------\n");
+        for (String message : finalMessages) {
+            logBuilder
+                    .append(message)
+                    .append("\n");
+        }
+        return logBuilder
+                .append("\n")
+                .toString();
+    }
+
+    public String toString() {
+        return logBuilder
+                .toString();
+    }
+
+    public void merge(Log log) {
+        logBuilder.append(log.toString());
     }
 }

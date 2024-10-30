@@ -9,7 +9,7 @@ import javax.persistence.Table;
 @Table(schema = "rawdl2",
         name = "l2_prig_adi")
 @ToString(callSuper=true)
-public class PrigAdi extends L2Common {
+public class PrigAdi extends L2Key {
     public Character   employee_cat;
     public Character   bilgroup_secur;
     public String      bilgroup_code;
