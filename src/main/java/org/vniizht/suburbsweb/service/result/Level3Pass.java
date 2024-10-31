@@ -178,7 +178,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p13(ex != null && ex.lgot_info.startsWith("22")
                                 ? ex.lgot_info.charAt(5)
                                 : null)
-                        .p14(ex == null ? null : ex.last_name + ' ' + ex.first_name.charAt(0) + ex.patronymic.charAt(0))
+                        .p14(ex == null ? null : ex.last_name.trim() + ' ' + ex.first_name.trim().charAt(0) + ex.patronymic.trim().charAt(0))
                         .p15(null)
                         .p16((byte) (main.oper_g == 'G'
                                 ? -1 :

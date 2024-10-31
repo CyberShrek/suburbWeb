@@ -10,6 +10,7 @@ import java.sql.Date;
 @Setter
 @ToString
 @SuperBuilder(toBuilder=true)
+@EqualsAndHashCode
 @NoArgsConstructor
 public class L3Key {
     private Date   request_date;

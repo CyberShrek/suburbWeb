@@ -138,11 +138,11 @@ public class Transformation {
 
     @PostConstruct
     public void test() {
-        int yyyy = 2024, mm = 7, dd = 05;
+        int yyyy = 2024, mm = 2, dd = 05;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
-                false,
-                true
+                true,
+                false
         ));
     }
 }

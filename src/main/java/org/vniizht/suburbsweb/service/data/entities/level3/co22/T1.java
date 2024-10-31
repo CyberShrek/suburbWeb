@@ -5,6 +5,7 @@ import lombok.experimental.SuperBuilder;
 import org.vniizht.suburbsweb.service.data.entities.level3.L3Key;
 
 import javax.persistence.*;
+import javax.servlet.annotation.HandlesTypes;
 import java.io.Serializable;
 
 @Entity

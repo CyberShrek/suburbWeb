@@ -237,8 +237,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p13(main.benefitgroup_code.equals("22") && adi != null
                                 ? adi.employee_cat
                                 : null)
-                        .p14(adi == null ? null : adi.surname + ' ' + adi.initials)
-                        .p15(adi == null ? null : adi.dependent_surname + ' ' + adi.dependent_initials)
+                        .p14(adi == null ? null : adi.surname.trim() + ' ' + adi.initials.trim())
+                        .p15(adi == null ? null : adi.dependent_surname.trim() + ' ' + adi.dependent_initials.trim())
                         .p16((byte) (
                                 main.abonement_type.equals("0 ")
                                         ?
