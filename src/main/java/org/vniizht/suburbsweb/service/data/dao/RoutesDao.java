@@ -40,16 +40,16 @@ public class RoutesDao {
 
                 if(st1 != null && st1.equals(depStation)){
                     switch (narr) {
-                        case 1 -> prigRoute.setRegionStart(est_obj_chr);
-                        case 2 -> prigRoute.setRoadStart(est_obj_chr);
-                        case 3 -> prigRoute.setDepartmentStart(est_obj_chr);
+                        case 1: prigRoute.setRegionStart(est_obj_chr); break;
+                        case 2: prigRoute.setRoadStart(est_obj_chr);   break;
+                        case 3: prigRoute.setDepartmentStart(est_obj_chr);
                     }
                 }
                 else if (st2 != null && st2.equals(depStation)) {
                     switch (narr) {
-                        case 1 -> prigRoute.setRegionEnd(est_obj_chr);
-                        case 2 -> prigRoute.setRoadEnd(est_obj_chr);
-                        case 3 -> prigRoute.setDepartmentEnd(est_obj_chr);
+                        case 1: prigRoute.setRegionEnd(est_obj_chr); break;
+                        case 2: prigRoute.setRoadEnd(est_obj_chr);   break;
+                        case 3: prigRoute.setDepartmentEnd(est_obj_chr);
                     }
                 }
                 if (narr == 5) {
@@ -58,12 +58,13 @@ public class RoutesDao {
                         prigRoute.setMcdDistance(rst);
                 }
             }
-            prigRoute.setMcdType(switch (mcdSet.size()) {
-                case 1 -> mcdSet.contains(1) ? '0' : '1';
-                case 2 -> mcdSet.contains(1) && mcdSet.contains(2) ? '2' : '3';
-                case 3 -> mcdSet.contains(1) && mcdSet.contains(2) && mcdSet.contains(3) ? '4' : null;
-                default -> null;
-            });
+            Character mcdType = null;
+            switch (mcdSet.size()) {
+                case 1: mcdType = mcdSet.contains(1) ? '0' : '1'; break;
+                case 2: mcdType = mcdSet.contains(1) && mcdSet.contains(2) ? '2' : '3'; break;
+                case 3: mcdType = mcdSet.contains(1) && mcdSet.contains(2) && mcdSet.contains(3) ? '4' : null;
+            }
+            prigRoute.setMcdType(mcdType);
 
             prigCache.put(key, prigRoute);
         }

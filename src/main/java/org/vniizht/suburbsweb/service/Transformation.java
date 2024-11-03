@@ -17,7 +17,7 @@ import org.vniizht.suburbsweb.service.data.dao.Level3Dao;
 import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
 
-import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -33,10 +33,15 @@ public class Transformation {
     @Autowired private RoutesDao routes;
     @Autowired private TripsDao trips;
 
-    public String transform(TransformationOptions options) {
+    @Transactional
+    public synchronized String transform(TransformationOptions options) {
         Log log = new Log();
         return log.sumUp("Итоговое время: " + Util.measureTime(() -> {
             if(!options.pass && !options.prig) return;
+            if(options.date == null) {
+                options.date = getRequestDate(log);
+                if(options.date == null) return;
+            }
 
             log.addTimeLine("Выполняю трансформацию записей за " + Util.formatDate(options.date, "dd.MM.yyyy"));
             log.sumUp();
@@ -45,18 +50,19 @@ public class Transformation {
             handbook.loadCache();
             log.addTimeLine("Справочники загружены.");
             log.sumUp();
-            try { save(
+            try { complete(
+                    options.date,
                     options.prig ? transformPrig(options.date, log) : null,
                     options.pass ? transformPass(options.date, log) : null,
                     log
             );
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(log.toString() + "\n" + e.getLocalizedMessage(), e);
             } finally {
                 handbook.clearCache();
                 routes.clearCache();
             }
-        }));
+        }) + "c");
     }
 
     private Level3Prig transformPrig(Date requestDate, Log log) throws Exception {
@@ -91,34 +97,45 @@ public class Transformation {
         log.addTimeLine("Трансформирую записи " + name + "...");
         Level3 level3 = loader.call();
         log.addTimeLine("Записи " + name + " успешно трансформированы.");
-        log.addLine(
-                "Затраты времени на трансформацию записей " + name + " (c): ",
-                "\tТрансформация t1: "          + level3.getT1TransformationTime() +
-                        " (включая поиск маршрутов: " + level3.getT1TripsSearchTime() + ")",
-                "\tТрансформация lgot: "        + level3.getLgotTransformationTime()
+        log.sumUp(
+//                "Затраты времени на трансформацию записей " + name,
+//                "\tТрансформация t1: "          + level3.getT1TransformationTime() +
+//                        "c (включая поиск маршрутов: " + level3.getT1TripsSearchTime() + "c)",
+//                "\tТрансформация lgot: "        + level3.getLgotTransformationTime() + "c"
         );
         return level3;
     }
 
-    private void save(Level3Prig level3Prig,
-                      Level3Pass level3Pass,
-                      Log log) {
+    private Date getRequestDate(Log log) {
+        log.addTimeLine("Определяю дату запроса...");
+        Date requestDate = level3.getNextRequestDate();
+        if(requestDate == null) {
+            log.addTimeLine("На третьем уровне ещё нет данных. Повторите запрос с указанием даты.");
+        }
+        return requestDate;
+    }
 
-        Set<T1>    t1Set   = aggregateT1(
+    private void complete(Date date,
+                          Level3Prig level3Prig,
+                          Level3Pass level3Pass,
+                          Log log) {
+
+        Set<T1>    t1Set   = new HashSet<>();
+                aggregateT1(
                 Stream.concat(
-                        level3Prig == null ? Stream.empty() : level3Prig.getT1List().stream(),
-                        level3Pass == null ? Stream.empty() : level3Pass.getT1List().stream())
+                        level3Prig == null ? Stream.empty() : level3Prig.getT1Result().stream(),
+                        level3Pass == null ? Stream.empty() : level3Pass.getT1Result().stream())
                         .collect(Collectors.toList()), log);
 
         Set<Lgot>  lgotSet = Stream.concat(
-                level3Prig == null ? Stream.empty() : level3Prig.getLgotList().stream(),
-                level3Pass == null ? Stream.empty() : level3Pass.getLgotList().stream())
+                level3Prig == null ? Stream.empty() : level3Prig.getLgotResult().stream(),
+                level3Pass == null ? Stream.empty() : level3Pass.getLgotResult().stream())
                 .collect(Collectors.toSet());
 
-        log.addTimeLine("Итоговое количество T1: " + t1Set.size());
-        log.addTimeLine("Итоговое количество Lgot: " + lgotSet.size());
+        log.sumUp("Итоговое количество T1: " + t1Set.size(),
+                "Итоговое количество Lgot: " + lgotSet.size());
 
-        log.addTimeLine("Записываю результаты...");
+        update(date, t1Set, lgotSet, log);
     }
 
     private Set<T1> aggregateT1(List<T1> t1List, Log log) {
@@ -136,13 +153,26 @@ public class Transformation {
         return new HashSet<>(t1Map.values());
     }
 
-    @PostConstruct
+    private void update(Date date, Set<T1> t1Set, Set<Lgot> lgotSet, Log log) {
+        log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
+            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(date, "dd.MM.yyyy") + "...");
+            level3.deleteForDate(date);
+            log.addLine("Записываю T1...");
+            t1Set.forEach(t1 -> level3.save(t1));
+            log.addLine("Записываю Lgot...");
+            lgotSet.forEach(lgot -> level3.save(lgot));
+            log.addTimeLine("Записи успешно обновлены.");
+        }) + "c");
+    }
+
+//    @PostConstruct
     public void test() {
         int yyyy = 2024, mm = 2, dd = 05;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
-                true,
-                false
+//                null,
+                false,
+                true
         ));
     }
 }

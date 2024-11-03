@@ -67,11 +67,11 @@ public class T1 {
     @Getter
     @Setter
     @EqualsAndHashCode(callSuper = true)
-    @ToString
+    @ToString(callSuper = true)
     @NoArgsConstructor
     static public class Key extends L3Key implements Serializable {
         private String          p1;
-        private Integer         p2;
+        private Long            p2;
         private String          p3;
         private String          p4;
         private String          p5;

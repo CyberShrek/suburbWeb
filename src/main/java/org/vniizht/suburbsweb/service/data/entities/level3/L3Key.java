@@ -3,7 +3,9 @@ package org.vniizht.suburbsweb.service.data.entities.level3;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.sql.Date;
+import javax.persistence.Column;
+import javax.persistence.MappedSuperclass;
+import java.util.Date;
 
 
 @Getter
@@ -12,7 +14,9 @@ import java.sql.Date;
 @SuperBuilder(toBuilder=true)
 @EqualsAndHashCode
 @NoArgsConstructor
+@MappedSuperclass
 public class L3Key {
-    private Date   request_date;
+    @Column(name = "request_date")
+    private Date requestDate;
     private Integer yyyymm;
 }

@@ -23,18 +23,14 @@ public class Log {
     }
 
     public String sumUp() {
-        return logBuilder
-                .append("-------------------------------------\n")
-                .append("\n\n")
-                .toString();
+        addLine("-------------------------------------\n");
+        return logBuilder.toString();
     }
 
     public String sumUp(String... finalMessages) {
-        logBuilder.append("-------------------------------------\n");
+        addLine("-------------------------------------");
         for (String message : finalMessages) {
-            logBuilder
-                    .append(message)
-                    .append("\n");
+            addLine(message);
         }
         return logBuilder
                 .append("\n")

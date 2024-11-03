@@ -1,6 +1,7 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ public class PassCost extends L2Key {
     public Float           sum_nde;
 
     @AllArgsConstructor
+    @EqualsAndHashCode
     static public class Identifier implements Serializable {
         public Long        idnum;
         public Short       sum_code;

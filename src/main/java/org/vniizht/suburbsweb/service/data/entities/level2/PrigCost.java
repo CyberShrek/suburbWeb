@@ -1,6 +1,7 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.persistence.Entity;
@@ -27,6 +28,7 @@ public class PrigCost extends L2Key {
     public Character   tarif_type;
 
     @AllArgsConstructor
+    @EqualsAndHashCode
     static public class Identifier implements Serializable {
         public Long    idnum;
         public Short   doc_reg;

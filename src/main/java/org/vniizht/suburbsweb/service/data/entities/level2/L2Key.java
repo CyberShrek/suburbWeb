@@ -6,7 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 
 @MappedSuperclass
 @ToString

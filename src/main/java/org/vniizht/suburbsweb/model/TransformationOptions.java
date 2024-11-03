@@ -8,7 +8,6 @@ import java.util.Date;
 
 @AllArgsConstructor
 public class TransformationOptions {
-    @NonNull
     @DateTimeFormat(pattern = "yyyyMMdd")
     public Date date;
     public boolean prig;

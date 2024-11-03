@@ -16,22 +16,26 @@ public class Handbook {
 
     public String getRoad2(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
-        return cache.findDor(stanv.getDor(), stanv.getGos())
-                .getNom2();
+        Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos());
+        return dor == null ? "null" : dor.getNom2();
     }
 
     public String getRoad3(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
-        return cache.findDor(stanv.getDor(), stanv.getGos())
-                .getNom3();
+        Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos());
+        return dor == null ? "null" : dor.getNom3();
     }
 
     public String getRegion(String stationCode, Date date) {
-        return Optional.ofNullable(cache.findStanv(stationCode, date).getSf()).orElse("00");
+        Stanv stanv = cache.findStanv(stationCode, date);
+        return stanv == null ? "00"
+                : Optional.ofNullable(stanv.getSf()).orElse("00");
     }
 
     public String getDepartment(String stationCode, Date date) {
-        return Optional.ofNullable(cache.findStanv(stationCode, date).getOtd()).orElse("000").substring(1);
+        Stanv stanv = cache.findStanv(stationCode, date);
+        return stanv == null ? "000"
+                : Optional.ofNullable(stanv.getOtd()).orElse("000").substring(1);
     }
 
     public String getOkatoByRegion(String regionCode, Date date) {
@@ -50,7 +54,8 @@ public class Handbook {
     }
 
     public String getArea(String stationCode, Date date) {
-        return cache.findStanv(stationCode, date).getNopr(); // ??
+        Stanv stanv = cache.findStanv(stationCode, date);
+        return stanv == null ? "null" : stanv.getNopr(); // ??
     }
 
     public String getTSite(String siteId, String countryCode, Date date){
@@ -66,7 +71,7 @@ public class Handbook {
     public String getGvc(String benefitGroupCode, String benefitCode, Date date){
         Sublx sublx = cache.findSublx(benefitGroupCode + benefitCode, date);
         if (sublx == null || sublx.getGvc() == null) {
-            return null;
+            return "null";
         }
         return String.valueOf(sublx.getGvc());
     }

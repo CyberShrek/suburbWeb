@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
-import org.vniizht.suburbsweb.service.data.repository.*;
+import org.vniizht.suburbsweb.service.data.repository.level2.*;
 
 import java.util.*;
 
@@ -58,6 +59,10 @@ public class Level2Dao {
                 record.getEx().add(ex);
         });
         return new LinkedHashSet<>(collector.values());
+    }
+
+    public Date getFirstRequestDate() {
+        return prigMainRepo.findByOrderByRequestDateAsc().requestDate;
     }
 
     @Getter

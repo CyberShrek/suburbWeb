@@ -8,7 +8,6 @@ import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
 import org.vniizht.suburbsweb.util.Util;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -20,20 +19,11 @@ public class TripsDao {
     public Set<T1> multiplyByTrips(T1 t1, PrigMain prigMain) {
 
         Set<T1> t1Set = new LinkedHashSet<>();
+        short abonementType = convertAbonementType(prigMain.abonement_type);
 
-        if (prigMain.abonement_type.charAt(0) != '0')
+        if (abonementType != 0)
             calculateTripsPerMonth(
-                    (short) switch (prigMain.abonement_type.charAt(0)) {
-                        case '1' -> 9; // билет на количество поездок
-                        case '2' -> 7; // билет на определенные даты
-                        case '3' -> 1; // билет «ежедневно» (помесячный)
-                        case '4' -> 2; // билет «ежедневно» (посуточный)
-                        case '5' -> 8; // билет «выходного дня»
-                        case '7' -> 3; // билет «рабочего дня» (помесячный)
-                        case '8' -> 4;
-                        default -> // билет «рабочего дня» (посуточный)
-                                0;
-                    },
+                    abonementType,
                     prigMain.seatstick_limit,
                     prigMain.operation_date,
                     prigMain.ticket_begdate,
@@ -41,7 +31,7 @@ public class TripsDao {
                     .forEach((yyyymm, trips) -> t1Set.add(t1.toBuilder()
                             .key(t1.getKey().toBuilder()
                                     .yyyymm(Integer.parseInt(yyyymm))
-                                    .p2(t1.getKey().getP2() + 1)
+//                                    .p2(t1.getKey().getP2() + 1)
                                     .build())
                             .p33(Long.valueOf(trips))
                             .build()));
@@ -50,6 +40,19 @@ public class TripsDao {
             t1Set.add(t1);
 
         return t1Set;
+    }
+
+    private short convertAbonementType(String abonementType) {
+        switch (abonementType.charAt(0)) {
+            case '1': return 9; // билет на количество поездок
+            case '2': return 7; // билет на определенные даты
+            case '3': return 1; // билет «ежедневно» (помесячный)
+            case '4': return 2; // билет «ежедневно» (посуточный)
+            case '5': return 8; // билет «выходного дня»
+            case '7': return 3; // билет «рабочего дня» (помесячный)
+            case '8': return 4; // билет «рабочего дня» (посуточный)
+            default:  return 0;
+        }
     }
 
     private Map<String, Integer> calculateTripsPerMonth(Short ticketCode,
