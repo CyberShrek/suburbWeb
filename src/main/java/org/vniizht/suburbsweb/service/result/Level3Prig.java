@@ -34,7 +34,10 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         main     = record.getMain();
         costList = record.getCost();
         adi      = record.getAdi();
-        route    = this.routes.getPrigRoute(main.departure_station, main.arrival_station, main.operation_date);
+        route    = this.routes.getPrigRoute(
+                main.departure_station,
+                main.arrival_station,
+                main.operation_date);
     }
     // Переменные для каждой записи
     private PrigMain       main;
@@ -45,6 +48,11 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
         return trips.multiplyByTrips(t1, main);
+    }
+
+    @Override
+    protected boolean t1Exists() {
+        return true;
     }
 
     @Override
@@ -491,6 +499,11 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
+    protected boolean lgotExists() {
+        return t1Exists() && main.benefit_code.equals("00");
+    }
+
+    @Override
     protected Integer getLgotP1() {
         return 1;
     }
@@ -582,12 +595,22 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected String getLgotP14() {
-        return adi == null ? null : adi.surname.trim() + ' ' + adi.initials.trim();
+        if (adi == null || adi.surname == null) return null;
+
+        String surname = adi.surname.trim();
+        String initials = adi.initials == null ? null : adi.initials.trim();
+
+        return surname + (initials == null ? "" : " " + initials);
     }
 
     @Override
     protected String getLgotP15() {
-        return adi == null ? null : adi.dependent_surname.trim() + ' ' + adi.dependent_initials.trim();
+        if (adi == null || adi.dependent_surname == null) return null;
+
+        String surname = adi.dependent_surname.trim();
+        String initials = adi.dependent_initials == null ? null : adi.dependent_initials.trim();
+
+        return surname + (initials == null ? "" : " " + initials);
     }
 
     @Override
@@ -664,13 +687,13 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected Integer getLgotP27() {
-        return Math.toIntExact(main.tariff_sum + 10);
+    protected Double  getLgotP27() {
+        return (double) (main.tariff_sum * 10);
     }
 
     @Override
-    protected Integer getLgotP28() {
-        return Math.toIntExact(main.tariff_sum + main.department_sum);
+    protected Double  getLgotP28() {
+        return (double) (main.tariff_sum - main.department_sum);
     }
 
     @Override
@@ -685,7 +708,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected String getLgotP31() {
-        return main.server_reqnum.toString();
+        return main.server_reqnum == null ? null : main.server_reqnum.toString();
     }
 
     @Override

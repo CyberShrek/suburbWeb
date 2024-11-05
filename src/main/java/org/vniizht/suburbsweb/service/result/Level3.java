@@ -35,6 +35,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Integer getYyyymm();
     abstract protected Date    getRequestDate();
 
+    // Проверка существования t1
+    abstract protected boolean   t1Exists();
+
     // Детали T1
     abstract protected String    getT1P1();
     abstract protected Integer   getT1P2();
@@ -100,6 +103,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Short     getT1P62();
     abstract protected Character getT1P63();
 
+    // Проверка существования льготы
+    abstract protected boolean   lgotExists();
+
     // Детали Lgot
     abstract protected String        getLgotList();
     abstract protected Integer       getLgotP1();
@@ -128,8 +134,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String        getLgotP24();
     abstract protected String        getLgotP25();
     abstract protected String        getLgotP26();
-    abstract protected Integer       getLgotP27();
-    abstract protected Integer       getLgotP28();
+    abstract protected Double        getLgotP27();
+    abstract protected Double        getLgotP28();
     abstract protected String        getLgotP29();
     abstract protected String        getLgotP30();
     abstract protected String        getLgotP31();
@@ -151,9 +157,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     protected void transform() {
         for (L2_RECORD record : records) {
             assignVariablesForEachRecord(record);
-            T1 t1 = getT1();
-            this.t1Result.addAll(multiplyT1(t1));
-            if(t1.getKey().getP25() == '1')
+            if(t1Exists())
+                t1Result.addAll(multiplyT1(getT1()));
+            if(lgotExists())
                 lgotResult.add(getLgot());
         }
         roundTimes();
@@ -163,7 +169,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         AtomicReference<T1> t1 = new AtomicReference<>();
         t1TransformationTime += Util.measureTime(() -> {
             t1.set(convertToT1());
-            t1TripsSearchTime += Util.measureTime(() -> addTripsTo1(t1.get()));
+//            t1TripsSearchTime += Util.measureTime(() -> addTripsTo1(t1.get()));
         });
         return t1.get();
     }
@@ -310,8 +316,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .build()
                 )
                 .p19(getLgotP19())
-                .p27(getLgotP27())
-                .p28(getLgotP28())
+                .p27(Math.ceil(getLgotP27() * 100) / 100)
+                .p28(Math.ceil(getLgotP28() * 100) / 100)
                 .p33(getLgotP33())
                 .build();
     }

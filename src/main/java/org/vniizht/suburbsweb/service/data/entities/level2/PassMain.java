@@ -36,6 +36,8 @@ public class PassMain extends L2Key {
 
     @Column
     public byte[]      f_tick;
+    @Column
+    public byte[]      f_r10af3;
     public Character   carriage_class;
     public String      benefit_code;
     public String      benefitcnt_code;

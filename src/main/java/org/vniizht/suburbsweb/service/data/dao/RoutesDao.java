@@ -78,8 +78,8 @@ public class RoutesDao {
             PassRoute passRoute = new PassRoute();
 
             String queryForRoads       = "SELECT * FROM getfunction.passkm_estimate_for_gos_and_dor(?, ?, ?, 2, ?, ?)";
-            String queryForDepartments = "SELECT * FROM nsi.passkm_estimate_for_otd(?, ?, ?, ?, ?)";
-            String queryForRegions     = "SELECT * FROM nsi.passkm_estimate_for_stan_dcs_sf(?, ?, ?, 5, ?, ?)";
+            String queryForDepartments = "SELECT * FROM getfunction.passkm_estimate_for_otd(?, ?, ?, ?, ?)";
+            String queryForRegions     = "SELECT * FROM getfunction.passkm_estimate_for_stan_dcs_sf(?, ?, ?, 5, ?, ?)";
 
             SqlRowSet roadsRS       = jdbcTemplate.queryForRowSet(queryForRoads,       trainId, trainThread, trainDepartureDate, depStation, arrStation);
             SqlRowSet departmentsRS = jdbcTemplate.queryForRowSet(queryForDepartments, trainId, trainThread, trainDepartureDate, depStation, arrStation);

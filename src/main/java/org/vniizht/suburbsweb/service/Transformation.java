@@ -17,6 +17,7 @@ import org.vniizht.suburbsweb.service.data.dao.Level3Dao;
 import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -120,8 +121,7 @@ public class Transformation {
                           Level3Pass level3Pass,
                           Log log) {
 
-        Set<T1>    t1Set   = new HashSet<>();
-                aggregateT1(
+        Set<T1>    t1Set   = aggregateT1(
                 Stream.concat(
                         level3Prig == null ? Stream.empty() : level3Prig.getT1Result().stream(),
                         level3Pass == null ? Stream.empty() : level3Pass.getT1Result().stream())
@@ -135,7 +135,7 @@ public class Transformation {
         log.sumUp("Итоговое количество T1: " + t1Set.size(),
                 "Итоговое количество Lgot: " + lgotSet.size());
 
-        update(date, t1Set, lgotSet, log);
+//        update(date, t1Set, lgotSet, log);
     }
 
     private Set<T1> aggregateT1(List<T1> t1List, Log log) {
@@ -157,9 +157,9 @@ public class Transformation {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
             log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(date, "dd.MM.yyyy") + "...");
             level3.deleteForDate(date);
-            log.addLine("Записываю T1...");
+            log.addTimeLine("Записываю T1...");
             t1Set.forEach(t1 -> level3.save(t1));
-            log.addLine("Записываю Lgot...");
+            log.addTimeLine("Записываю Lgot...");
             lgotSet.forEach(lgot -> level3.save(lgot));
             log.addTimeLine("Записи успешно обновлены.");
         }) + "c");
@@ -171,8 +171,8 @@ public class Transformation {
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
 //                null,
-                false,
-                true
+                true,
+                false
         ));
     }
 }

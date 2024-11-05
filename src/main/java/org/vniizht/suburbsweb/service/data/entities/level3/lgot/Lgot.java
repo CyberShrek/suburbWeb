@@ -24,8 +24,8 @@ public class Lgot {
     @EmbeddedId
     private Key         key;
     private Short       p19;
-    private Integer     p27;
-    private Integer     p28;
+    private Double      p27;
+    private Double      p28;
     private Short       p33;
 
     @Embeddable
@@ -33,7 +33,7 @@ public class Lgot {
     @Getter
     @Setter
     @EqualsAndHashCode(callSuper = true)
-    @ToString
+    @ToString(callSuper = true)
     @NoArgsConstructor
     static public class Key extends L3Key implements Serializable {
         private String      list;

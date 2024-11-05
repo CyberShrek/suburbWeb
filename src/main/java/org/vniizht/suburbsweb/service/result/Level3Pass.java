@@ -25,14 +25,12 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         main     = record.getMain();
         costList = record.getCost();
         ex       = record.getEx().isEmpty() ? null : record.getEx().get(0);
-        route    = null;
-        routes.getPassRoute(
+        route    = routes.getPassRoute(
                 main.train_num,
                 main.train_thread,
                 main.departure_date,
                 main.departure_station,
-                main.arrival_station
-        );
+                main.arrival_station);
     }
     // Переменные для каждой записи
     private PassMain       main;
@@ -54,6 +52,11 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
             );
         }
         return result;
+    }
+
+    @Override
+    protected boolean t1Exists() {
+        return main.f_r10af3[8] == '1';
     }
 
     @Override
@@ -192,8 +195,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected String getT1P24() {
         return main.paymenttype == 'В'
                 ? "21" + String.format("%02d", main.military_code)
-                : ex != null && ex.lgot_info != null && !main.benefit_code.equals("000") && !main.benefit_code.equals("013")
-                ? ex.lgot_info.substring(1, 4)
+                : ex != null && ex.lgot_info != null && ex.lgot_info.length() > 4 && !main.benefit_code.equals("000") && !main.benefit_code.equals("013")
+                ? ex.lgot_info.substring(0, 4)
                 : null;
     }
 
@@ -210,7 +213,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected String getT1P26() {
-        return ex == null ? null
+        return ex == null || ex.lgot_info == null || ex.lgot_info.length() < 2 ? null
                 :
                 handbook.getGvc(
                         ex.lgot_info.substring(0, 2),
@@ -419,7 +422,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected Character getT1P58() {
-        if (ex != null) switch (ex.lgot_info.charAt(9)) {
+        if (ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") && ex.lgot_info.length() >= 10) switch (ex.lgot_info.charAt(9)) {
             case '0': case '1': case '2': case '3': case '4': return '0';
             case '5': case '6': case '7': case '8': case '9': return '1';
         }
@@ -428,7 +431,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected Character getT1P59() {
-        if (main.paymenttype == 'Ж' && ex != null && ex.lgot_info.startsWith("22")) switch (ex.lgot_info.charAt(5)){
+        if (main.paymenttype == 'Ж' && ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22")) switch (ex.lgot_info.charAt(5)){
             case 'Ф': case 'Д': return '1';
         }
         return '0';
@@ -456,7 +459,12 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected String getLgotList() {
-        return "R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G');
+        return "R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G');
+    }
+
+    @Override
+    protected boolean lgotExists() {
+        return t1Exists() && main.benefit_code.equals("00");
     }
 
     @Override
@@ -515,34 +523,43 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected String getLgotP10() {
-        return ex == null ? null : ex.nomlgud;
+        return ex != null && ex.lgot_info != null
+                ? ex.nomlgud
+                : null;
     }
 
     @Override
     protected String getLgotP11() {
-        return ex != null && ex.lgot_info.startsWith("22")
+        return ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") && ex.lgot_info.length() >= 12
                 ? ex.lgot_info.substring(7, 12)
                 : main.saleregion_code;
     }
 
     @Override
     protected String getLgotP12() {
-        return ex != null && ex.lgot_info.startsWith("22")
+        return ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") && ex.lgot_info.length() >= 23
                 ? ex.lgot_info.substring(13, 23)
                 : null;
     }
 
     @Override
     protected Character getLgotP13() {
-        return ex != null && ex.lgot_info.startsWith("22")
+        return ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") && ex.lgot_info.length() >= 5
                 ? ex.lgot_info.charAt(5)
                 : null;
     }
 
     @Override
     protected String getLgotP14() {
-        return ex == null ? null :
-                ex.last_name.trim() + ' ' + ex.first_name.trim().charAt(0) + ex.patronymic.trim().charAt(0);
+        if(ex == null || ex.last_name == null) return null;
+
+        String lastName = ex.last_name.trim();
+        String firstName = ex.first_name == null ? "" : ex.first_name.trim();
+        String patronymic = ex.patronymic == null ? "" : ex.patronymic.trim();
+
+        return lastName + ' '
+                + (firstName.isEmpty() ? "" : firstName.charAt(0))
+                + (patronymic.isEmpty() ? "" : patronymic.charAt(0));
     }
 
     @Override
@@ -610,16 +627,16 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected Integer getLgotP27() {
+    protected Double  getLgotP27() {
         return costList == null ? 0
-                : (int) (costList.stream().mapToDouble(
+                : (costList.stream().mapToDouble(
                         cost -> cost.sum_te).sum() * 10);
     }
 
     @Override
-    protected Integer getLgotP28() {
+    protected Double  getLgotP28() {
         return costList == null ? 0 :
-                (int) (costList.stream().mapToDouble(
+                 (costList.stream().mapToDouble(
                         cost -> {
                             switch (cost.sum_code) {
                                 case 101: case 102: case 116:

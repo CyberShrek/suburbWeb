@@ -17,13 +17,13 @@ public class Handbook {
     public String getRoad2(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
         Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos());
-        return dor == null ? "null" : dor.getNom2();
+        return dor == null ? null : dor.getNom2();
     }
 
     public String getRoad3(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
         Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos());
-        return dor == null ? "null" : dor.getNom3();
+        return dor == null ? null : dor.getNom3();
     }
 
     public String getRegion(String stationCode, Date date) {
@@ -55,7 +55,7 @@ public class Handbook {
 
     public String getArea(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
-        return stanv == null ? "null" : stanv.getNopr(); // ??
+        return stanv == null ? null : stanv.getNopr(); // ??
     }
 
     public String getTSite(String siteId, String countryCode, Date date){
@@ -71,7 +71,7 @@ public class Handbook {
     public String getGvc(String benefitGroupCode, String benefitCode, Date date){
         Sublx sublx = cache.findSublx(benefitGroupCode + benefitCode, date);
         if (sublx == null || sublx.getGvc() == null) {
-            return "null";
+            return null;
         }
         return String.valueOf(sublx.getGvc());
     }
