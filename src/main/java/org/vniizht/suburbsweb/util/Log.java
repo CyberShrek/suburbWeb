@@ -1,5 +1,7 @@
 package org.vniizht.suburbsweb.util;
 
+import org.vniizht.suburbsweb.websocket.LogWS;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -14,6 +16,7 @@ public class Log {
                     .append(line)
                     .append("\n");
         }
+        LogWS.spreadLog(logBuilder.toString());
     }
 
     public void addTimeLine(String... messages) {
@@ -40,9 +43,5 @@ public class Log {
     public String toString() {
         return logBuilder
                 .toString();
-    }
-
-    public void merge(Log log) {
-        logBuilder.append(log.toString());
     }
 }

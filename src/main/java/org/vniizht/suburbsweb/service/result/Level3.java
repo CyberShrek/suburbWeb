@@ -7,6 +7,7 @@ import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.util.Util;
+import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,9 +28,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     // Мультипликатор
     abstract protected Set<T1> multiplyT1(T1 t1);
-
-    //
-//    abstract protected Route
 
     // Детали общие
     abstract protected Integer getYyyymm();
@@ -155,12 +153,16 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     }
 
     protected void transform() {
+        int progress = 0;
         for (L2_RECORD record : records) {
             assignVariablesForEachRecord(record);
             if(t1Exists())
                 t1Result.addAll(multiplyT1(getT1()));
             if(lgotExists())
                 lgotResult.add(getLgot());
+
+            progress++;
+            LogWS.spreadProgress((int) ((float) progress / records.size() * 100));
         }
         roundTimes();
     }

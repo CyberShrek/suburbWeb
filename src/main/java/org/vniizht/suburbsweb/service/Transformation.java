@@ -16,6 +16,7 @@ import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.Level3Dao;
 import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
+import org.vniizht.suburbsweb.websocket.LogWS;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
@@ -38,30 +39,34 @@ public class Transformation {
     public synchronized String transform(TransformationOptions options) {
         Log log = new Log();
         return log.sumUp("Итоговое время: " + Util.measureTime(() -> {
-            if(!options.pass && !options.prig) return;
-            if(options.date == null) {
-                options.date = getRequestDate(log);
-                if(options.date == null) return;
-            }
+            try {
+                if(!options.pass && !options.prig) return;
+                if(options.date == null) {
+                    options.date = getRequestDate(log);
+                    if(options.date == null) return;
+                }
 
-            log.addTimeLine("Выполняю трансформацию записей за " + Util.formatDate(options.date, "dd.MM.yyyy"));
-            log.sumUp();
+                log.addTimeLine("Выполняю трансформацию записей за " + Util.formatDate(options.date, "dd.MM.yyyy"));
+                log.sumUp();
 
-            log.addTimeLine("Загружаю справочники...");
-            handbook.loadCache();
-            log.addTimeLine("Справочники загружены.");
-            log.sumUp();
-            try { complete(
-                    options.date,
-                    options.prig ? transformPrig(options.date, log) : null,
-                    options.pass ? transformPass(options.date, log) : null,
-                    log
-            );
+                log.addTimeLine("Получаю справочники...");
+                LogWS.spreadProgress(0);
+                handbook.loadCache();
+                log.addTimeLine("Справочники загружены.");
+                log.sumUp();
+                complete(
+                        options.date,
+                        options.prig ? transformPrig(options.date, log) : null,
+                        options.pass ? transformPass(options.date, log) : null,
+                        log
+                );
             } catch (Exception e) {
-                throw new RuntimeException(log.toString() + "\n" + e.getLocalizedMessage(), e);
+                LogWS.spreadError(e.getLocalizedMessage());
+                throw new RuntimeException(log + "\n" + e.getLocalizedMessage(), e);
             } finally {
                 handbook.clearCache();
                 routes.clearCache();
+                LogWS.spreadProgress(-1);
             }
         }) + "c");
     }
@@ -87,9 +92,10 @@ public class Transformation {
     }
 
     private Set loadRecords(Callable<Set> loader, Log log, String name) throws Exception {
-        log.addTimeLine("Загружаю записи " + name + "...");
+        log.addTimeLine("Ищу записи " + name + "...");
+        LogWS.spreadProgress(0);
         Set<Level2Dao.Record> records = loader.call();
-        log.addTimeLine("Записи" + name + " успешно загружены. Количество: " + records.size());
+        log.addTimeLine("Записи " + name + " успешно получены. Количество: " + records.size());
 
         return records;
     }
@@ -109,6 +115,7 @@ public class Transformation {
 
     private Date getRequestDate(Log log) {
         log.addTimeLine("Определяю дату запроса...");
+        LogWS.spreadProgress(0);
         Date requestDate = level3.getNextRequestDate();
         if(requestDate == null) {
             log.addTimeLine("На третьем уровне ещё нет данных. Повторите запрос с указанием даты.");
@@ -132,8 +139,8 @@ public class Transformation {
                 level3Pass == null ? Stream.empty() : level3Pass.getLgotResult().stream())
                 .collect(Collectors.toSet());
 
-        log.sumUp("Итоговое количество T1: " + t1Set.size(),
-                "Итоговое количество Lgot: " + lgotSet.size());
+        log.sumUp("Сформировано записей T1:   " + t1Set.size(),
+                "Сформировано записей Lgot: " + lgotSet.size());
 
 //        update(date, t1Set, lgotSet, log);
     }

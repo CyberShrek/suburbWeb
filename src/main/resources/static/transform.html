@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Запуск</title>
+    <link rel="stylesheet" href="transform.css">
+</head>
+<body>
+<form id="form">
+    <p>Ручной запуск трансформации</p>
+
+    <div>
+        <label for="date">Дата запроса</label>
+        <input type="date" id="date" name="date">
+    </div>
+    <div>
+        <input type="checkbox" id="prig" name="prig">
+        <label for="prig">Трансформировать пригородные с местами (l2_prig)</label>
+    </div>
+    <div>
+        <input type="checkbox" id="pass" name="pass">
+        <label for="pass">Трансформировать пригородные без мест (l2_pass)</label>
+    </div>
+
+    <button type="submit" name="submit">Пуск</button>
+</form>
+<div id="logs-container">
+    <div class="list">
+
+    </div>
+</div>
+
+</body>
+<script src="transform.js"></script>
+</html>
