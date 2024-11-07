@@ -20,7 +20,7 @@ public class TransformationController {
 
     @PostMapping
     @ResponseBody
-    public String runTransformation(@RequestBody TransformationOptions options) {
+    public String runTransformation(@RequestBody TransformationOptions options) throws Exception {
         return transformation.transform(options);
     }
 }

@@ -24,20 +24,14 @@ public class Level2Dao {
     public Set<PrigRecord> findPrigRecords(Date requestDate) {
         Map<Long, PrigRecord> collector = new LinkedHashMap<>();
         List<PrigMain> mainList = prigMainRepo.findAllByRequestDate(requestDate);
-        List<PrigCost> costList = prigCostRepo.findAllByRequestDate(requestDate);
-        List<PrigAdi>   adiList = prigAdiRepo .findAllByRequestDate(requestDate);
+//        List<PrigCost> costList = prigCostRepo.findAllByRequestDate(requestDate);
 
         mainList.forEach(main -> collector.put(main.idnum, new PrigRecord(main)));
-        costList.forEach(cost -> {
-            PrigRecord record = collector.get(cost.idnum);
-            if (record != null)
-                record.getCost().add(cost);
-        });
-        adiList.forEach(adi -> {
-            PrigRecord record = collector.get(adi.idnum);
-            if (record != null)
-                record.setAdi(adi);
-        });
+//        costList.forEach(cost -> {
+//            PrigRecord record = collector.get(cost.idnum);
+//            if (record != null)
+//                record.getCost().add(cost);
+//        });
         return new LinkedHashSet<>(collector.values());
     }
 
@@ -69,13 +63,12 @@ public class Level2Dao {
     @Setter
     static public class PrigRecord extends Record {
         private PrigMain main;
-        private List<PrigCost> cost;
-        private PrigAdi adi;
+//        private List<PrigCost> cost;
 
         PrigRecord(PrigMain main) {
             super(main.idnum);
             this.main = main;
-            this.cost = new ArrayList<>();
+//            this.cost = new ArrayList<>();
         }
     }
 

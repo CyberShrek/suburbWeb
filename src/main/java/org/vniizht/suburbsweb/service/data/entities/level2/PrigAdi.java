@@ -1,8 +1,12 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -20,4 +24,10 @@ public class PrigAdi extends L2Key {
     public String      dependent_surname;
     public String      dependent_initials;
     public String      snils;
+
+    @OneToOne
+    @JoinColumn(name="idnum", insertable = false, updatable = false)
+    @Getter
+    @Setter
+    private PrigMain main;
 }

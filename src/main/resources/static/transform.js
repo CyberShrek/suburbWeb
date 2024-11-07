@@ -1,13 +1,12 @@
 new WebSocket("ws://" + location.host + "/suburb/logs").addEventListener("message", (event) => {
-    const splitMessage = event.data.split("::")
+    const splitMessage = event.data.split(":::")
     const log = {
         type:    splitMessage[0],
         message: splitMessage[1]
     }
     switch (log.type) {
         case "log"     : updateLog(log.message); break
-        case "progress": updateProgress(log.message); break
-        case "error"   : showError(log.message)
+        case "progress": updateProgress(log.message);
     }
 })
 
@@ -36,11 +35,6 @@ function updateProgress(message) {
     }
 }
 
-function showError(message) {
-    document.querySelector("#logs-container progress")?.remove()
-    alert(message)
-}
-
 async function runTransformation() {
     return await fetch("", {
         method: "POST",
@@ -53,6 +47,6 @@ async function runTransformation() {
             pass: form.pass.checked
         })
     }).catch(
-        error => showError(error.message)
+        error => alert(error.message)
     )
 }

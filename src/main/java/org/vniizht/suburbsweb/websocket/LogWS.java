@@ -34,17 +34,13 @@ public class LogWS {
         spread("progress", String.valueOf(progress));
     }
 
-    // spread error text to all clients
-    public static void spreadError(String error) {
-        spread("error", error);
-    }
-
     private static void spread(String key, String value) {
+        if(lastMessages.containsKey(key) && lastMessages.get(key).equals(value)) return;
         lastMessages.put(key, value);
         for (Session session : sessions.values())
             sendToSession(session, key, value);
     }
     private static void sendToSession(Session session, String key, String value) {
-        session.getAsyncRemote().sendText(key + "::" + value);
+        session.getAsyncRemote().sendText(key + ":::" + value);
     }
 }

@@ -1,13 +1,8 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
@@ -26,6 +21,12 @@ public class PrigCost extends L2Key {
     public String      arrival_station;
     public String      region_code;
     public Character   tarif_type;
+
+    @ManyToOne
+    @JoinColumn(name="idnum", insertable = false, updatable = false)
+    @Getter
+    @Setter
+    private PrigMain main;
 
     @AllArgsConstructor
     @EqualsAndHashCode

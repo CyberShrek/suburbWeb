@@ -46,8 +46,9 @@ public class Transformation {
                     if(options.date == null) return;
                 }
 
-                log.addTimeLine("Выполняю трансформацию записей за " + Util.formatDate(options.date, "dd.MM.yyyy"));
-                log.sumUp();
+                log.addTimeLine("Выполняю трансформацию записей за "
+                        + Util.formatDate(options.date, "dd.MM.yyyy"));
+                log.sumUp((options.prig ? " l2_prig" : "") + (options.pass ? " l2_pass" : ""));
 
                 log.addTimeLine("Получаю справочники...");
                 LogWS.spreadProgress(0);
@@ -61,8 +62,9 @@ public class Transformation {
                         log
                 );
             } catch (Exception e) {
-                LogWS.spreadError(e.getLocalizedMessage());
-                throw new RuntimeException(log + "\n" + e.getLocalizedMessage(), e);
+                log.sumUp(e.getLocalizedMessage());
+                LogWS.spreadProgress(-1);
+                e.printStackTrace();
             } finally {
                 handbook.clearCache();
                 routes.clearCache();
@@ -142,19 +144,19 @@ public class Transformation {
         log.sumUp("Сформировано записей T1:   " + t1Set.size(),
                 "Сформировано записей Lgot: " + lgotSet.size());
 
-//        update(date, t1Set, lgotSet, log);
+        update(date, t1Set, lgotSet, log);
     }
 
     private Set<T1> aggregateT1(List<T1> t1List, Log log) {
         log.addTimeLine("Агрегирую T1...");
-        Map<T1.Key, T1> t1Map = new HashMap<>();
+        Map<String, T1> t1Map = new HashMap<>();
 
         for (T1 t1 : t1List) {
             T1.Key key = t1.getKey();
-            if(t1Map.containsKey(key))
-                t1Map.get(key).add(t1);
+            if(t1Map.containsKey(key.toString()))
+                t1Map.get(key.toString()).add(t1);
             else
-                t1Map.put(key, t1);
+                t1Map.put(key.toString(), t1);
         }
         log.addTimeLine("T1 агрегированы.");
         return new HashSet<>(t1Map.values());
@@ -163,11 +165,12 @@ public class Transformation {
     private void update(Date date, Set<T1> t1Set, Set<Lgot> lgotSet, Log log) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
             log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(date, "dd.MM.yyyy") + "...");
+            LogWS.spreadProgress(0);
             level3.deleteForDate(date);
             log.addTimeLine("Записываю T1...");
-            t1Set.forEach(t1 -> level3.save(t1));
+            level3.saveT1s(t1Set);
             log.addTimeLine("Записываю Lgot...");
-            lgotSet.forEach(lgot -> level3.save(lgot));
+            level3.saveLgots(lgotSet);
             log.addTimeLine("Записи успешно обновлены.");
         }) + "c");
     }

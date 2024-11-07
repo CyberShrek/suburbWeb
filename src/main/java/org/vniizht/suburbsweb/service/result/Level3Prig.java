@@ -13,6 +13,7 @@ import org.vniizht.suburbsweb.service.data.dao.TripsDao;
 import org.vniizht.suburbsweb.util.Util;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -32,8 +33,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected void assignVariablesForEachRecord(Level2Dao.PrigRecord record) {
         main     = record.getMain();
-        costList = record.getCost();
-        adi      = record.getAdi();
+        costList = main.getCosts();
+        adi      = main.getAdi();
         route    = this.routes.getPrigRoute(
                 main.departure_station,
                 main.arrival_station,
@@ -47,7 +48,10 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
-        return trips.multiplyByTrips(t1, main);
+        Set<T1> result = new HashSet<>();
+        result.add(t1);
+        return result;
+        //trips.multiplyByTrips(t1, main);
     }
 
     @Override
@@ -62,7 +66,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Date getRequestDate() {
-        return main.operation_date;
+        return main.requestDate;
     }
 
     @Override
