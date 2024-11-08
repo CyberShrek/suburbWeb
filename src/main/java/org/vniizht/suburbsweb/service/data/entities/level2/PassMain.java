@@ -1,11 +1,12 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.List;
@@ -46,4 +47,16 @@ public class PassMain extends L2Key {
 
     public Short       distance;
     public Short       seats_qty;
+
+    @OneToMany(mappedBy = "main")
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private List<PassCost> costs;
+
+    @OneToOne(mappedBy = "main")
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private PassEx  ex;
 }

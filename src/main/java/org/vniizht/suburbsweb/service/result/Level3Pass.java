@@ -23,8 +23,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     @Override
     protected void assignVariablesForEachRecord(Level2Dao.PassRecord record) {
         main     = record.getMain();
-        costList = record.getCost();
-        ex       = record.getEx().isEmpty() ? null : record.getEx().get(0);
+        costList = main.getCosts();
+        ex       = main.getEx();
         route    = routes.getPassRoute(
                 main.train_num,
                 main.train_thread,

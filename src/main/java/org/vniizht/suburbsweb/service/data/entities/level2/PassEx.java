@@ -1,12 +1,13 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
@@ -25,6 +26,13 @@ public class PassEx extends L2Key {
     public String      first_name;
     public String      patronymic;
     public String      snils;
+
+    @OneToOne
+    @JoinColumn(name = "idnum", referencedColumnName = "idnum", insertable = false, updatable = false)
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private PassMain main;
 
     @AllArgsConstructor
     static public class Identifier implements Serializable {

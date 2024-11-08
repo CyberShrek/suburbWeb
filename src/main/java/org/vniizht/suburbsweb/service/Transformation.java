@@ -97,7 +97,7 @@ public class Transformation {
         log.addTimeLine("Ищу записи " + name + "...");
         LogWS.spreadProgress(0);
         Set<Level2Dao.Record> records = loader.call();
-        log.addTimeLine("Записи " + name + " успешно получены. Количество: " + records.size());
+        log.addTimeLine("Записи " + name + " успешно получены. Количество " + name + "_main: " + records.size());
 
         return records;
     }

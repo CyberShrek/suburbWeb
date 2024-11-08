@@ -3,6 +3,9 @@ package org.vniizht.suburbsweb.service.data.entities.level2;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -26,7 +29,8 @@ public class PrigAdi extends L2Key {
     public String      snils;
 
     @OneToOne
-    @JoinColumn(name="idnum", insertable = false, updatable = false)
+    @JoinColumn(name="idnum", referencedColumnName = "idnum", insertable = false, updatable = false)
+    @Fetch(FetchMode.JOIN)
     @Getter
     @Setter
     private PrigMain main;

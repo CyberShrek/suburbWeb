@@ -1,8 +1,8 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -19,6 +19,13 @@ public class PassCost extends L2Key {
     @Id public Character   paymenttype;
     public Float           sum_te; // department_sum
     public Float           sum_nde;
+
+    @ManyToOne
+    @JoinColumn(name = "idnum", referencedColumnName = "idnum", insertable = false, updatable = false)
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private PassMain main;
 
     @AllArgsConstructor
     @EqualsAndHashCode

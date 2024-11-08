@@ -1,6 +1,9 @@
 package org.vniizht.suburbsweb.service.data.entities.level2;
 
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,7 +26,8 @@ public class PrigCost extends L2Key {
     public Character   tarif_type;
 
     @ManyToOne
-    @JoinColumn(name="idnum", insertable = false, updatable = false)
+    @JoinColumn(name="idnum", referencedColumnName = "idnum", insertable = false, updatable = false)
+    @Fetch(FetchMode.JOIN)
     @Getter
     @Setter
     private PrigMain main;

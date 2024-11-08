@@ -9,8 +9,6 @@ import java.util.List;
 
 @NoRepositoryBean
 interface Level2Repo<ENTITY, ID> extends JpaRepository<ENTITY, ID> {
-    List<ENTITY> findAllByIdnumGreaterThan(Long idnum);
-    List<ENTITY> findAllByRequestDate(Date date);
     ENTITY findByOrderByRequestDateAsc();
 }
 

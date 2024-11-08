@@ -38,20 +38,8 @@ public class Level2Dao {
     public Set<PassRecord> findPassRecords(Date requestDate) {
         Map<Long, PassRecord> collector = new LinkedHashMap<>();
         List<PassMain> mainList = passMainRepo.findAllByRequestDate(requestDate);
-        List<PassCost> costList = passCostRepo.findAllByRequestDate(requestDate);
-        List<PassEx>     exList = passExRepo  .findAllByRequestDate(requestDate);
 
         mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));
-        costList.forEach(cost -> {
-            PassRecord record = collector.get(cost.idnum);
-            if (record != null)
-                record.getCost().add(cost);
-        });
-        exList.forEach(ex -> {
-            PassRecord record = collector.get(ex.idnum);
-            if (record != null)
-                record.getEx().add(ex);
-        });
         return new LinkedHashSet<>(collector.values());
     }
 
@@ -76,14 +64,10 @@ public class Level2Dao {
     @Setter
     static public class PassRecord extends Record {
         private PassMain main;
-        private List<PassCost> cost;
-        private List<PassEx> ex;
 
         PassRecord(PassMain main) {
             super(main.idnum);
             this.main = main;
-            this.cost = new ArrayList<>();
-            this.ex   = new ArrayList<>();
         }
     }
 
