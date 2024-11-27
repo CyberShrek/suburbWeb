@@ -2,6 +2,7 @@ package org.vniizht.suburbsweb.service.result;
 
 import lombok.Getter;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
+import org.vniizht.suburbsweb.service.data.entities.level3.co22.T2;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
@@ -20,6 +21,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     // Подсчитанное время на каждую операцию (с)
     @Getter private float t1TransformationTime   = 0;
+    @Getter private float t2TransformationTime   = 0;
+    @Getter private float t3TransformationTime   = 0;
+    @Getter private float t4TransformationTime   = 0;
+//    @Getter private float t5TransformationTime   = 0;
+    @Getter private float t6TransformationTime   = 0;
     @Getter private float lgotTransformationTime = 0;
     @Getter private float t1TripsSearchTime      = 0;
 
@@ -37,6 +43,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected boolean   t1Exists();
 
     // Детали T1
+    abstract protected int[]     getRoutes();
     abstract protected String    getT1P1();
     abstract protected Integer   getT1P2();
     abstract protected String    getT1P3();
@@ -100,6 +107,15 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Character getT1P61();
     abstract protected Short     getT1P62();
     abstract protected Character getT1P63();
+
+    // Детали T2
+    protected String             getT2P1() {return "tab2";};
+    protected String             getT2P2() {return "017";};
+    protected String             getT2P3() {return null;};
+    abstract protected String    getT2P4();
+    abstract protected String    getT2P5();
+    abstract protected String    getT2P6();
+    abstract protected String    getT2P7();
 
     // Проверка существования льготы
     abstract protected boolean   lgotExists();
@@ -171,9 +187,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         AtomicReference<T1> t1 = new AtomicReference<>();
         t1TransformationTime += Util.measureTime(() -> {
             t1.set(convertToT1());
-//            t1TripsSearchTime += Util.measureTime(() -> addTripsTo1(t1.get()));
+            t1TripsSearchTime += Util.measureTime(() -> addTripsTo1(t1.get()));
         });
         return t1.get();
+    }
+
+    private T2 getT2() {
+        AtomicReference<T2> t2 = new AtomicReference<>();
+        t2TransformationTime += Util.measureTime(() ->
+            t2.set(convertToT2())
+        );
+        return t2.get();
     }
 
     private Lgot getLgot() {
@@ -261,6 +285,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     }
     private void addTripsTo1(T1 t1) {
             t1.setKey(t1.getKey().toBuilder()
+                    .routes(getRoutes())
                     // key
                     .p13(getT1P13())
                     .p14(getT1P14())
@@ -275,6 +300,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                     // key
                     .build()
             );
+    }
+
+    private T2 convertToT2() {
+        return T2.builder()
+                .build();
     }
 
     private Lgot convertToLgot() {

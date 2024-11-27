@@ -70,6 +70,7 @@ public class T1 {
     @ToString(callSuper = true)
     @NoArgsConstructor
     static public class Key extends L3Key implements Serializable {
+        private int[]           routes;
         private String          p1;
         private Long            p2;
         private String          p3;

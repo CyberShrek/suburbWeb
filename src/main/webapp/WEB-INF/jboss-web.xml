@@ -4,5 +4,5 @@
            xmlns="http://www.jboss.com/xml/ns/javaee"
            xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/schema/jbossas/jboss-web_8_0.xsd">
     <context-root>/suburb</context-root>
-    <security-domain>UnderSecDomain</security-domain>
+<!--    <security-domain>UnderSecDomain</security-domain>-->
 </jboss-web>

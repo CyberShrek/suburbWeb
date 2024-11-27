@@ -70,6 +70,11 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
+    protected int[] getRoutes() {
+        return null;
+    }
+
+    @Override
     protected String getT1P1() {
         return "tab1";
     }
@@ -273,7 +278,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected Long getT1P36() {
         return (long) costList.stream().mapToDouble(
                 costListItem -> costListItem.sum_nde
-        ).sum() / 10;
+        ).sum() * 10;
     }
 
     @Override
@@ -294,7 +299,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                     return Math.round(costListItem.sum_nde);
                 default: return 0L;
             }}
-        ).sum();
+        ).sum() * 10;
     }
 
     @Override
@@ -303,7 +308,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 costListItem -> costListItem.sum_code == 101
                         ? (long) Math.round(costListItem.sum_nde)
                         : 0L
-        ).sum();
+        ).sum() * 10;
     }
 
     @Override
@@ -333,7 +338,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 }
             }
             return 0L;
-        }).sum();
+        }).sum() * 10;
     }
 
     @Override
@@ -357,7 +362,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                     }
             }
             return 0L;
-        }).sum();
+        }).sum() * 10;
     }
 
     @Override
@@ -368,7 +373,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                     return Math.round(costListItem.sum_nde);
             }
             return 0L;
-        }).sum();
+        }).sum() * 10;
     }
 
     @Override

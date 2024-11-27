@@ -5,7 +5,6 @@ import org.vniizht.suburbsweb.service.data.entities.level2.PrigAdi;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigCost;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigMain;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
-import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
@@ -67,6 +66,11 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected Date getRequestDate() {
         return main.requestDate;
+    }
+
+    @Override
+    protected int[] getRoutes() {
+        return costList.stream().mapToInt(cost -> cost.route_num).toArray();
     }
 
     @Override
@@ -692,7 +696,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Double  getLgotP27() {
-        return (double) (main.tariff_sum * 10);
+        return (double) (main.department_sum);
     }
 
     @Override
