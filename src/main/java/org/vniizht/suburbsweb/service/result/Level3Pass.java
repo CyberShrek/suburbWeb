@@ -1,9 +1,8 @@
 package org.vniizht.suburbsweb.service.result;
 
+import org.vniizht.suburbsweb.service.data.entities.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
-import org.vniizht.suburbsweb.service.data.entities.route.PassRoute;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
-import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
@@ -25,18 +24,23 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         main     = record.getMain();
         costList = main.getCosts();
         ex       = main.getEx();
-        route    = routes.getPassRoute(
-                main.train_num,
-                main.train_thread,
-                main.departure_date,
-                main.departure_station,
-                main.arrival_station);
     }
     // Переменные для каждой записи
     private PassMain       main;
     private List<PassCost> costList;
     private PassEx         ex;
-    private PassRoute      route;
+
+    @Override
+    protected List<Route> getRoutesDao() {
+        List<Route> routes = new ArrayList<>();
+        routes.add(routesDao.getRoute(
+                main.train_num,
+                main.train_thread,
+                main.departure_date,
+                main.departure_station,
+                main.arrival_station));
+        return routes;
+    }
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
@@ -70,7 +74,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected int[] getRoutes() {
+    protected int[] getRouteNums() {
         return null;
     }
 

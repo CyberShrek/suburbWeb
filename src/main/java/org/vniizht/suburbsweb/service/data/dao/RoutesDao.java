@@ -2,31 +2,25 @@ package org.vniizht.suburbsweb.service.data.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.service.data.entities.route.PassRoute;
-import org.vniizht.suburbsweb.service.data.entities.route.PrigRoute;
-import org.vniizht.suburbsweb.service.data.entities.route.PrigRouteOld;
+import org.vniizht.suburbsweb.service.data.entities.Route;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Service
 public class RoutesDao {
     @Autowired private JdbcTemplate jdbcTemplate;
 
-    private final Map<String, PrigRoute> prigCache = new HashMap<>();
-    private final Map<String, PassRoute> passCache = new HashMap<>();
+    private final Map<String, Route> routesCache = new HashMap<>();
 
-    public PrigRoute getPrigRoute(String depStation, String arrStation, Date date){
+    public Route getRoute(Short routeNum, String depStation, String arrStation, Date date){
         String key = depStation + arrStation + date;
-        if (!prigCache.containsKey(key)) {
-            PrigRoute prigRoute = new PrigRoute();
+        if (!routesCache.containsKey(key)) {
+            Route route = new Route();
 
-            SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?)",
-                    depStation, arrStation, date);
+            SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
+                    routeNum, depStation, arrStation, date);
 
             Set <Integer> mcdSet = new HashSet<>();
 
@@ -40,22 +34,22 @@ public class RoutesDao {
 
                 if(st1 != null && st1.equals(depStation)){
                     switch (narr) {
-                        case 1: prigRoute.setRegionStart(est_obj_chr); break;
-                        case 2: prigRoute.setRoadStart(est_obj_chr);   break;
-                        case 3: prigRoute.setDepartmentStart(est_obj_chr);
+                        case 1: route.setRegionStart(est_obj_chr); break;
+                        case 2: route.setRoadStart(est_obj_chr);   break;
+                        case 3: route.setDepartmentStart(est_obj_chr);
                     }
                 }
                 else if (st2 != null && st2.equals(depStation)) {
                     switch (narr) {
-                        case 1: prigRoute.setRegionEnd(est_obj_chr); break;
-                        case 2: prigRoute.setRoadEnd(est_obj_chr);   break;
-                        case 3: prigRoute.setDepartmentEnd(est_obj_chr);
+                        case 1: route.setRegionEnd(est_obj_chr); break;
+                        case 2: route.setRoadEnd(est_obj_chr);   break;
+                        case 3: route.setDepartmentEnd(est_obj_chr);
                     }
                 }
                 if (narr == 5) {
                     mcdSet.add(pr_mcd);
                     if (est_obj_chr != null && est_obj_chr.trim().equals("1") && pr_mcd == 2)
-                        prigRoute.setMcdDistance(rst);
+                        route.setMcdDistance(rst);
                 }
             }
             Character mcdType = null;
@@ -64,18 +58,18 @@ public class RoutesDao {
                 case 2: mcdType = mcdSet.contains(1) && mcdSet.contains(2) ? '2' : '3'; break;
                 case 3: mcdType = mcdSet.contains(1) && mcdSet.contains(2) && mcdSet.contains(3) ? '4' : null;
             }
-            prigRoute.setMcdType(mcdType);
+            route.setMcdType(mcdType);
 
-            prigCache.put(key, prigRoute);
+            routesCache.put(key, route);
         }
-        return prigCache.get(key);
+        return routesCache.get(key);
     }
 
-    public PassRoute getPassRoute(String trainId, Character trainThread, Date trainDepartureDate,
-                                  String depStation, String arrStation) {
+    public Route getRoute(String trainId, Character trainThread, Date trainDepartureDate,
+                          String depStation, String arrStation) {
         String key = trainId + trainThread + trainDepartureDate + depStation + arrStation;
-        if (!passCache.containsKey(key)) {
-            PassRoute passRoute = new PassRoute();
+        if (!routesCache.containsKey(key)) {
+            Route route = new Route();
 
             String queryForRoads       = "SELECT * FROM getfunction.passkm_estimate_for_gos_and_dor(?, ?, ?, 2, ?, ?)";
             String queryForDepartments = "SELECT * FROM getfunction.passkm_estimate_for_otd(?, ?, ?, ?, ?)";
@@ -87,42 +81,26 @@ public class RoutesDao {
 
             while (roadsRS.next()) {
                 String dor3 = roadsRS.getString("dor3");
-                if (roadsRS.isFirst()) passRoute.setRoadStart(dor3);
-                else if (roadsRS.isLast()) passRoute.setRoadEnd(dor3);
+                if (roadsRS.isFirst()) route.setRoadStart(dor3);
+                else if (roadsRS.isLast()) route.setRoadEnd(dor3);
             }
             while (departmentsRS.next()) {
                 String otd = departmentsRS.getString("otd");
-                if (departmentsRS.isFirst()) passRoute.setDepartmentStart(otd);
-                else if (departmentsRS.isLast()) passRoute.setDepartmentEnd(otd);
+                if (departmentsRS.isFirst()) route.setDepartmentStart(otd);
+                else if (departmentsRS.isLast()) route.setDepartmentEnd(otd);
             }
             while (regionsRS.next()) {
                 String sf = regionsRS.getString("sf");
-                if (regionsRS.isFirst()) passRoute.setRegionStart(sf);
-                else if (regionsRS.isLast()) passRoute.setRegionEnd(sf);
+                if (regionsRS.isFirst()) route.setRegionStart(sf);
+                else if (regionsRS.isLast()) route.setRegionEnd(sf);
             }
-            
-            passCache.put(key, passRoute);
+
+            routesCache.put(key, route);
         }
-        return passCache.get(key);
+        return routesCache.get(key);
     }
 
     public void clearCache() {
-        prigCache.clear();
-    }
-
-    private static class PrigRouteRowMapper implements RowMapper<PrigRouteOld> {
-
-        @Override
-        public PrigRouteOld mapRow(ResultSet rs, int rowNum) throws SQLException {
-            return PrigRouteOld.builder()
-                    .type(rs.getInt("narr"))
-                    .stationBeg(rs.getString("st1"))
-                    .stationEnd(rs.getString("st2"))
-                    .matterStr(rs.getString("est_obj_chr"))
-                    .matterInt(rs.getInt("est_obj_int"))
-                    .mcd(rs.getInt("pr_mcd"))
-                    .distance(rs.getInt("rst"))
-                    .build();
-        }
+        routesCache.clear();
     }
 }

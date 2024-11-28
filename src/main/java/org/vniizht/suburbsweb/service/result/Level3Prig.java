@@ -1,6 +1,6 @@
 package org.vniizht.suburbsweb.service.result;
 
-import org.vniizht.suburbsweb.service.data.entities.route.PrigRoute;
+import org.vniizht.suburbsweb.service.data.entities.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigAdi;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigCost;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigMain;
@@ -11,10 +11,7 @@ import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.service.data.dao.TripsDao;
 import org.vniizht.suburbsweb.util.Util;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
@@ -34,16 +31,23 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         main     = record.getMain();
         costList = main.getCosts();
         adi      = main.getAdi();
-        route    = this.routes.getPrigRoute(
-                main.departure_station,
-                main.arrival_station,
-                main.operation_date);
     }
     // Переменные для каждой записи
     private PrigMain       main;
     private List<PrigCost> costList;
     private PrigAdi        adi;
-    private PrigRoute      route;
+
+    @Override
+    protected List<Route> getRoutesDao() {
+        List<Route> routes = new ArrayList<>();
+        costList.forEach(cost -> routes.add(routesDao.getRoute(
+                cost.route_num,
+                main.departure_station,
+                main.arrival_station,
+                main.operation_date
+        )));
+        return routes;
+    }
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
@@ -69,7 +73,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected int[] getRoutes() {
+    protected int[] getRouteNums() {
         return costList.stream().mapToInt(cost -> cost.route_num).toArray();
     }
 
