@@ -34,7 +34,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected void assignVariablesForEachRecord(L2_RECORD record);
 
     // Получение маршрутов для каждой записи
-    abstract protected List<Route> getRoutesDao();
+    abstract protected List<Route> getRoutes();
 
     // Мультипликатор
     abstract protected Set<T1> multiplyT1(T1 t1);
@@ -48,7 +48,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     // Детали T1
     abstract protected String    getT1P1();
-    abstract protected Integer   getT1P2();
+             protected Long      getT1P2() {return null;}
     abstract protected String    getT1P3();
     abstract protected String    getT1P4();
     abstract protected String    getT1P5();
@@ -59,10 +59,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P10();
     abstract protected String    getT1P11();
     abstract protected String    getT1P12();
-    abstract protected String    getT1P13();
-    abstract protected String    getT1P14();
+             protected String    getT1P13(Route route) {return route.getRoadStart();}
+             protected String    getT1P14(Route route) {return route.getDepartmentStart();}
     abstract protected String    getT1P15();
-    abstract protected String    getT1P16();
+             protected String    getT1P16(Route route) {return route.getRegionStart();}
     abstract protected String    getT1P17();
     abstract protected String    getT1P18();
     abstract protected Character getT1P19();
@@ -73,9 +73,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P24();
     abstract protected Character getT1P25();
     abstract protected String    getT1P26();
-    abstract protected String    getT1P27();
-    abstract protected String    getT1P28();
-    abstract protected String    getT1P29();
+             protected String    getT1P27(Route route) {return route.getRoadEnd();}
+             protected String    getT1P28(Route route) {return route.getDepartmentEnd();}
+             protected String    getT1P29(Route route) {return route.getRegionEnd();}
     abstract protected String    getT1P30();
     abstract protected String    getT1P31();
     abstract protected Short     getT1P32();
@@ -108,17 +108,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Character getT1P59();
     abstract protected String    getT1P60();
     abstract protected Character getT1P61();
-    abstract protected Short     getT1P62();
-    abstract protected Character getT1P63();
+             protected Short     getT1P62(Route route) {return route.getMcdDistance();}
+             protected Character getT1P63(Route route) {return route.getMcdType();}
 
     // Детали T2
-    protected String             getT2P1() {return "tab2";};
-    protected String             getT2P2() {return "017";};
-    protected String             getT2P3() {return null;};
-    abstract protected String    getT2P4();
-    abstract protected String    getT2P5();
-    abstract protected String    getT2P6();
-    abstract protected String    getT2P7();
+    protected String    getT2P1() {return "tab2";}
+    protected String    getT2P2() {return "017";}
+    protected String    getT2P3() {return null;}
+    protected Short     getT2P4(Route route) {return route.getSerial();}
+    protected String    getT2P5(Route route) {return route.getRoadStart();}
+    protected String    getT2P6(Route route) {return route.getRegionStart();}
+    protected Short     getT2P7(Route route) {return route.getMcdDistance();}
 
     // Детали T3
 
@@ -127,7 +127,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     // Детали Lgot
     abstract protected String        getLgotList();
-    abstract protected Integer       getLgotP1();
+             protected Integer       getLgotP1() {return null;}
     abstract protected String        getLgotP2();
     abstract protected String        getLgotP3();
     abstract protected Character     getLgotP4();
@@ -177,22 +177,25 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         int progress = 0;
         for (L2_RECORD record : records) {
             assignVariablesForEachRecord(record);
-            if(t1Exists())
-                t1Result.addAll(multiplyT1(getT1()));
-            if(lgotExists())
+            if(t1Exists()) {
+                List<Route> routes = getRoutes();
+                T1 t1              = getT1(routes);
+                t1Result.addAll(multiplyT1(t1));
+            }
+            if(lgotExists()) {
                 lgotResult.add(getLgot());
-
+            }
             progress++;
             LogWS.spreadProgress((int) ((float) progress / records.size() * 100));
         }
         roundTimes();
     }
 
-    private T1 getT1() {
+    private T1 getT1(List<Route> routes) {
         AtomicReference<T1> t1 = new AtomicReference<>();
         t1TransformationTime += Util.measureTime(() -> {
             t1.set(buildT1());
-            t1TripsSearchTime += Util.measureTime(() -> addTripsToT1(t1.get()));
+            t1TripsSearchTime += Util.measureTime(() -> addTripsToT1(t1.get(), routes));
         });
         return t1.get();
     }
@@ -225,7 +228,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .requestDate(getRequestDate())
                         .yyyymm(getYyyymm())
                         .p1(getT1P1())
-//                        .p2(getT1P2())
+                        .p2(getT1P2())
                         .p3(getT1P3())
                         .p4(getT1P4())
                         .p5(getT1P5())
@@ -236,9 +239,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .p10(getT1P10())
                         .p11(getT1P11())
                         .p12(getT1P12())
-
                         .p15(getT1P15())
-
                         .p17(getT1P17())
                         .p18(getT1P18())
                         .p19(getT1P19())
@@ -252,7 +253,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .p30(getT1P30())
                         .p31(getT1P31())
                         .p32(getT1P32())
-
                         .p52(getT1P52())
                         .p53(getT1P53())
                         .p54(getT1P54())
@@ -263,7 +263,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .p59(getT1P59())
                         .p60(getT1P60())
                         .p61(getT1P61())
-                        // trips
                         .build()
                 )
                 .p33(getT1P33())
@@ -287,26 +286,25 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p51(getT1P51())
                 .build();
     }
-    private void addTripsToT1(T1 t1) {
+    private void addTripsToT1(T1 t1, List<Route> routes) {
+        T1.Key key = t1.getKey();
+        key.setRoutes(routes.stream().mapToInt(Route::getNum).toArray());
 
-        List<Route> routes = getRoutesDao();
+        Route route = routes.get(0);
+        if(route != null) {
+            key = key.toBuilder()
+                    .p13(getT1P13(route))
+                    .p14(getT1P14(route))
+                    .p16(getT1P16(route))
+                    .p27(getT1P27(route))
+                    .p28(getT1P28(route))
+                    .p29(getT1P29(route))
+                    .p62(getT1P62(route))
+                    .p63(getT1P63(route))
+                    .build();
+        }
 
-        t1.setKey(t1.getKey().toBuilder()
-                .routes(routes.stream().mapToInt(Route::getNum).toArray())
-//                // key
-//                .p13(getT1P13())
-//                .p14(getT1P14())
-//                .p16(getT1P16())
-//                // key
-//                .p27(getT1P27())
-//                .p28(getT1P28())
-//                .p29(getT1P29())
-//                // key
-//                .p62(getT1P62())
-//                .p63(getT1P63())
-                // key
-                .build()
-        );
+        t1.setKey(key);
     }
 
     private T2 convertToT2() {

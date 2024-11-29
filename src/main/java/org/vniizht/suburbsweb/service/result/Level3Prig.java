@@ -38,7 +38,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     private PrigAdi        adi;
 
     @Override
-    protected List<Route> getRoutesDao() {
+    protected List<Route> getRoutes() {
         List<Route> routes = new ArrayList<>();
         costList.forEach(cost -> routes.add(routesDao.getRoute(
                 cost.route_num,
@@ -73,17 +73,12 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected int[] getRouteNums() {
-        return costList.stream().mapToInt(cost -> cost.route_num).toArray();
-    }
-
-    @Override
     protected String getT1P1() {
         return "tab1";
     }
 
     @Override
-    protected Integer getT1P2() {
+    protected Long getT1P2() {
         return null;
     }
 
@@ -152,23 +147,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected String getT1P13() {
-        return route.getRoadStart();
-    }
-
-    @Override
-    protected String getT1P14() {
-        return route.getDepartmentStart();
-    }
-
-    @Override
     protected String getT1P15() {
         return main.departure_station;
-    }
-
-    @Override
-    protected String getT1P16() {
-        return route.getRegionStart();
     }
 
     @Override
@@ -250,21 +230,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 main.benefitgroup_code,
                 main.benefit_code,
                 main.operation_date);
-    }
-
-    @Override
-    protected String getT1P27() {
-        return route.getRoadEnd();
-    }
-
-    @Override
-    protected String getT1P28() {
-        return route.getDepartmentEnd();
-    }
-
-    @Override
-    protected String getT1P29() {
-        return route.getRegionEnd();
     }
 
     @Override
@@ -496,16 +461,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected Short getT1P62() {
-        return route.getMcdDistance();
-    }
-
-    @Override
-    protected Character getT1P63() {
-        return route.getMcdType();
-    }
-
-    @Override
     protected String getLgotList() {
         return "R064" + (main.benefitgroup_code.equals("22") ? 'Z' : 'G');
     }
@@ -513,11 +468,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected boolean lgotExists() {
         return t1Exists() && main.benefit_code.equals("00");
-    }
-
-    @Override
-    protected Integer getLgotP1() {
-        return 1;
     }
 
     @Override

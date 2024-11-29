@@ -9,6 +9,7 @@ import lombok.ToString;
 @ToString
 public class Route {
     Short     num;
+    Short     serial;
     String    roadStart;
     String    roadEnd;
     String    departmentStart;

@@ -31,7 +31,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private PassEx         ex;
 
     @Override
-    protected List<Route> getRoutesDao() {
+    protected List<Route> getRoutes() {
         List<Route> routes = new ArrayList<>();
         routes.add(routesDao.getRoute(
                 main.train_num,
@@ -74,18 +74,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected int[] getRouteNums() {
-        return null;
-    }
-
-    @Override
     protected String getT1P1() {
         return "tab1";
-    }
-
-    @Override
-    protected Integer getT1P2() {
-        return 1;
     }
 
     @Override
@@ -139,23 +129,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected String getT1P13() {
-        return route.getRoadStart();
-    }
-
-    @Override
-    protected String getT1P14() {
-        return route.getDepartmentStart();
-    }
-
-    @Override
     protected String getT1P15() {
         return main.departure_station;
-    }
-
-    @Override
-    protected String getT1P16() {
-        return route.getRegionStart();
     }
 
     @Override
@@ -227,21 +202,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 handbook.getGvc(
                         ex.lgot_info.substring(0, 2),
                         main.benefit_code, main.oper_date);
-    }
-
-    @Override
-    protected String getT1P27() {
-        return route.getRoadEnd();
-    }
-
-    @Override
-    protected String getT1P28() {
-        return route.getDepartmentEnd();
-    }
-
-    @Override
-    protected String getT1P29() {
-        return route.getRegionEnd();
     }
 
     @Override
@@ -457,16 +417,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected Short getT1P62() {
-        return null;
-    }
-
-    @Override
-    protected Character getT1P63() {
-        return null;
-    }
-
-    @Override
     protected String getLgotList() {
         return "R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G');
     }
@@ -474,11 +424,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     @Override
     protected boolean lgotExists() {
         return t1Exists() && main.benefit_code.equals("00");
-    }
-
-    @Override
-    protected Integer getLgotP1() {
-        return getT1P2();
     }
 
     @Override
