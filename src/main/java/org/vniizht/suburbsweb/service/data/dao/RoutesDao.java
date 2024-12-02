@@ -58,7 +58,7 @@ public class RoutesDao {
                 case 2: mcdType = mcdSet.contains(1) && mcdSet.contains(2) ? '2' : '3'; break;
                 case 3: mcdType = mcdSet.contains(1) && mcdSet.contains(2) && mcdSet.contains(3) ? '4' : null;
             }
-            route.setMcdType(mcdType);
+            route.setMcd(mcdType);
 
             routesCache.put(key, route);
         }

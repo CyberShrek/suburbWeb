@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.result;
 import lombok.Getter;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T2;
+import org.vniizht.suburbsweb.service.data.entities.level3.co22.T3;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.data.entities.Route;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
@@ -46,7 +47,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Проверка существования t1
     abstract protected boolean   t1Exists();
 
-    // Детали T1
+    // Компоненты T1
     abstract protected String    getT1P1();
              protected Long      getT1P2() {return null;}
     abstract protected String    getT1P3();
@@ -109,23 +110,50 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P60();
     abstract protected Character getT1P61();
              protected Short     getT1P62(Route route) {return route.getMcdDistance();}
-             protected Character getT1P63(Route route) {return route.getMcdType();}
+             protected Character getT1P63(Route route) {return route.getMcd();}
 
-    // Детали T2
-    protected String    getT2P1() {return "tab2";}
-    protected String    getT2P2() {return "017";}
-    protected String    getT2P3() {return null;}
+    // Компоненты T2
+    protected String    getT2P1()            {return "tab2";}
+    protected String    getT2P2()            {return "017";}
+    protected Integer   getT2P3()            {return null;}
     protected Short     getT2P4(Route route) {return route.getSerial();}
     protected String    getT2P5(Route route) {return route.getRoadStart();}
-    protected String    getT2P6(Route route) {return route.getRegionStart();}
-    protected Short     getT2P7(Route route) {return route.getMcdDistance();}
+    protected String    getT2P6(Route route) {return route.getDepartmentStart();}
+    protected Short     getT2P7(Route route) {return route.getDepartmentDistance();}
 
-    // Детали T3
+    // Компоненты T3
+    protected String    getT3P1()            {return "tab3";}
+    protected String    getT3P2()            {return "017";}
+    protected Integer   getT3P3()            {return null;}
+    protected Short     getT3P4(Route route) {return route.getSerial();}
+    protected String    getT3P5(Route route) {return route.getRegionStart();}
+    protected String    getT3P5(T1 t1)       {return t1.getKey().getP17();}
+    protected Short     getT3P6(Route route) {return route.getRegionDistance();}
+
+    // Компоненты T4
+    protected String    getT4P1()            {return "tab4";}
+    protected String    getT4P2()            {return "017";}
+    protected Integer   getT4P3()            {return null;}
+    protected Short     getT4P4(Route route) {return route.getSerial();}
+    protected String    getT4P5(Route route) {return route.getRoadStart();}
+    protected String    getT4P6(T1 t1)       {return t1.getKey().getP17();}
+    protected Long      getT4P7(Route route) {return 0L;}
+    protected Long      getT4P8(Route route) {return 0L;}
+    protected Short     getT4P9(Route route) {return 0;}
+
+    // Компоненты T6
+    protected String    getT6P1()            {return "tab6";}
+    protected String    getT6P2()            {return "017";}
+    protected Integer   getT6P3()            {return null;}
+    protected Short     getT6P4(Route route) {return route.getSerial();}
+    protected String    getT6P5(Route route) {return route.getRoadStart();}
+    protected Short     getT6P6(Route route) {return route.getDcs();}
+    protected Short     getT6P7(Route route) {return route.getDcsDistance();}
 
     // Проверка существования льготы
     abstract protected boolean   lgotExists();
 
-    // Детали Lgot
+    // Компоненты Lgot
     abstract protected String        getLgotList();
              protected Integer       getLgotP1() {return null;}
     abstract protected String        getLgotP2();
@@ -207,6 +235,14 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         );
         return t2.get();
     }
+
+//    private T3 getT3() {
+//        AtomicReference<T3> t3 = new AtomicReference<>();
+//        t3TransformationTime += Util.measureTime(() ->
+//            t3.set(convertToT3())
+//        );
+//        return t3.get();
+//    }
 
     private Lgot getLgot() {
         AtomicReference<Lgot> lgot = new AtomicReference<>();
@@ -309,7 +345,12 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     private T2 convertToT2() {
         return T2.builder()
-
+                .p1(getT2P1())
+                .p2(getT2P2())
+                .p3(getT2P3())
+                .p4(getT2P4())
+                .p5(getT2P5())
+                .p6(getT2P6())
                 .build();
     }
 
