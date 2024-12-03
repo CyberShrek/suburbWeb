@@ -1,9 +1,7 @@
 package org.vniizht.suburbsweb.service.result;
 
 import lombok.Getter;
-import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
-import org.vniizht.suburbsweb.service.data.entities.level3.co22.T2;
-import org.vniizht.suburbsweb.service.data.entities.level3.co22.T3;
+import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.data.entities.Route;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
@@ -14,22 +12,17 @@ import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     // Конечные результаты - трансформированные записи второго уровня, готовые к записи в базу данных
-    @Getter private final List<T1>   t1Result   = new ArrayList<>();
-    @Getter private final List<Lgot> lgotResult = new ArrayList<>();
+    @Getter private final Map<String, CO22> co22Result = new HashMap<>();
+    @Getter private final List<Lgot>        lgotResult = new ArrayList<>();
 
-    // Подсчитанное время на каждую операцию (с)
-    @Getter private float t1TransformationTime   = 0;
-    @Getter private float t2TransformationTime   = 0;
-    @Getter private float t3TransformationTime   = 0;
-    @Getter private float t4TransformationTime   = 0;
-//    @Getter private float t5TransformationTime   = 0;
-    @Getter private float t6TransformationTime   = 0;
-    @Getter private float lgotTransformationTime = 0;
-    @Getter private float t1TripsSearchTime      = 0;
+    // Подсчитанное время на сопутствующие операции (с)
+    @Getter private float transformationTime   = 0;
+    @Getter private float routesSearchTime     = 0;
 
     // Функция обработки каждой записи второго уровня
     abstract protected void assignVariablesForEachRecord(L2_RECORD record);
@@ -112,46 +105,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
              protected Short     getT1P62(Route route) {return route.getMcdDistance();}
              protected Character getT1P63(Route route) {return route.getMcd();}
 
-    // Компоненты T2
-    protected String    getT2P1()            {return "tab2";}
-    protected String    getT2P2()            {return "017";}
-    protected Integer   getT2P3()            {return null;}
-    protected Short     getT2P4(Route route) {return route.getSerial();}
-    protected String    getT2P5(Route route) {return route.getRoadStart();}
-    protected String    getT2P6(Route route) {return route.getDepartmentStart();}
-    protected Short     getT2P7(Route route) {return route.getDepartmentDistance();}
-
-    // Компоненты T3
-    protected String    getT3P1()            {return "tab3";}
-    protected String    getT3P2()            {return "017";}
-    protected Integer   getT3P3()            {return null;}
-    protected Short     getT3P4(Route route) {return route.getSerial();}
-    protected String    getT3P5(Route route) {return route.getRegionStart();}
-    protected String    getT3P5(T1 t1)       {return t1.getKey().getP17();}
-    protected Short     getT3P6(Route route) {return route.getRegionDistance();}
-
-    // Компоненты T4
-    protected String    getT4P1()            {return "tab4";}
-    protected String    getT4P2()            {return "017";}
-    protected Integer   getT4P3()            {return null;}
-    protected Short     getT4P4(Route route) {return route.getSerial();}
-    protected String    getT4P5(Route route) {return route.getRoadStart();}
-    protected String    getT4P6(T1 t1)       {return t1.getKey().getP17();}
-    protected Long      getT4P7(Route route) {return 0L;}
-    protected Long      getT4P8(Route route) {return 0L;}
-    protected Short     getT4P9(Route route) {return 0;}
-
-    // Компоненты T6
-    protected String    getT6P1()            {return "tab6";}
-    protected String    getT6P2()            {return "017";}
-    protected Integer   getT6P3()            {return null;}
-    protected Short     getT6P4(Route route) {return route.getSerial();}
-    protected String    getT6P5(Route route) {return route.getRoadStart();}
-    protected Short     getT6P6(Route route) {return route.getDcs();}
-    protected Short     getT6P7(Route route) {return route.getDcsDistance();}
-
     // Проверка существования льготы
-    abstract protected boolean   lgotExists();
+    abstract protected boolean lgotExists();
 
     // Компоненты Lgot
     abstract protected String        getLgotList();
@@ -192,13 +147,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     protected final Set<L2_RECORD> records;
     protected final Handbook handbook;
     protected final RoutesDao routesDao;
+    private Long t1Serial;
 
-    protected Level3(Set<L2_RECORD> records,
-           Handbook handbook,
-           RoutesDao routesDao) {
-        this.records = records;
+    protected Level3(
+            Set<L2_RECORD> records,
+            Handbook handbook,
+            RoutesDao routesDao,
+            Long initialT1Serial) {
+        this.records   = records;
         this.handbook  = handbook;
         this.routesDao = routesDao;
+        this.t1Serial  = initialT1Serial;
     }
 
     protected void transform() {
@@ -206,12 +165,22 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         for (L2_RECORD record : records) {
             assignVariablesForEachRecord(record);
             if(t1Exists()) {
-                List<Route> routes = getRoutes();
-                T1 t1              = getT1(routes);
-                t1Result.addAll(multiplyT1(t1));
+                AtomicReference<List<Route>> routes = new AtomicReference<>();
+                routesSearchTime   += Util.measureTime(() -> routes.set(getRoutes()));
+                transformationTime += Util.measureTime(() -> {
+                    Set<T1> t1Set = multiplyT1(buildT1(routes.get()));
+                    t1Set.forEach(t1 -> {
+                        String key = t1.getKey().toString();
+                        // Агрегация данных
+                        if(co22Result.containsKey(key))
+                            co22Result.get(key).t1.add(t1);
+                        else
+                            co22Result.put(key, new CO22(t1, routes.get()));
+                    });
+                });
             }
             if(lgotExists()) {
-                lgotResult.add(getLgot());
+                transformationTime += Util.measureTime(() -> lgotResult.add(buildLgot()));
             }
             progress++;
             LogWS.spreadProgress((int) ((float) progress / records.size() * 100));
@@ -219,50 +188,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         roundTimes();
     }
 
-    private T1 getT1(List<Route> routes) {
-        AtomicReference<T1> t1 = new AtomicReference<>();
-        t1TransformationTime += Util.measureTime(() -> {
-            t1.set(buildT1());
-            t1TripsSearchTime += Util.measureTime(() -> addTripsToT1(t1.get(), routes));
-        });
-        return t1.get();
-    }
-
-    private T2 getT2() {
-        AtomicReference<T2> t2 = new AtomicReference<>();
-        t2TransformationTime += Util.measureTime(() ->
-            t2.set(convertToT2())
-        );
-        return t2.get();
-    }
-
-//    private T3 getT3() {
-//        AtomicReference<T3> t3 = new AtomicReference<>();
-//        t3TransformationTime += Util.measureTime(() ->
-//            t3.set(convertToT3())
-//        );
-//        return t3.get();
-//    }
-
-    private Lgot getLgot() {
-        AtomicReference<Lgot> lgot = new AtomicReference<>();
-        lgotTransformationTime += Util.measureTime(() ->
-            lgot.set(buildLgot())
-        );
-        return lgot.get();
-    }
-
     private void roundTimes() {
-        t1TransformationTime   = (float) Math.round(t1TransformationTime   * 100) / 100;
-        lgotTransformationTime = (float) Math.round(lgotTransformationTime * 100) / 100;
-        t1TripsSearchTime      = (float) Math.round(t1TripsSearchTime      * 100) / 100;
+        transformationTime = (float) Math.round(transformationTime * 100) / 100;
+        routesSearchTime   = (float) Math.round(routesSearchTime   * 100) / 100;
     }
 
-    private T1 buildT1() {
-        return T1.builder()
+    private T1 buildT1(List<Route> routes) {
+        T1 t1 = T1.builder()
                 .key(T1.Key.builder()
                         .requestDate(getRequestDate())
                         .yyyymm(getYyyymm())
+                        .routes(routes.stream().map(Route::getNum).toArray(Short[]::new))
                         .p1(getT1P1())
                         .p2(getT1P2())
                         .p3(getT1P3())
@@ -321,14 +257,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p50(getT1P50())
                 .p51(getT1P51())
                 .build();
-    }
-    private void addTripsToT1(T1 t1, List<Route> routes) {
-        T1.Key key = t1.getKey();
-        key.setRoutes(routes.stream().mapToInt(Route::getNum).toArray());
 
         Route route = routes.get(0);
-        if(route != null) {
-            key = key.toBuilder()
+        if(route != null)
+            t1.setKey(t1.getKey().toBuilder()
                     .p13(getT1P13(route))
                     .p14(getT1P14(route))
                     .p16(getT1P16(route))
@@ -337,20 +269,58 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                     .p29(getT1P29(route))
                     .p62(getT1P62(route))
                     .p63(getT1P63(route))
-                    .build();
-        }
+                    .build());
 
-        t1.setKey(key);
+        return t1;
     }
 
-    private T2 convertToT2() {
+    private T2 buildT2(T1 t1, Route route) {
         return T2.builder()
-                .p1(getT2P1())
-                .p2(getT2P2())
-                .p3(getT2P3())
-                .p4(getT2P4())
-                .p5(getT2P5())
-                .p6(getT2P6())
+                .p1("tab2")
+                .p2("017")
+                .p3(t1.getKey().getP2())
+                .p4(route.getSerial())
+                .p5(route.getRoadStart())
+                .p6(route.getDepartmentStart())
+                .p7(route.getDepartmentDistance())
+                .build();
+    }
+
+    private T3 buildT3(T1 t1, Route route) {
+        return T3.builder()
+                .p1("tab3")
+                .p2("017")
+                .p3(t1.getKey().getP2())
+                .p4(route.getSerial())
+                .p5(route.getRegionStart())
+                .p6(t1.getKey().getP17())
+                .p7(route.getRegionDistance())
+                .build();
+    }
+
+    private T4 buildT4(T1 t1, Route route) {
+        return T4.builder()
+                .p1("tab4")
+                .p2("017")
+                .p3(t1.getKey().getP2())
+                .p4(route.getSerial())
+                .p5(route.getRoadStart())
+                .p6(t1.getKey().getP17())
+                .p7(0L)
+                .p8(0L)
+                .p9((short) 0)
+                .build();
+    }
+
+    private T6 buildT6(T1 t1, Route route) {
+        return T6.builder()
+                .p1("tab6")
+                .p2("017")
+                .p3(t1.getKey().getP2())
+                .p4(route.getSerial())
+                .p5(route.getRoadStart())
+                .p6(route.getDcs())
+                .p7(route.getDcsDistance())
                 .build();
     }
 
@@ -360,7 +330,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .requestDate(getRequestDate())
                         .yyyymm(getYyyymm())
                         .list(getLgotList())
-//                        .p1(getLgotP1())
+                        .p1(getLgotP1())
                         .p2(getLgotP2())
                         .p3(getLgotP3())
                         .p4(getLgotP4())
@@ -378,7 +348,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .p16(getLgotP16())
                         .p17(getLgotP17())
                         .p18(getLgotP18())
-                        // values
                         .p20(getLgotP20())
                         .p21(getLgotP21())
                         .p22(getLgotP22())
@@ -386,12 +355,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .p24(getLgotP24())
                         .p25(getLgotP25())
                         .p26(getLgotP26())
-                        // values
                         .p29(getLgotP29())
                         .p30(getLgotP30())
                         .p31(getLgotP31())
                         .p32(getLgotP32())
-                        // values
                         .build()
                 )
                 .p19(getLgotP19())
@@ -399,5 +366,32 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p28(Math.ceil(getLgotP28() * 100) / 100)
                 .p33(getLgotP33())
                 .build();
+    }
+
+    // ЦО22 включая все дочерние записи
+    @Getter class CO22 {
+        private final T1 t1;
+        private final List<T2> t2 = new ArrayList<>();
+        private final List<T3> t3 = new ArrayList<>();
+        private final List<T4> t4 = new ArrayList<>();
+        private final List<T6> t6 = new ArrayList<>();
+
+        CO22(T1 t1, List<Route> routes) {
+            this.t1 = t1;
+            routes.forEach(route -> {
+                t2.add(buildT2(t1, route));
+                t3.add(buildT3(t1, route));
+                t4.add(buildT4(t1, route));
+                t6.add(buildT6(t1, route));
+            });
+        }
+
+        void assignSerials() {
+            t1.getKey().setP2(t1Serial);
+            t2.forEach(t -> t.setP3(t1Serial));
+            t3.forEach(t -> t.setP3(t1Serial));
+            t4.forEach(t -> t.setP3(t1Serial));
+            t6.forEach(t -> t.setP3(t1Serial));
+        }
     }
 }

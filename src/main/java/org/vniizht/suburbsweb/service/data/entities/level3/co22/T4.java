@@ -12,7 +12,7 @@ import lombok.ToString;
 public class T4 {
     private String          p1;
     private String          p2;
-    private Integer         p3;
+    private Long            p3;
     private Short           p4;
     private String          p5;
     private String          p6;
