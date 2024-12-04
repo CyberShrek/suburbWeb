@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.model.TransformationOptions;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.service.data.dao.TripsDao;
+import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.result.Level3;
 import org.vniizht.suburbsweb.service.result.Level3Pass;
 import org.vniizht.suburbsweb.service.result.Level3Prig;
-import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
@@ -78,7 +78,7 @@ public class Transformation {
                 () -> level2.findPrigRecords(requestDate), log, "l2_prig");
 
         return (Level3Prig) transform(
-                () -> new Level3Prig(records, handbook, routes, trips),
+                () -> new Level3Prig(records, handbook, routes, level3.getLatestT1P2() + 1),
                 log, "l2_prig"
         );
     }
@@ -88,7 +88,7 @@ public class Transformation {
                 () -> level2.findPassRecords(requestDate), log, "l2_pass");
 
         return (Level3Pass) transform(
-                () -> new Level3Pass(records, handbook, routes),
+                () -> new Level3Pass(records, handbook, routes, level3.getLatestT1P2() + 1),
                 log, "l2_pass"
         );
     }
@@ -106,12 +106,7 @@ public class Transformation {
         log.addTimeLine("Трансформирую записи " + name + "...");
         Level3 level3 = loader.call();
         log.addTimeLine("Записи " + name + " успешно трансформированы.");
-        log.sumUp(
-//                "Затраты времени на трансформацию записей " + name,
-//                "\tТрансформация t1: "          + level3.getT1TransformationTime() +
-//                        "c (включая поиск маршрутов: " + level3.getT1TripsSearchTime() + "c)",
-//                "\tТрансформация lgot: "        + level3.getLgotTransformationTime() + "c"
-        );
+
         return level3;
     }
 
@@ -130,45 +125,58 @@ public class Transformation {
                           Level3Pass level3Pass,
                           Log log) {
 
-        Set<T1>    t1Set   = aggregateT1(
-                Stream.concat(
-                        level3Prig == null ? Stream.empty() : level3Prig.getT1Result().stream(),
-                        level3Pass == null ? Stream.empty() : level3Pass.getT1Result().stream())
-                        .collect(Collectors.toList()), log);
+        Set<Level3.CO22>    co22Set   = aggregateCO22(
+                level3Prig == null ? new HashMap<>() : level3Prig.getCo22Result(),
+                level3Pass == null ? new HashMap<>() : level3Pass.getCo22Result());
 
         Set<Lgot>  lgotSet = Stream.concat(
                 level3Prig == null ? Stream.empty() : level3Prig.getLgotResult().stream(),
                 level3Pass == null ? Stream.empty() : level3Pass.getLgotResult().stream())
                 .collect(Collectors.toSet());
 
-        log.sumUp("Сформировано записей T1:   " + t1Set.size(),
-                "Сформировано записей Lgot: " + lgotSet.size());
+        log.sumUp("Сформировано записей ЦО-22:      " + co22Set.size(),
+                "Сформировано записей Льготников: " + lgotSet.size());
 
-        update(date, t1Set, lgotSet, log);
+        update(date, co22Set, lgotSet, log);
     }
 
-    private Set<T1> aggregateT1(List<T1> t1List, Log log) {
-        log.addTimeLine("Агрегирую T1...");
-        Map<String, T1> t1Map = new HashMap<>();
-
-        for (T1 t1 : t1List) {
-            T1.Key key = t1.getKey();
-            if(t1Map.containsKey(key.toString()))
-                t1Map.get(key.toString()).add(t1);
-            else
-                t1Map.put(key.toString(), t1);
-        }
-        log.addTimeLine("T1 агрегированы.");
-        return new HashSet<>(t1Map.values());
+    // TODO refactor
+    private Set<Level3.CO22> aggregateCO22(Map<String, Level3Prig.CO22> prigMap,
+                                           Map<String, Level3Pass.CO22> passMap)
+    {
+        Set<Level3.CO22> co22Set = new HashSet<>();
+        prigMap.forEach((co22Key, co22) -> {
+            co22Set.add(co22);
+        });
+        passMap.forEach((co22Key, co22) -> {
+            co22Set.add(co22);
+        });
+        return co22Set;
     }
 
-    private void update(Date date, Set<T1> t1Set, Set<Lgot> lgotSet, Log log) {
+    private void update(Date date, Set<Level3.CO22> co22Set, Set<Lgot> lgotSet, Log log) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
             log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(date, "dd.MM.yyyy") + "...");
             LogWS.spreadProgress(0);
             level3.deleteForDate(date);
             log.addTimeLine("Записываю T1...");
-            level3.saveT1s(t1Set);
+            level3.saveT1s(co22Set.stream().map(Level3.CO22::getT1).collect(Collectors.toSet()));
+            log.addTimeLine("Записываю T2...");
+            Set<T2> t2Set = new HashSet<>();
+            co22Set.forEach(co22 -> t2Set.addAll(co22.getT2()));
+            level3.saveT2s(t2Set);
+            log.addTimeLine("Записываю T3...");
+            Set<T3> t3Set = new HashSet<>();
+            co22Set.forEach(co22 -> t3Set.addAll(co22.getT3()));
+            level3.saveT3s(t3Set);
+            log.addTimeLine("Записываю T4...");
+            Set<T4> t4Set = new HashSet<>();
+            co22Set.forEach(co22 -> t4Set.addAll(co22.getT4()));
+            level3.saveT4s(t4Set);
+            log.addTimeLine("Записываю T6...");
+            Set<T6> t6Set = new HashSet<>();
+            co22Set.forEach(co22 -> t6Set.addAll(co22.getT6()));
+            level3.saveT6s(t6Set);
             log.addTimeLine("Записываю Lgot...");
             level3.saveLgots(lgotSet);
             log.addTimeLine("Записи успешно обновлены.");
@@ -180,7 +188,6 @@ public class Transformation {
         int yyyy = 2024, mm = 2, dd = 05;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
-//                null,
                 true,
                 false
         ));

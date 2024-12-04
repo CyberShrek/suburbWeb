@@ -15,19 +15,16 @@ import java.util.*;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
-    private final TripsDao trips;
-
     public Level3Prig(Set<Level2Dao.PrigRecord> records,
                       Handbook handbook,
                       RoutesDao routes,
-                      TripsDao trips) {
-        super(records, handbook, routes);
-        this.trips = trips;
+                      Long initialT1Serial) {
+        super(records, handbook, routes, initialT1Serial);
         transform();
     }
 
     @Override
-    protected void assignVariablesForEachRecord(Level2Dao.PrigRecord record) {
+    protected void assignVariablesForRecord(Level2Dao.PrigRecord record) {
         main     = record.getMain();
         costList = main.getCosts();
         adi      = main.getAdi();

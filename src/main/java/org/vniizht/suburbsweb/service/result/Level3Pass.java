@@ -14,13 +14,14 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     
     public Level3Pass(Set<Level2Dao.PassRecord> records,
                       Handbook handbook,
-                      RoutesDao routes) {
-        super(records, handbook, routes);
+                      RoutesDao routes,
+                      Long initialT1Serial) {
+        super(records, handbook, routes, initialT1Serial);
         transform();
     }
 
     @Override
-    protected void assignVariablesForEachRecord(Level2Dao.PassRecord record) {
+    protected void assignVariablesForRecord(Level2Dao.PassRecord record) {
         main     = record.getMain();
         costList = main.getCosts();
         ex       = main.getEx();

@@ -20,17 +20,17 @@ public class RoutesDao {
             Route route = new Route();
 
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
-                    routeNum, depStation, arrStation, date);
+                    routeNum, date, depStation, arrStation);
 
             Set <Integer> mcdSet = new HashSet<>();
 
             while (prigRS.next()){
                 int narr = prigRS.getInt("narr");
-                String st1 = prigRS.getString("st1");
-                String st2 = prigRS.getString("st2");
-                String est_obj_chr = prigRS.getString("est_obj_chr");
+                String st1 = prigRS.getString("sto");
+                String st2 = prigRS.getString("stn");
+                String est_obj_chr = prigRS.getString("obj_chr");
                 int pr_mcd = prigRS.getInt("pr_mcd");
-                short rst = prigRS.getShort("rst");
+                short rst = prigRS.getShort("rst_p");
 
                 if(st1 != null && st1.equals(depStation)){
                     switch (narr) {

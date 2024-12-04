@@ -12,7 +12,6 @@ import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
@@ -25,7 +24,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     @Getter private float routesSearchTime     = 0;
 
     // Функция обработки каждой записи второго уровня
-    abstract protected void assignVariablesForEachRecord(L2_RECORD record);
+    abstract protected void assignVariablesForRecord(L2_RECORD record);
 
     // Получение маршрутов для каждой записи
     abstract protected List<Route> getRoutes();
@@ -163,29 +162,38 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     protected void transform() {
         int progress = 0;
         for (L2_RECORD record : records) {
-            assignVariablesForEachRecord(record);
-            if(t1Exists()) {
-                AtomicReference<List<Route>> routes = new AtomicReference<>();
-                routesSearchTime   += Util.measureTime(() -> routes.set(getRoutes()));
-                transformationTime += Util.measureTime(() -> {
-                    Set<T1> t1Set = multiplyT1(buildT1(routes.get()));
-                    t1Set.forEach(t1 -> {
-                        String key = t1.getKey().toString();
-                        // Агрегация данных
-                        if(co22Result.containsKey(key))
-                            co22Result.get(key).t1.add(t1);
-                        else
-                            co22Result.put(key, new CO22(t1, routes.get()));
-                    });
-                });
-            }
-            if(lgotExists()) {
-                transformationTime += Util.measureTime(() -> lgotResult.add(buildLgot()));
-            }
+            transformRecord(record);
             progress++;
             LogWS.spreadProgress((int) ((float) progress / records.size() * 100));
         }
+        assignSerials();
         roundTimes();
+    }
+
+    private void transformRecord(L2_RECORD record) {
+        assignVariablesForRecord(record);
+        if(t1Exists()) {
+            AtomicReference<List<Route>> routes = new AtomicReference<>();
+            routesSearchTime   += Util.measureTime(() -> routes.set(getRoutes()));
+            transformationTime += Util.measureTime(() -> {
+                Set<T1> t1Set = multiplyT1(buildT1(routes.get()));
+                t1Set.forEach(t1 -> {
+                    String key = t1.getKey().toString();
+                    // Агрегация данных
+                    if(co22Result.containsKey(key))
+                        co22Result.get(key).t1.add(t1);
+                    else
+                        co22Result.put(key, new CO22(t1, routes.get()));
+                });
+            });
+        }
+        if(lgotExists()) {
+            transformationTime += Util.measureTime(() -> lgotResult.add(buildLgot()));
+        }
+    }
+
+    private void assignSerials() {
+        co22Result.values().forEach(CO22::assignSerials);
     }
 
     private void roundTimes() {
@@ -274,11 +282,12 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         return t1;
     }
 
-    private T2 buildT2(T1 t1, Route route) {
+    private T2 buildT2(Route route) {
         return T2.builder()
+                .requestDate(getRequestDate())
                 .p1("tab2")
                 .p2("017")
-                .p3(t1.getKey().getP2())
+                .p3(null)
                 .p4(route.getSerial())
                 .p5(route.getRoadStart())
                 .p6(route.getDepartmentStart())
@@ -286,37 +295,40 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .build();
     }
 
-    private T3 buildT3(T1 t1, Route route) {
+    private T3 buildT3(Route route) {
         return T3.builder()
+                .requestDate(getRequestDate())
                 .p1("tab3")
                 .p2("017")
-                .p3(t1.getKey().getP2())
+                .p3(null)
                 .p4(route.getSerial())
                 .p5(route.getRegionStart())
-                .p6(t1.getKey().getP17())
+                .p6(getT1P17())
                 .p7(route.getRegionDistance())
                 .build();
     }
 
-    private T4 buildT4(T1 t1, Route route) {
+    private T4 buildT4(Route route) {
         return T4.builder()
+                .requestDate(getRequestDate())
                 .p1("tab4")
                 .p2("017")
-                .p3(t1.getKey().getP2())
+                .p3(null)
                 .p4(route.getSerial())
                 .p5(route.getRoadStart())
-                .p6(t1.getKey().getP17())
+                .p6(getT1P17())
                 .p7(0L)
                 .p8(0L)
                 .p9((short) 0)
                 .build();
     }
 
-    private T6 buildT6(T1 t1, Route route) {
+    private T6 buildT6(Route route) {
         return T6.builder()
+                .requestDate(getRequestDate())
                 .p1("tab6")
                 .p2("017")
-                .p3(t1.getKey().getP2())
+                .p3(null)
                 .p4(route.getSerial())
                 .p5(route.getRoadStart())
                 .p6(route.getDcs())
@@ -369,7 +381,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     }
 
     // ЦО22 включая все дочерние записи
-    @Getter class CO22 {
+    @Getter public class CO22 {
         private final T1 t1;
         private final List<T2> t2 = new ArrayList<>();
         private final List<T3> t3 = new ArrayList<>();
@@ -379,11 +391,15 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         CO22(T1 t1, List<Route> routes) {
             this.t1 = t1;
             routes.forEach(route -> {
-                t2.add(buildT2(t1, route));
-                t3.add(buildT3(t1, route));
-                t4.add(buildT4(t1, route));
-                t6.add(buildT6(t1, route));
+                t2.add(buildT2(route));
+                t3.add(buildT3(route));
+                t4.add(buildT4(route));
+                t6.add(buildT6(route));
             });
+        }
+
+        public void add(CO22 co22) {
+            t1.add(co22.t1);
         }
 
         void assignSerials() {
@@ -392,6 +408,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t3.forEach(t -> t.setP3(t1Serial));
             t4.forEach(t -> t.setP3(t1Serial));
             t6.forEach(t -> t.setP3(t1Serial));
+            t1Serial++;
         }
     }
 }

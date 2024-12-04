@@ -5,11 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @Builder
 @ToString
 public class T4 {
+    private Date            requestDate;
     private String          p1;
     private String          p2;
     private Long            p3;
