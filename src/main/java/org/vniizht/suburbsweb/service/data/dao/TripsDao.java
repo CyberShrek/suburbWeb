@@ -8,6 +8,7 @@ import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.handbook.HandbookCache;
 import org.vniizht.suburbsweb.util.Util;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service
@@ -20,6 +21,7 @@ public class TripsDao {
 
         Set<T1> t1Set = new LinkedHashSet<>();
         short abonementType = convertAbonementType(prigMain.abonement_type);
+//        String
 
         if (abonementType != 0)
             calculateTripsPerMonth(
@@ -31,12 +33,13 @@ public class TripsDao {
                     .forEach((yyyymm, trips) -> t1Set.add(t1.toBuilder()
                             .key(t1.getKey().toBuilder()
                                     .yyyymm(Integer.parseInt(yyyymm))
-//                                    .p2(t1.getKey().getP2() + 1)
                                     .build())
                             .p33(Long.valueOf(trips))
+                            // Стоимости
+//                            .p34()
                             .build()));
 
-        if(t1Set.isEmpty())
+        if (t1Set.isEmpty())
             t1Set.add(t1);
 
         return t1Set;
@@ -44,14 +47,22 @@ public class TripsDao {
 
     private short convertAbonementType(String abonementType) {
         switch (abonementType.charAt(0)) {
-            case '1': return 9; // билет на количество поездок
-            case '2': return 7; // билет на определенные даты
-            case '3': return 1; // билет «ежедневно» (помесячный)
-            case '4': return 2; // билет «ежедневно» (посуточный)
-            case '5': return 8; // билет «выходного дня»
-            case '7': return 3; // билет «рабочего дня» (помесячный)
-            case '8': return 4; // билет «рабочего дня» (посуточный)
-            default:  return 0;
+            case '1':
+                return 9; // билет на количество поездок
+            case '2':
+                return 7; // билет на определенные даты
+            case '3':
+                return 1; // билет «ежедневно» (помесячный)
+            case '4':
+                return 2; // билет «ежедневно» (посуточный)
+            case '5':
+                return 8; // билет «выходного дня»
+            case '7':
+                return 3; // билет «рабочего дня» (помесячный)
+            case '8':
+                return 4; // билет «рабочего дня» (посуточный)
+            default:
+                return 0;
         }
     }
 
@@ -61,59 +72,92 @@ public class TripsDao {
                                                         Date begDate,
                                                         Date endDate) {
 
+        Map<String, Integer> result = new LinkedHashMap<>();
         SeasonTrip seasonTrip = handbookCache.findTrip(ticketCode, period, begDate);
-        if (seasonTrip == null) return new HashMap<>();
 
-        int   saleMonth = saleDate.getMonth(), saleYear = saleDate.getYear();
-        int   begMonth  = begDate.getMonth(),  begYear  = begDate.getYear();
-        int   endMonth  = endDate.getMonth(),  endYear  = endDate.getYear();
-        Map <String, Integer> collectorBefore = new LinkedHashMap<>();
-        Map <String, Integer> collector = new LinkedHashMap<>();
-        Calendar calendar = new GregorianCalendar();
-        calendar.setTime(saleDate);
-        while (calendar.getTime().getTime() <= begDate.getTime()) {
-            collectorBefore.put(Util.formatDate(calendar.getTime(), "yyyyMM"), 0);
-            calendar.add(Calendar.MONTH, 1);
+//        if(seasonTrip != null) {
+        for (Date iterDate = new Date(Math.min(saleDate.getTime(), begDate.getTime()));
+             iterDate.before(endDate) || yyyymm(iterDate).equals(yyyymm(endDate));
+             iterDate = new Date(iterDate.getTime() + 86400000)) {
+
+            int tripsCount = result.computeIfAbsent(yyyymm(iterDate), k -> 0);
+
+            if(iterDate.getTime() >= saleDate.getTime()) {
+                tripsCount++;
+            }
+
+            result.put(yyyymm(iterDate), tripsCount);
         }
-        calendar.setTime(begDate);
-        int totalTrips = 0;
-        while (calendar.getTime().getTime() <= endDate.getTime()) {
-            int     day           = calendar.get(Calendar.DAY_OF_MONTH);
-            int     month         = calendar.get(Calendar.MONTH);
-            int     year          = calendar.get(Calendar.YEAR) - 1900;
-            boolean isStart       = month == begMonth && year == begYear;
-            boolean isEnd         = month == endMonth && year == endYear;
-            int     maxDays       = 30;
-            int     involvedDays  = isEnd ? day : maxDays - day + 1;
-            int     monthTrips    = seasonTrip.getKol_trips();
-            int     involvedTrips =
-                    isStart ? Math.round((float) (monthTrips * involvedDays) / maxDays) :
-                            isEnd ? monthTrips * collector.size() - totalTrips
-                                    : monthTrips;
 
-            totalTrips += involvedTrips;
+//        }
 
-            collector.put(Util.formatDate(calendar.getTime(), "yyyyMM"), involvedTrips);
-            calendar.add(Calendar.MONTH, 1);
-            calendar.set(Calendar.DAY_OF_MONTH, isEnd ? endDate.getDate() : 1);
-        }
-        return collector;
+        return result;
     }
 
-//    @PostConstruct
-    private void test(){
-//        calculateTripsPerMonth(
-//                (short) 9,
-//                (short) 120,
-//                new Date(2024 - 1900, Calendar.DECEMBER, 15),
-//                new Date(2024 - 1900, Calendar.DECEMBER, 16))
-//                .forEach((k, v) -> System.out.println(k + " " + v));
+    private String yyyymm(Date date) {
+        return Util.formatDate(date, "yyyyMM");
+    }
+
+//    private Map<String, Integer> calculateTripsPerMonth(Short ticketCode,
+//                                                        Short period,
+//                                                        Date saleDate,
+//                                                        Date begDate,
+//                                                        Date endDate) {
+//
+//        SeasonTrip seasonTrip = handbookCache.findTrip(ticketCode, period, begDate);
+//        if (seasonTrip == null) return new HashMap<>();
+//
+//        int   saleMonth = saleDate.getMonth(), saleYear = saleDate.getYear();
+//        int   begMonth  = begDate.getMonth(),  begYear  = begDate.getYear();
+//        int   endMonth  = endDate.getMonth(),  endYear  = endDate.getYear();
+//        Map <String, Integer> collectorBefore = new LinkedHashMap<>();
+//        Map <String, Integer> collector = new LinkedHashMap<>();
+//        Calendar calendar = new GregorianCalendar();
+//        calendar.setTime(saleDate);
+//        while (calendar.getTime().getTime() <= begDate.getTime()) {
+//            collectorBefore.put(Util.formatDate(calendar.getTime(), "yyyyMM"), 0);
+//            calendar.add(Calendar.MONTH, 1);
+//        }
+//        calendar.setTime(begDate);
+//        int totalTrips = 0;
+//        while (calendar.getTime().getTime() <= endDate.getTime()) {
+//            int     day           = calendar.get(Calendar.DAY_OF_MONTH);
+//            int     month         = calendar.get(Calendar.MONTH);
+//            int     year          = calendar.get(Calendar.YEAR) - 1900;
+//            boolean isStart       = month == begMonth && year == begYear;
+//            boolean isEnd         = month == endMonth && year == endYear;
+//            int     maxDays       = 30;
+//            int     involvedDays  = isEnd ? day : maxDays - day + 1;
+//            int     monthTrips    = seasonTrip.getKol_trips();
+//            int     involvedTrips =
+//                    isStart ? Math.round((float) (monthTrips * involvedDays) / maxDays) :
+//                            isEnd ? monthTrips * collector.size() - totalTrips
+//                                    : monthTrips;
+//
+//            totalTrips += involvedTrips;
+//
+//            collector.put(Util.formatDate(calendar.getTime(), "yyyyMM"), involvedTrips);
+//            calendar.add(Calendar.MONTH, 1);
+//            calendar.set(Calendar.DAY_OF_MONTH, isEnd ? endDate.getDate() : 1);
+//        }
+//        return collector;
+//    }
+
+    @PostConstruct
+    private void test() {
+        calculateTripsPerMonth(
+                (short) 9,
+                (short) 120,
+                new Date(2024 - 1900, Calendar.DECEMBER, 15),
+                new Date(2024 - 1900, Calendar.DECEMBER, 16),
+                new Date(2024 - 1900, Calendar.OCTOBER, 24))
+                .forEach((k, v) -> System.out.println(k + " " + v));
 
         calculateTripsPerMonth(
                 (short) 9,
                 (short) 90,
                 new Date(2024 - 1900, Calendar.JUNE, 10),
-                new Date(2024 - 1900, Calendar.JUNE, 27),
+                new Date(2024 - 1900, Calendar.JUNE, 7),
                 new Date(2024 - 1900, Calendar.OCTOBER, 24))
                 .forEach((k, v) -> System.out.println(k + " " + v));
 

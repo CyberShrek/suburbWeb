@@ -15,11 +15,25 @@ import java.util.*;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
+    private TripsDao trips;
+    private boolean isAbonement;
+
     public Level3Prig(Set<Level2Dao.PrigRecord> records,
                       Handbook handbook,
                       RoutesDao routes,
+                      TripsDao trips,
                       Long initialT1Serial) {
         super(records, handbook, routes, initialT1Serial);
+
+        switch (getT1P21()) {
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5': isAbonement = true;
+            default : isAbonement = false;
+        }
+
         transform();
     }
 
@@ -48,10 +62,16 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
-        Set<T1> result = new HashSet<>();
-        result.add(t1);
+        Set<T1> result;
+
+        if (isAbonement) {
+            result = trips.multiplyByTrips(t1, main);
+        } else {
+            result = new HashSet<>();
+            result.add(t1);
+        }
+
         return result;
-        //trips.multiplyByTrips(t1, main);
     }
 
     @Override
@@ -133,9 +153,10 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         );
     }
 
+
     @Override
     protected String getT1P12() {
-        switch (getTicketType(main)) {
+        switch (getT1P21()) {
             // Для разового билета и абонементов - yymm даты начала действия
             case '2': case '3': case '5':
                 return Util.formatDate(main.ticket_begdate, "yyMM");
@@ -184,7 +205,15 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Character getT1P21() {
-        return getTicketType(main);
+        if(main.flg_fee_onboard == '1') return '8'; // Квитанция за оформление в поезде
+        if(main.carryon_type    == '1') return '6'; // Перевозочный документ (для багажа)
+        switch (main.abonement_type.charAt(0)) {
+            case '5': case '6': return '4';         // Билет выходного дня
+            case '0': return main.flg_2wayticket == '1'
+                    ? '3'                           // В обоих направлениях
+                    : '2';                          // В одном направлении
+        }
+        return '5';
     }
 
     @Override
@@ -255,14 +284,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Long getT1P33() {
-        switch (getTicketType(main)) {
-            case '1':
-                case '2':
-                    case '3':
-                        case '4':
-                            case '5': return (long) main.pass_qty;
-        }
-        return (long) main.carryon_weight;
+        return (long) (isAbonement ? main.pass_qty : main.carryon_weight);
     }
 
     @Override
@@ -678,19 +700,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected Short getLgotP33() {
         return main.carryon_weight;
-    }
-
-
-    private Character getTicketType(PrigMain main) {
-        if(main.flg_fee_onboard == '1') return '8'; // Квитанция за оформление в поезде
-        if(main.carryon_type    == '1') return '6'; // Перевозочный документ (для багажа)
-        switch (main.abonement_type.charAt(0)) {
-            case '5': case '6': return '4';         // Билет выходного дня
-            case '0': return main.flg_2wayticket == '1'
-                    ? '3'                           // В обоих направлениях
-                    : '2';                          // В одном направлении
-        }
-        return '5';
     }
 
     private String getTSite(PrigMain main) {

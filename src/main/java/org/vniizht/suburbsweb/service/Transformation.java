@@ -78,7 +78,7 @@ public class Transformation {
                 () -> level2.findPrigRecords(requestDate), log, "l2_prig");
 
         return (Level3Prig) transform(
-                () -> new Level3Prig(records, handbook, routes, level3.getLatestT1P2() + 1),
+                () -> new Level3Prig(records, handbook, routes, trips, level3.getLatestT1P2() + 1),
                 log, "l2_prig"
         );
     }
@@ -185,7 +185,7 @@ public class Transformation {
 
 //    @PostConstruct
     public void test() {
-        int yyyy = 2024, mm = 2, dd = 05;
+        int yyyy = 2024, mm = 10, dd = 31;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
                 true,
