@@ -71,6 +71,9 @@ public class HandbookCache {
 
         return null;
     }
+    public SeasonTrip findTrip(Short season_tick_code, Short period) {
+        return findTrip(season_tick_code, period, new Date());
+    }
 
     // Key is used for codes. Multiple codes will be concatenated
     private final Map<String, Dor>    dorMap           = new HashMap<>();

@@ -3,12 +3,14 @@ package org.vniizht.suburbsweb.service.data.entities.level3.co22;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.vniizht.suburbsweb.service.data.entities.level3.L3Key;
+import org.vniizht.suburbsweb.util.Util;
 
 import javax.persistence.*;
 import javax.servlet.annotation.HandlesTypes;
 import java.io.Serializable;
+import java.util.Arrays;
 
-@Entity
+//@Entity
 @Table(schema = "prigl3",
         name = "co22_t1")
 @Getter
@@ -39,6 +41,7 @@ public class T1 {
     private Long p49;
     private Long p50;
     private Long p51;
+    private Long[] idnums = new Long[0];
 
     public void add(T1 t1) {
         p33 += t1.p33;
@@ -60,6 +63,7 @@ public class T1 {
         p49 += t1.p49;
         p50 += t1.p50;
         p51 += t1.p51;
+        idnums = Util.concatArrays(idnums, t1.idnums);
     }
 
     @Embeddable

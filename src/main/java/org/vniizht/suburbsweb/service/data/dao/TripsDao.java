@@ -17,155 +17,84 @@ public class TripsDao {
     @Autowired
     private HandbookCache handbookCache;
 
-    public Set<T1> multiplyByTrips(T1 t1, PrigMain prigMain) {
-
-        Set<T1> t1Set = new LinkedHashSet<>();
-        short abonementType = convertAbonementType(prigMain.abonement_type);
-//        String
-
-        if (abonementType != 0)
-            calculateTripsPerMonth(
-                    abonementType,
-                    prigMain.seatstick_limit,
-                    prigMain.operation_date,
-                    prigMain.ticket_begdate,
-                    prigMain.ticket_enddate)
-                    .forEach((yyyymm, trips) -> t1Set.add(t1.toBuilder()
-                            .key(t1.getKey().toBuilder()
-                                    .yyyymm(Integer.parseInt(yyyymm))
-                                    .build())
-                            .p33(Long.valueOf(trips))
-                            // Стоимости
-//                            .p34()
-                            .build()));
-
-        if (t1Set.isEmpty())
-            t1Set.add(t1);
-
-        return t1Set;
+    public Map<String, Integer> calculateTripsPerMonth(PrigMain main) {
+        return calculateTripsPerMonth(
+                handbookCache.findTrip(
+                        abonementType2ticketCode(main.abonement_type),
+                        main.seatstick_limit,
+                        main.ticket_begdate),
+                main.operation_date,
+                main.ticket_begdate,
+                main.ticket_enddate
+        );
     }
 
-    private short convertAbonementType(String abonementType) {
-        switch (abonementType.charAt(0)) {
-            case '1':
-                return 9; // билет на количество поездок
-            case '2':
-                return 7; // билет на определенные даты
-            case '3':
-                return 1; // билет «ежедневно» (помесячный)
-            case '4':
-                return 2; // билет «ежедневно» (посуточный)
-            case '5':
-                return 8; // билет «выходного дня»
-            case '7':
-                return 3; // билет «рабочего дня» (помесячный)
-            case '8':
-                return 4; // билет «рабочего дня» (посуточный)
-            default:
-                return 0;
-        }
-    }
-
-    private Map<String, Integer> calculateTripsPerMonth(Short ticketCode,
-                                                        Short period,
+    public Map<String, Integer> calculateTripsPerMonth(SeasonTrip seasonTrip,
                                                         Date saleDate,
                                                         Date begDate,
                                                         Date endDate) {
 
-        Map<String, Integer> result = new LinkedHashMap<>();
-        SeasonTrip seasonTrip = handbookCache.findTrip(ticketCode, period, begDate);
+        Map<String, Integer> totalTripsPerMonth = new LinkedHashMap<>();
+        calculateDaysWithTripsPerMonth(saleDate, begDate, endDate)
+                .forEach((yyyymm, daysWithTrips) ->
+                        totalTripsPerMonth
+                                .put(yyyymm, seasonTrip == null ? 0 :
+                                        Math.round(((float) seasonTrip.getKol__round_trips() / 2)
+                                                * ((float) daysWithTrips / 31))
+                                )
+                );
 
-//        if(seasonTrip != null) {
+        return totalTripsPerMonth;
+    }
+
+    private Map<String, Byte> calculateDaysWithTripsPerMonth(Date saleDate,
+                                                             Date begDate,
+                                                             Date endDate) {
+        Map<String, Byte> daysWithTripsPerMonth = new LinkedHashMap<>();
+
         for (Date iterDate = new Date(Math.min(saleDate.getTime(), begDate.getTime()));
-             iterDate.before(endDate) || yyyymm(iterDate).equals(yyyymm(endDate));
+             iterDate.before(endDate) || iterDate.equals(endDate);
              iterDate = new Date(iterDate.getTime() + 86400000)) {
 
-            int tripsCount = result.computeIfAbsent(yyyymm(iterDate), k -> 0);
+            byte daysWithTrips = daysWithTripsPerMonth.computeIfAbsent(yyyymm(iterDate), k -> (byte) 0);
+            if (iterDate.getTime() >= begDate.getTime())
+                daysWithTrips++;
 
-            if(iterDate.getTime() >= saleDate.getTime()) {
-                tripsCount++;
-            }
-
-            result.put(yyyymm(iterDate), tripsCount);
+            daysWithTripsPerMonth.put(yyyymm(iterDate), daysWithTrips);
         }
+        return daysWithTripsPerMonth;
+    }
 
-//        }
-
-        return result;
+    private short abonementType2ticketCode(String abonementType) {
+        switch (abonementType.charAt(0)) {
+            case '1': return 9; // билет на количество поездок
+            case '2': return 7; // билет на определенные даты
+            case '3': return 1; // билет «ежедневно» (помесячный)
+            case '4': return 2; // билет «ежедневно» (посуточный)
+            case '5': return 8; // билет «выходного дня»
+            case '7': return 3; // билет «рабочего дня» (помесячный)
+            case '8': return 4; // билет «рабочего дня» (посуточный)
+            default : return 0;
+        }
     }
 
     private String yyyymm(Date date) {
         return Util.formatDate(date, "yyyyMM");
     }
 
-//    private Map<String, Integer> calculateTripsPerMonth(Short ticketCode,
-//                                                        Short period,
-//                                                        Date saleDate,
-//                                                        Date begDate,
-//                                                        Date endDate) {
-//
-//        SeasonTrip seasonTrip = handbookCache.findTrip(ticketCode, period, begDate);
-//        if (seasonTrip == null) return new HashMap<>();
-//
-//        int   saleMonth = saleDate.getMonth(), saleYear = saleDate.getYear();
-//        int   begMonth  = begDate.getMonth(),  begYear  = begDate.getYear();
-//        int   endMonth  = endDate.getMonth(),  endYear  = endDate.getYear();
-//        Map <String, Integer> collectorBefore = new LinkedHashMap<>();
-//        Map <String, Integer> collector = new LinkedHashMap<>();
-//        Calendar calendar = new GregorianCalendar();
-//        calendar.setTime(saleDate);
-//        while (calendar.getTime().getTime() <= begDate.getTime()) {
-//            collectorBefore.put(Util.formatDate(calendar.getTime(), "yyyyMM"), 0);
-//            calendar.add(Calendar.MONTH, 1);
-//        }
-//        calendar.setTime(begDate);
-//        int totalTrips = 0;
-//        while (calendar.getTime().getTime() <= endDate.getTime()) {
-//            int     day           = calendar.get(Calendar.DAY_OF_MONTH);
-//            int     month         = calendar.get(Calendar.MONTH);
-//            int     year          = calendar.get(Calendar.YEAR) - 1900;
-//            boolean isStart       = month == begMonth && year == begYear;
-//            boolean isEnd         = month == endMonth && year == endYear;
-//            int     maxDays       = 30;
-//            int     involvedDays  = isEnd ? day : maxDays - day + 1;
-//            int     monthTrips    = seasonTrip.getKol_trips();
-//            int     involvedTrips =
-//                    isStart ? Math.round((float) (monthTrips * involvedDays) / maxDays) :
-//                            isEnd ? monthTrips * collector.size() - totalTrips
-//                                    : monthTrips;
-//
-//            totalTrips += involvedTrips;
-//
-//            collector.put(Util.formatDate(calendar.getTime(), "yyyyMM"), involvedTrips);
-//            calendar.add(Calendar.MONTH, 1);
-//            calendar.set(Calendar.DAY_OF_MONTH, isEnd ? endDate.getDate() : 1);
-//        }
-//        return collector;
-//    }
-
-    @PostConstruct
+//    @PostConstruct
     private void test() {
-        calculateTripsPerMonth(
-                (short) 9,
-                (short) 120,
-                new Date(2024 - 1900, Calendar.DECEMBER, 15),
-                new Date(2024 - 1900, Calendar.DECEMBER, 16),
-                new Date(2024 - 1900, Calendar.OCTOBER, 24))
-                .forEach((k, v) -> System.out.println(k + " " + v));
+
+        handbookCache.load();
 
         calculateTripsPerMonth(
-                (short) 9,
-                (short) 90,
-                new Date(2024 - 1900, Calendar.JUNE, 10),
-                new Date(2024 - 1900, Calendar.JUNE, 7),
+                handbookCache.findTrip(
+                        (short) 9,
+                        (short) 90
+                ),
+                new Date(2024 - 1900, Calendar.MAY, 10),
+                new Date(2024 - 1900, Calendar.JUNE, 27),
                 new Date(2024 - 1900, Calendar.OCTOBER, 24))
                 .forEach((k, v) -> System.out.println(k + " " + v));
-
-//        calculateTripsPerMonth(
-//                (short) 1,
-//                (short) 1,
-//                new Date(2024 - 1900, Calendar.JULY, 26),
-//                new Date(2024 - 1900, Calendar.OCTOBER, 25))
-//                .forEach((k, v) -> System.out.println(k + " " + v));
     }
 }

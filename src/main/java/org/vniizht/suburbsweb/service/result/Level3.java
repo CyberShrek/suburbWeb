@@ -26,27 +26,26 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Функция обработки каждой записи второго уровня
     abstract protected void assignVariablesForRecord(L2_RECORD record);
 
-    // Получение маршрутов для каждой записи
-    abstract protected List<Route> getRoutes();
-
     // Мультипликатор
     abstract protected Set<T1> multiplyT1(T1 t1);
 
-    // Детали общие
+    // Детали общие и метаданные
     abstract protected Integer getYyyymm();
     abstract protected Date    getRequestDate();
+    abstract protected List<Route> getRoutes();
+    abstract protected Long        getIdnum();
 
     // Проверка существования t1
     abstract protected boolean   t1Exists();
 
     // Компоненты T1
-    abstract protected String    getT1P1();
+             protected String    getT1P1() {return "tab1";}
              protected Long      getT1P2() {return null;}
     abstract protected String    getT1P3();
     abstract protected String    getT1P4();
-    abstract protected String    getT1P5();
+             protected String    getT1P5() {return "017";}
     abstract protected String    getT1P6();
-    abstract protected String    getT1P7();
+             protected String    getT1P7() {return getT1P6();}
     abstract protected String    getT1P8();
     abstract protected String    getT1P9();
     abstract protected String    getT1P10();
@@ -203,6 +202,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     private T1 buildT1(List<Route> routes) {
         T1 t1 = T1.builder()
+                .idnums(new Long[]{getIdnum()})
                 .key(T1.Key.builder()
                         .requestDate(getRequestDate())
                         .yyyymm(getYyyymm())
@@ -308,7 +308,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .build();
     }
 
-    private T4 buildT4(Route route) {
+    private T4 buildT4(Route route, boolean hasCosts) {
         return T4.builder()
                 .requestDate(getRequestDate())
                 .p1("tab4")
@@ -317,9 +317,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p4(route.getSerial())
                 .p5(route.getRoadStart())
                 .p6(getT1P17())
-                .p7(0L)
-                .p8(0L)
-                .p9((short) 0)
+                .p7(hasCosts ? route.getCost() : 0)
+                .p8(hasCosts ? route.getLostCost() : 0)
+                .p9(route.getDistance())
                 .build();
     }
 
@@ -393,7 +393,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             routes.forEach(route -> {
                 t2.add(buildT2(route));
                 t3.add(buildT3(route));
-                t4.add(buildT4(route));
+                t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4())));
                 t6.add(buildT6(route));
             });
         }

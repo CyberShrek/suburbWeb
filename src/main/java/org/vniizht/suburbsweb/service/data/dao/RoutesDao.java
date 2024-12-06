@@ -19,8 +19,6 @@ public class RoutesDao {
         if (!routesCache.containsKey(key)) {
             Route route = new Route();
 
-            System.out.println("routeNum = " + routeNum + ", date = " + date + ", depStation = " + depStation + ", arrStation = " + arrStation);
-
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
                     routeNum, date, depStation, arrStation);
 

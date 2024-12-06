@@ -32,6 +32,11 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private PassEx         ex;
 
     @Override
+    protected Long getIdnum() {
+        return main.idnum;
+    }
+
+    @Override
     protected List<Route> getRoutes() {
         List<Route> routes = new ArrayList<>();
         routes.add(routesDao.getRoute(
@@ -75,18 +80,13 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected String getT1P1() {
-        return "tab1";
-    }
-
-    @Override
     protected String getT1P3() {
         return Util.formatDate(main.oper_date, "yyyy");
     }
 
     @Override
     protected String getT1P4() {
-        return Util.formatDate(main.oper_date, "mm");
+        return Util.formatDate(main.oper_date, "MM");
     }
 
     @Override
@@ -96,11 +96,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected String getT1P6() {
-        return handbook.getRoad3(main.sale_station, main.oper_date);
-    }
-
-    @Override
-    protected String getT1P7() {
         return handbook.getRoad3(main.sale_station, main.oper_date);
     }
 
@@ -126,7 +121,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected String getT1P12() {
-        return Util.formatDate(main.departure_date, "yymm");
+        return Util.formatDate(main.departure_date, "yyMM");
     }
 
     @Override

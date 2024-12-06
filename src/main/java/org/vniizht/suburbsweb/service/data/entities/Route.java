@@ -27,4 +27,8 @@ public class Route {
 
     Character mcd;
     Short     mcdDistance;
+
+    Long      cost;
+    Long      lostCost;
+    Short     distance;
 }

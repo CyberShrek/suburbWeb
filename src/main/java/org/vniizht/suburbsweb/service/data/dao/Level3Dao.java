@@ -101,7 +101,7 @@ public class Level3Dao {
                 "?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11),\n" +
                 "?::numeric(9) , ?::char       , ?::char(4)    , ?::char(7)    , ?::char       ,\n" +
                 "?::char(3)    , ?::char       , ?::char       , ?::char       , ?::char(3)    ,\n" +
-                "?::char       , ?::integer    , ?::char       )",
+                "?::char       , ?::integer    , ?::char       , ?::smallint[] , ?::bigint[])",
                 t1List,
                 BATCH_SIZE,
                 (ps, t1) -> {
@@ -178,6 +178,8 @@ public class Level3Dao {
                     ps.setObject(63, t1.getKey().getP61());
                     ps.setObject(64, t1.getKey().getP62());
                     ps.setObject(65, t1.getKey().getP63());
+                    ps.setObject(66, t1.getKey().getRoutes());
+                    ps.setObject(67, t1.getIdnums());
                     progress.getAndIncrement();
                     LogWS.spreadProgress((int) (((float) progress.get()) / t1List.size() * 100));
                 }

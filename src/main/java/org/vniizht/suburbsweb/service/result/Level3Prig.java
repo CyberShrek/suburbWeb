@@ -15,7 +15,7 @@ import java.util.*;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
-    private TripsDao trips;
+    private final TripsDao trips;
     private boolean isAbonement;
 
     public Level3Prig(Set<Level2Dao.PrigRecord> records,
@@ -24,7 +24,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                       TripsDao trips,
                       Long initialT1Serial) {
         super(records, handbook, routes, initialT1Serial);
-
+        this.trips = trips;
         switch (getT1P21()) {
             case '1':
             case '2':
@@ -49,6 +49,11 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     private PrigAdi        adi;
 
     @Override
+    protected Long getIdnum() {
+        return main.idnum;
+    }
+
+    @Override
     protected List<Route> getRoutes() {
         List<Route> routes = new ArrayList<>();
         costList.forEach(cost -> routes.add(routesDao.getRoute(
@@ -62,16 +67,42 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
-        Set<T1> result;
+        Set<T1> t1Set = new LinkedHashSet<>();
 
         if (isAbonement) {
-            result = trips.multiplyByTrips(t1, main);
+            trips.calculateTripsPerMonth(main)
+                    .forEach((yyyymm, trips) -> {
+                        boolean isActual = t1.getKey().getYyyymm() == Integer.parseInt(yyyymm);
+                        t1Set.add(t1.toBuilder()
+                                .key(t1.getKey().toBuilder()
+                                        .yyyymm(Integer.parseInt(yyyymm))
+                                        .build())
+                                .p33(Long.valueOf(trips))
+                                // Стоимости
+                                .p34(isActual ? t1.getP34() : 0)
+                                .p35(isActual ? t1.getP35() : 0)
+                                .p36(isActual ? t1.getP36() : 0)
+                                .p37(isActual ? t1.getP37() : 0)
+                                .p38(isActual ? t1.getP38() : 0)
+                                .p39(isActual ? t1.getP39() : 0)
+                                .p40(isActual ? t1.getP40() : 0)
+                                .p41(isActual ? t1.getP41() : 0)
+                                .p42(isActual ? t1.getP42() : 0)
+                                .p43(isActual ? t1.getP43() : 0)
+                                .p44(isActual ? t1.getP44() : 0)
+                                .p45(isActual ? t1.getP45() : 0)
+                                .p46(isActual ? t1.getP46() : 0)
+                                .p47(isActual ? t1.getP47() : 0)
+                                .p48(isActual ? t1.getP48() : 0)
+                                .p49(isActual ? t1.getP49() : 0)
+                                .p50(isActual ? t1.getP50() : 0)
+                                .build());
+                    });
         } else {
-            result = new HashSet<>();
-            result.add(t1);
+            t1Set.add(t1);
         }
 
-        return result;
+        return t1Set;
     }
 
     @Override
@@ -90,42 +121,19 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected String getT1P1() {
-        return "tab1";
-    }
-
-    @Override
-    protected Long getT1P2() {
-        return null;
-    }
-
-    @Override
     protected String getT1P3() {
         return Util.formatDate(main.operation_date, "yyyy");
     }
 
     @Override
     protected String getT1P4() {
-        return Util.formatDate(main.operation_date, "mm");
-    }
-
-    @Override
-    protected String getT1P5() {
-        return "17";
+        return Util.formatDate(main.operation_date, "MM");
     }
 
     @Override
     protected String getT1P6() {
         return handbook.getRoad3(
                 main.sale_station,
-                main.operation_date
-        );
-    }
-
-    @Override
-    protected String getT1P7() {
-        return handbook.getRoad3(
-                main.departure_station,
                 main.operation_date
         );
     }
@@ -474,9 +482,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Character getT1P61() {
-        return main.train_num.trim().isEmpty()
-                ? '0'
-                : main.train_num.trim().charAt(0);
+        return main.train_num.matches("^\\d {5}")
+                ? main.train_num.trim().charAt(0)
+                : 0;
     }
 
     @Override

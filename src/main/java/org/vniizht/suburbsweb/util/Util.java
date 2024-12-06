@@ -1,6 +1,7 @@
 package org.vniizht.suburbsweb.util;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Util {
@@ -15,5 +16,12 @@ public class Util {
     // Форматирует дату в заданный формат
     public static String formatDate(Date date, String format) {
         return new SimpleDateFormat(format).format(date);
+    }
+
+    // Объединяет два массива в один
+    public static <T> T[] concatArrays(T[] array1, T[] array2) {
+        T[] result = Arrays.copyOf(array1, array1.length + array2.length);
+        System.arraycopy(array2, 0, result, array1.length, array2.length);
+        return result;
     }
 }
