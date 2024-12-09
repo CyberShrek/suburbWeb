@@ -22,34 +22,48 @@ public class RoutesDao {
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
                     routeNum, date, depStation, arrStation);
 
-            Set <Integer> mcdSet = new HashSet<>();
+            Set<Integer> mcdSet = new HashSet<>();
+            Set<Integer> dcsSet = new HashSet<>();
 
             while (prigRS.next()){
                 int narr = prigRS.getInt("narr");
                 String st1 = prigRS.getString("sto");
                 String st2 = prigRS.getString("stn");
-                String est_obj_chr = prigRS.getString("obj_chr");
+                String obj_chr = prigRS.getString("obj_chr");
                 int pr_mcd = prigRS.getInt("pr_mcd");
                 short rst = prigRS.getShort("rst_p");
 
-                if(st1 != null && st1.equals(depStation)){
-                    switch (narr) {
-                        case 1: route.setRegionStart(est_obj_chr); break;
-                        case 2: route.setRoadStart(est_obj_chr);   break;
-                        case 3: route.setDepartmentStart(est_obj_chr);
+                boolean isStart = st1 != null && st1.equals(depStation);
+                boolean isEnd   = st2 != null && st2.equals(arrStation);
+
+                switch (narr) {
+                    case 1: {
+                        if (isStart) route.setRegionStart(obj_chr);
+                        if (isEnd)   route.setRegionEnd(obj_chr);
+                        break;
                     }
-                }
-                else if (st2 != null && st2.equals(depStation)) {
-                    switch (narr) {
-                        case 1: route.setRegionEnd(est_obj_chr); break;
-                        case 2: route.setRoadEnd(est_obj_chr);   break;
-                        case 3: route.setDepartmentEnd(est_obj_chr);
+                    case 2: {
+                        if (isStart) route.setRoadStart(obj_chr);
+                        if (isEnd)   route.setRoadEnd(obj_chr);
+                        break;
                     }
-                }
-                if (narr == 5) {
-                    mcdSet.add(pr_mcd);
-                    if (est_obj_chr != null && est_obj_chr.trim().equals("1") && pr_mcd == 2)
-                        route.setMcdDistance(rst);
+                    case 3: {
+                        if (isStart) route.setDepartmentStart(obj_chr);
+                        if (isEnd)   route.setDepartmentEnd(obj_chr);
+                        break;
+                    }
+                    case 4: {
+                        route.setDcsDistance((short) (
+                                Optional.ofNullable(route.getDcsDistance()).orElse((short) 0) + rst
+                        ));
+                        break;
+                    }
+                    case 5:
+                        mcdSet.add(pr_mcd);
+                        if (obj_chr != null && obj_chr.trim().equals("1"))
+                            route.setMcdDistance((short) (
+                                    Optional.ofNullable(route.getMcdDistance()).orElse((short) 0) + rst
+                            ));
                 }
             }
             Character mcdType = null;

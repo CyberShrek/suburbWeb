@@ -20,7 +20,7 @@ public class TripsDao {
     public Map<String, Integer> calculateTripsPerMonth(PrigMain main) {
         return calculateTripsPerMonth(
                 handbookCache.findTrip(
-                        abonementType2ticketCode(main.abonement_type),
+                        abonementType2ticketCode(main.abonement_subtype, main.abonement_type),
                         main.seatstick_limit,
                         main.ticket_begdate),
                 main.operation_date,
@@ -65,13 +65,18 @@ public class TripsDao {
         return daysWithTripsPerMonth;
     }
 
-    private short abonementType2ticketCode(String abonementType) {
+    private short abonementType2ticketCode(Character abonementSubtype, String abonementType) {
         switch (abonementType.charAt(0)) {
             case '1': return 9; // билет на количество поездок
-            case '2': return 7; // билет на определенные даты
+            case '2': switch (abonementSubtype) {
+                case '1': return 6;
+                case '2': return 5;
+                default : return 7; // билет на определенные даты
+            }
             case '3': return 1; // билет «ежедневно» (помесячный)
             case '4': return 2; // билет «ежедневно» (посуточный)
-            case '5': return 8; // билет «выходного дня»
+            case '5':
+            case '6': return 8; // билет «выходного дня»
             case '7': return 3; // билет «рабочего дня» (помесячный)
             case '8': return 4; // билет «рабочего дня» (посуточный)
             default : return 0;

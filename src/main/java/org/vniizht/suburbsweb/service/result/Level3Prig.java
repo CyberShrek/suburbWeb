@@ -60,7 +60,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 cost.route_num,
                 main.departure_station,
                 main.arrival_station,
-                main.operation_date
+                cost.requestDate
         )));
         return routes;
     }

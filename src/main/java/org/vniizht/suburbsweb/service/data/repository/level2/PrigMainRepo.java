@@ -10,9 +10,10 @@ import java.util.List;
 @Repository
 public interface PrigMainRepo extends Level2Repo<PrigMain, Long> {
 
-    @Query("SELECT pm FROM PrigMain pm " +
-            "LEFT OUTER JOIN FETCH pm.adi " +
-            "LEFT OUTER JOIN FETCH pm.costs " +
-            "WHERE pm.requestDate = ?1")
+    @Query("SELECT main FROM PrigMain main " +
+            "LEFT OUTER JOIN FETCH main.adi adi " +
+            "LEFT OUTER JOIN FETCH main.costs costs " +
+            "WHERE main.requestDate = ?1" +
+            "ORDER BY costs.doc_reg")
     List<PrigMain> findAllByRequestDate(Date date);
 }

@@ -266,19 +266,20 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p51(getT1P51())
                 .build();
 
-        Route route = routes.get(0);
-        if(route != null)
+        if(routes.size() > 1) {
+            Route firstRoute = routes.get(0);
+            Route lastRoute  = routes.get(routes.size() - 1);
             t1.setKey(t1.getKey().toBuilder()
-                    .p13(getT1P13(route))
-                    .p14(getT1P14(route))
-                    .p16(getT1P16(route))
-                    .p27(getT1P27(route))
-                    .p28(getT1P28(route))
-                    .p29(getT1P29(route))
-                    .p62(getT1P62(route))
-                    .p63(getT1P63(route))
+                    .p13(getT1P13(firstRoute))
+                    .p14(getT1P14(firstRoute))
+                    .p16(getT1P16(firstRoute))
+                    .p27(getT1P27(lastRoute))
+                    .p28(getT1P28(lastRoute))
+                    .p29(getT1P29(lastRoute))
+                    .p62(getT1P62(firstRoute))
+                    .p63(getT1P63(firstRoute))
                     .build());
-
+        }
         return t1;
     }
 
