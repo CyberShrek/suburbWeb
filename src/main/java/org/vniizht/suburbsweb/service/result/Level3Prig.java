@@ -56,12 +56,25 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected List<Route> getRoutes() {
         List<Route> routes = new ArrayList<>();
-        costList.forEach(cost -> routes.add(routesDao.getRoute(
-                cost.route_num,
-                main.departure_station,
-                main.arrival_station,
-                cost.requestDate
-        )));
+        Map<Short, List<PrigCost>> costsPerRouteNum = new LinkedHashMap<>();
+        costList.forEach(cost -> {
+            if (!costsPerRouteNum.containsKey(cost.route_num)) {
+                costsPerRouteNum.put(cost.route_num, new ArrayList<>());
+            }
+            costsPerRouteNum.get(cost.route_num).add(cost);
+        });
+        costsPerRouteNum.forEach((routeNum, costs) -> {
+            PrigCost firstCost = costs.get(0);
+            PrigCost lastCost  = costs.get(costs.size() - 1);
+            Route route = routesDao.getRoute(
+                    routeNum,
+                    firstCost.departure_station,
+                    lastCost.arrival_station,
+                    firstCost.requestDate
+            );
+            route.incrementSerial();
+            routes.add(route);
+        });
         return routes;
     }
 

@@ -13,13 +13,20 @@ public class Route {
 
     String    roadStart;
     String    roadEnd;
+    String    road;
+    String    roadToFollow;
+    Short     roadDistance;
+
+    String    okato;
 
     String    departmentStart;
     String    departmentEnd;
+    String    department;
     Short     departmentDistance;
 
     String    regionStart;
     String    regionEnd;
+    String    region;
     Short     regionDistance;
 
     Short     dcs;
@@ -31,4 +38,8 @@ public class Route {
     Long      cost;
     Long      lostCost;
     Short     distance;
+
+    public void incrementSerial() {
+        serial++;
+    }
 }

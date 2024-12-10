@@ -5,12 +5,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.Route;
+import org.vniizht.suburbsweb.service.handbook.Handbook;
 
 import java.util.*;
 
 @Service
 public class RoutesDao {
     @Autowired private JdbcTemplate jdbcTemplate;
+    @Autowired private Handbook handbook;
 
     private final Map<String, Route> routesCache = new HashMap<>();
 
@@ -18,6 +20,7 @@ public class RoutesDao {
         String key = depStation + arrStation + date;
         if (!routesCache.containsKey(key)) {
             Route route = new Route();
+            route.setSerial((short) 1);
 
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
                     routeNum, date, depStation, arrStation);
@@ -26,12 +29,13 @@ public class RoutesDao {
             Set<Integer> dcsSet = new HashSet<>();
 
             while (prigRS.next()){
-                int narr = prigRS.getInt("narr");
-                String st1 = prigRS.getString("sto");
-                String st2 = prigRS.getString("stn");
-                String obj_chr = prigRS.getString("obj_chr");
-                int pr_mcd = prigRS.getInt("pr_mcd");
-                short rst = prigRS.getShort("rst_p");
+                int    narr     = prigRS.getInt("narr");
+                String st1      = prigRS.getString("sto");
+                String st2      = prigRS.getString("stn");
+                String obj_chr  = prigRS.getString("obj_chr");
+                int    obj_int  = prigRS.getInt("obj_int");
+                int    pr_mcd   = prigRS.getInt("pr_mcd");
+                short  rst      = prigRS.getShort("rst_p");
 
                 boolean isStart = st1 != null && st1.equals(depStation);
                 boolean isEnd   = st2 != null && st2.equals(arrStation);
@@ -40,16 +44,23 @@ public class RoutesDao {
                     case 1: {
                         if (isStart) route.setRegionStart(obj_chr);
                         if (isEnd)   route.setRegionEnd(obj_chr);
+                        route.setRegion(obj_chr);
+                        route.setRegionDistance(rst);
+                        route.setOkato(handbook.getOkatoByRegion(obj_chr, date));
                         break;
                     }
                     case 2: {
                         if (isStart) route.setRoadStart(obj_chr);
                         if (isEnd)   route.setRoadEnd(obj_chr);
+                        route.setRoad(String.valueOf(obj_int));
+                        route.setRoadDistance(rst);
                         break;
                     }
                     case 3: {
                         if (isStart) route.setDepartmentStart(obj_chr);
                         if (isEnd)   route.setDepartmentEnd(obj_chr);
+                        route.setDepartment(String.valueOf(obj_int));
+                        route.setDepartmentDistance(rst);
                         break;
                     }
                     case 4: {
@@ -58,13 +69,20 @@ public class RoutesDao {
                         ));
                         break;
                     }
-                    case 5:
+                    case 5: {
                         mcdSet.add(pr_mcd);
                         if (obj_chr != null && obj_chr.trim().equals("1"))
                             route.setMcdDistance((short) (
                                     Optional.ofNullable(route.getMcdDistance()).orElse((short) 0) + rst
                             ));
+                        break;
+                    }
+                    case 6: {
+                        route.setRoadToFollow(String.valueOf(obj_int));
+                        route.setOkato(handbook.getOkatoByStation(obj_chr, date));
+                    }
                 }
+
             }
             Character mcdType = null;
             switch (mcdSet.size()) {

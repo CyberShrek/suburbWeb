@@ -290,8 +290,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRoadStart())
-                .p6(route.getDepartmentStart())
+                .p5(route.getRoad())
+                .p6(route.getDepartment())
                 .p7(route.getDepartmentDistance())
                 .build();
     }
@@ -303,7 +303,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRegionStart())
+                .p5(route.getRegion())
                 .p6(getT1P17())
                 .p7(route.getRegionDistance())
                 .build();
