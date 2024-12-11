@@ -3,7 +3,7 @@ package org.vniizht.suburbsweb.service.result;
 import lombok.Getter;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
-import org.vniizht.suburbsweb.service.data.entities.Route;
+import org.vniizht.suburbsweb.service.data.entities.routes.*;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
@@ -12,6 +12,7 @@ import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
@@ -32,7 +33,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Детали общие и метаданные
     abstract protected Integer getYyyymm();
     abstract protected Date    getRequestDate();
-    abstract protected List<Route> getRoutes();
+    abstract protected List<RouteGroup> getRouteGroups();
     abstract protected Long        getIdnum();
 
     // Проверка существования t1
@@ -51,10 +52,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P10();
     abstract protected String    getT1P11();
     abstract protected String    getT1P12();
-             protected String    getT1P13(Route route) {return route.getRoadStart();}
-             protected String    getT1P14(Route route) {return route.getDepartmentStart();}
+             protected String    getT1P13(RoadRoute route)       {return route.getRoadStart();}
+             protected String    getT1P14(DepartmentRoute route) {return route.getDepartmentStart();}
     abstract protected String    getT1P15();
-             protected String    getT1P16(Route route) {return route.getRegionStart();}
+             protected String    getT1P16(RegionRoute route)     {return route.getRegionStart();}
     abstract protected String    getT1P17();
     abstract protected String    getT1P18();
     abstract protected Character getT1P19();
@@ -65,9 +66,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P24();
     abstract protected Character getT1P25();
     abstract protected String    getT1P26();
-             protected String    getT1P27(Route route) {return route.getRoadEnd();}
-             protected String    getT1P28(Route route) {return route.getDepartmentEnd();}
-             protected String    getT1P29(Route route) {return route.getRegionEnd();}
+             protected String    getT1P27(RoadRoute route)       {return route.getRoadEnd();}
+             protected String    getT1P28(DepartmentRoute route) {return route.getDepartmentEnd();}
+             protected String    getT1P29(RegionRoute route)     {return route.getRegionEnd();}
     abstract protected String    getT1P30();
     abstract protected String    getT1P31();
     abstract protected Short     getT1P32();
@@ -100,8 +101,19 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Character getT1P59();
     abstract protected String    getT1P60();
     abstract protected Character getT1P61();
-             protected Short     getT1P62(Route route) {return route.getMcdDistance();}
-             protected Character getT1P63(Route route) {return route.getMcd();}
+             protected Short     getT1P62(List<McdRoute> routes) {
+                 return (short) routes.stream().mapToInt(McdRoute::getDistance).sum();
+             }
+             protected Character getT1P63(List<McdRoute> routes) {
+                 if (routes.stream().anyMatch(mcdRoute -> mcdRoute.getCode() == '1')) {
+                     switch (routes.size()) {
+                         case 1:  return '1';
+                         case 2:  return routes.get(0).getCode() == 0 ? '2' : '3';
+                         default: return '4';
+                     }
+                 }
+                 return '0';
+             }
 
     // Проверка существования льготы
     abstract protected boolean lgotExists();
@@ -172,17 +184,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     private void transformRecord(L2_RECORD record) {
         assignVariablesForRecord(record);
         if(t1Exists()) {
-            AtomicReference<List<Route>> routes = new AtomicReference<>();
-            routesSearchTime   += Util.measureTime(() -> routes.set(getRoutes()));
+            AtomicReference<List<RouteGroup>> routeGroups = new AtomicReference<>();
+            routesSearchTime   += Util.measureTime(() -> routeGroups.set(getRouteGroups()));
             transformationTime += Util.measureTime(() -> {
-                Set<T1> t1Set = multiplyT1(buildT1(routes.get()));
+                Set<T1> t1Set = multiplyT1(buildT1(routeGroups.get()));
                 t1Set.forEach(t1 -> {
                     String key = t1.getKey().toString();
                     // Агрегация данных
                     if(co22Result.containsKey(key))
                         co22Result.get(key).t1.add(t1);
                     else
-                        co22Result.put(key, new CO22(t1, routes.get()));
+                        co22Result.put(key, new CO22(t1, routeGroups.get()));
                 });
             });
         }
@@ -200,13 +212,13 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         routesSearchTime   = (float) Math.round(routesSearchTime   * 100) / 100;
     }
 
-    private T1 buildT1(List<Route> routes) {
+    private T1 buildT1(List<RouteGroup> routeGroupList) {
         T1 t1 = T1.builder()
                 .idnums(new Long[]{getIdnum()})
                 .key(T1.Key.builder()
                         .requestDate(getRequestDate())
                         .yyyymm(getYyyymm())
-                        .routes(routes.stream().map(Route::getNum).toArray(Short[]::new))
+                        .routes(routeGroupList.stream().map(RouteGroup::getNum).toArray(Short[]::new))
                         .p1(getT1P1())
                         .p2(getT1P2())
                         .p3(getT1P3())
@@ -266,24 +278,28 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p51(getT1P51())
                 .build();
 
-        if(routes.size() > 1) {
-            Route firstRoute = routes.get(0);
-            Route lastRoute  = routes.get(routes.size() - 1);
+        if(routeGroupList.size() > 1) {
+            RouteGroup firstGroup = routeGroupList.get(0);
+            RouteGroup lastGroup  = routeGroupList.get(routeGroupList.size() - 1);
+            List<McdRoute> mcdRoutes = routeGroupList.stream()
+                    .map(group -> Optional.ofNullable(group.getMcdRoutes()).orElseGet(ArrayList::new))
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
             t1.setKey(t1.getKey().toBuilder()
-                    .p13(getT1P13(firstRoute))
-                    .p14(getT1P14(firstRoute))
-                    .p16(getT1P16(firstRoute))
-                    .p27(getT1P27(lastRoute))
-                    .p28(getT1P28(lastRoute))
-                    .p29(getT1P29(lastRoute))
-                    .p62(getT1P62(firstRoute))
-                    .p63(getT1P63(firstRoute))
+                    .p13(getT1P13(firstGroup.getFirstRoadRoute()))
+                    .p14(getT1P14(firstGroup.getFirstDepartmentRoute()))
+                    .p16(getT1P16(firstGroup.getFirstRegionRoute()))
+                    .p27(getT1P27(lastGroup.getLastRoadRoute()))
+                    .p28(getT1P28(lastGroup.getLastDepartmentRoute()))
+                    .p29(getT1P29(lastGroup.getLastRegionRoute()))
+                    .p62(getT1P62(mcdRoutes))
+                    .p63(getT1P63(mcdRoutes))
                     .build());
         }
         return t1;
     }
 
-    private T2 buildT2(Route route) {
+    private T2 buildT2(DepartmentRoute route) {
         return T2.builder()
                 .requestDate(getRequestDate())
                 .p1("tab2")
@@ -292,11 +308,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p4(route.getSerial())
                 .p5(route.getRoad())
                 .p6(route.getDepartment())
-                .p7(route.getDepartmentDistance())
+                .p7(route.getDistance())
                 .build();
     }
 
-    private T3 buildT3(Route route) {
+    private T3 buildT3(RegionRoute route) {
         return T3.builder()
                 .requestDate(getRequestDate())
                 .p1("tab3")
@@ -304,36 +320,36 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p3(null)
                 .p4(route.getSerial())
                 .p5(route.getRegion())
-                .p6(getT1P17())
-                .p7(route.getRegionDistance())
+                .p6(route.getOkato())
+                .p7(route.getDistance())
                 .build();
     }
 
-    private T4 buildT4(Route route, boolean hasCosts) {
+    private T4 buildT4(FollowRoute route, boolean hasCosts) {
         return T4.builder()
                 .requestDate(getRequestDate())
                 .p1("tab4")
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRoadStart())
-                .p6(getT1P17())
+                .p5(route.getRoad())
+                .p6(route.getOkato())
                 .p7(hasCosts ? route.getCost() : 0)
                 .p8(hasCosts ? route.getLostCost() : 0)
                 .p9(route.getDistance())
                 .build();
     }
 
-    private T6 buildT6(Route route) {
+    private T6 buildT6(DcsRoute route) {
         return T6.builder()
                 .requestDate(getRequestDate())
                 .p1("tab6")
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRoadStart())
+                .p5(route.getRoad())
                 .p6(route.getDcs())
-                .p7(route.getDcsDistance())
+                .p7(route.getDistance())
                 .build();
     }
 
@@ -389,13 +405,13 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         private final List<T4> t4 = new ArrayList<>();
         private final List<T6> t6 = new ArrayList<>();
 
-        CO22(T1 t1, List<Route> routes) {
+        CO22(T1 t1, List<RouteGroup> routeGroupList) {
             this.t1 = t1;
-            routes.forEach(route -> {
-                t2.add(buildT2(route));
-                t3.add(buildT3(route));
-                t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4())));
-                t6.add(buildT6(route));
+            routeGroupList.forEach(routeGroup -> {
+                routeGroup.getDepartmentRoutes().forEach(route   -> t2.add(buildT2(route)));
+                routeGroup.getRegionRoutes().forEach(regionRoute -> t3.add(buildT3(regionRoute)));
+                routeGroup.getFollowRoutes().forEach(route       -> t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4()))));
+                routeGroup.getDcsRoutes().forEach(route          -> t6.add(buildT6(route)));
             });
         }
 

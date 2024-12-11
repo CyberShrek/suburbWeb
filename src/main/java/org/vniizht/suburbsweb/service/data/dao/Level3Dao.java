@@ -253,7 +253,7 @@ public class Level3Dao {
     private void insertT6s(List<T6> t6List){
         AtomicInteger progress = new AtomicInteger();
         jdbcTemplate.batchUpdate("INSERT INTO " + T6_TABLE + " VALUES (\ndefault," +
-                        "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(2), ?::int, ?::int, ?::date)",
+                        "?::char(4), ?::char(3), ?::bigint, ?::char(6), ?::char(2), ?::int, ?::int, ?::date)",
                 t6List,
                 BATCH_SIZE,
                 (ps, t3) -> {

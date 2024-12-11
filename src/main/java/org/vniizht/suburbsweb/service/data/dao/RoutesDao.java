@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.service.data.entities.Route;
+import org.vniizht.suburbsweb.service.data.entities.routes.*;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 
 import java.util.*;
@@ -14,19 +14,18 @@ public class RoutesDao {
     @Autowired private JdbcTemplate jdbcTemplate;
     @Autowired private Handbook handbook;
 
-    private final Map<String, Route> routesCache = new HashMap<>();
+    private final Map<String, RouteGroup> routesCache = new HashMap<>();
 
-    public Route getRoute(Short routeNum, String depStation, String arrStation, Date date){
+    public RouteGroup getRoutes(Short routeNum,
+                                String depStation,
+                                String arrStation,
+                                Date date) {
         String key = depStation + arrStation + date;
         if (!routesCache.containsKey(key)) {
-            Route route = new Route();
-            route.setSerial((short) 1);
+            RouteGroup routeGroup = new RouteGroup(routeNum);
 
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
                     routeNum, date, depStation, arrStation);
-
-            Set<Integer> mcdSet = new HashSet<>();
-            Set<Integer> dcsSet = new HashSet<>();
 
             while (prigRS.next()){
                 int    narr     = prigRS.getInt("narr");
@@ -41,58 +40,50 @@ public class RoutesDao {
                 boolean isEnd   = st2 != null && st2.equals(arrStation);
 
                 switch (narr) {
-                    case 1: {
-                        if (isStart) route.setRegionStart(obj_chr);
-                        if (isEnd)   route.setRegionEnd(obj_chr);
-                        route.setRegion(obj_chr);
-                        route.setRegionDistance(rst);
-                        route.setOkato(handbook.getOkatoByRegion(obj_chr, date));
-                        break;
-                    }
-                    case 2: {
-                        if (isStart) route.setRoadStart(obj_chr);
-                        if (isEnd)   route.setRoadEnd(obj_chr);
-                        route.setRoad(String.valueOf(obj_int));
-                        route.setRoadDistance(rst);
-                        break;
-                    }
-                    case 3: {
-                        if (isStart) route.setDepartmentStart(obj_chr);
-                        if (isEnd)   route.setDepartmentEnd(obj_chr);
-                        route.setDepartment(String.valueOf(obj_int));
-                        route.setDepartmentDistance(rst);
-                        break;
-                    }
-                    case 4: {
-                        route.setDcsDistance((short) (
-                                Optional.ofNullable(route.getDcsDistance()).orElse((short) 0) + rst
-                        ));
-                        break;
-                    }
-                    case 5: {
-                        mcdSet.add(pr_mcd);
-                        if (obj_chr != null && obj_chr.trim().equals("1"))
-                            route.setMcdDistance((short) (
-                                    Optional.ofNullable(route.getMcdDistance()).orElse((short) 0) + rst
-                            ));
-                        break;
-                    }
-                    case 6: {
-                        route.setRoadToFollow(String.valueOf(obj_int));
-                        route.setOkato(handbook.getOkatoByStation(obj_chr, date));
-                    }
+                    case 1: routeGroup.addRegionRoute((RegionRoute) RegionRoute.builder()
+                            .regionStart(isStart ? obj_chr : null)
+                            .regionEnd(isEnd ? obj_chr : null)
+                            .region(obj_chr)
+                            .okato(handbook.getOkatoByRegion(obj_chr, date))
+                            .distance(rst)
+                            .build());
+                    break;
+                    case 2: routeGroup.addRoadRoute((RoadRoute) RoadRoute.builder()
+                            .roadStart(isStart ? obj_chr : null)
+                            .roadEnd(isEnd ? obj_chr : null)
+                            .road(obj_chr)
+                            .distance(rst)
+                            .build());
+                    break;
+                    case 3: routeGroup.addDepartmentRoute((DepartmentRoute) DepartmentRoute.builder()
+                            .road(String.valueOf(obj_int))
+                            .department(obj_chr)
+                            .departmentStart(isStart ? obj_chr : null)
+                            .departmentEnd(isEnd ? obj_chr : null)
+                            .distance(rst)
+                            .build());
+                    break;
+                    case 4: routeGroup.addDcsRoute((DcsRoute) DcsRoute.builder()
+                            .road(String.valueOf(obj_int))
+                            .dcs(obj_chr)
+                            .distance(rst)
+                            .build());
+                    break;
+                    case 5:
+                        boolean isMcd = obj_chr != null && obj_chr.trim().equals("1");
+                        routeGroup.addMcdRoute((McdRoute) McdRoute.builder()
+                            .code(isMcd ? '1' : '0')
+                            .distance(isMcd ? rst : 0)
+                            .build());
+                    break;
+                    case 6: routeGroup.addFollowRoute((FollowRoute) FollowRoute.builder()
+                            .road(String.valueOf(obj_int))
+                            .okato(handbook.getOkatoByRegion(obj_chr, date))
+                            .distance(rst)
+                            .build());
                 }
-
             }
-            Character mcdType = null;
-            switch (mcdSet.size()) {
-                case 1: mcdType = mcdSet.contains(1) ? '0' : '1'; break;
-                case 2: mcdType = mcdSet.contains(1) && mcdSet.contains(2) ? '2' : '3'; break;
-                case 3: mcdType = mcdSet.contains(1) && mcdSet.contains(2) && mcdSet.contains(3) ? '4' : null;
-            }
-            route.setMcd(mcdType);
-
-            routesCache.put(key, route);
+            routesCache.put(key, routeGroup);
         }
         return routesCache.get(key);
     }

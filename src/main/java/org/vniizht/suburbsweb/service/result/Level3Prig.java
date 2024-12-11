@@ -1,10 +1,10 @@
 package org.vniizht.suburbsweb.service.result;
 
-import org.vniizht.suburbsweb.service.data.entities.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigAdi;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigCost;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigMain;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
+import org.vniizht.suburbsweb.service.data.entities.routes.RouteGroup;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
@@ -54,8 +54,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected List<Route> getRoutes() {
-        List<Route> routes = new ArrayList<>();
+    protected List<RouteGroup> getRouteGroups() {
+        List<RouteGroup> routes = new ArrayList<>();
         Map<Short, List<PrigCost>> costsPerRouteNum = new LinkedHashMap<>();
         costList.forEach(cost -> {
             if (!costsPerRouteNum.containsKey(cost.route_num)) {
@@ -66,14 +66,12 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         costsPerRouteNum.forEach((routeNum, costs) -> {
             PrigCost firstCost = costs.get(0);
             PrigCost lastCost  = costs.get(costs.size() - 1);
-            Route route = routesDao.getRoute(
+            routes.add(routesDao.getRoutes(
                     routeNum,
                     firstCost.departure_station,
                     lastCost.arrival_station,
                     firstCost.requestDate
-            );
-            route.incrementSerial();
-            routes.add(route);
+            ));
         });
         return routes;
     }

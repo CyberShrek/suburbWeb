@@ -1,6 +1,6 @@
 package org.vniizht.suburbsweb.service.result;
 
-import org.vniizht.suburbsweb.service.data.entities.Route;
+import org.vniizht.suburbsweb.service.data.entities.routes.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
@@ -37,7 +37,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected List<Route> getRoutes() {
+    protected List<Route> getRouteGroups() {
         List<Route> routes = new ArrayList<>();
         routes.add(routesDao.getRoute(
                 main.train_num,
