@@ -8,19 +8,13 @@ import java.util.List;
 @Getter
 public class RouteGroup {
 
-    private final Short num;
-
     private List<RoadRoute>       roadRoutes;
     private List<DepartmentRoute> departmentRoutes;
     private List<RegionRoute>     regionRoutes;
     private List<DcsRoute>        dcsRoutes;
     private List<McdRoute>        mcdRoutes;
     private List<FollowRoute>     followRoutes;
-
-    public RouteGroup(Short num) {
-        this.num = num;
-    }
-
+    
     public void addRoadRoute(RoadRoute route) {
         roadRoutes = collectRoute(route, roadRoutes);
     }
@@ -86,19 +80,23 @@ public class RouteGroup {
     public FollowRoute getLastFollowRoute() {
         return getLastRouteOrNull(followRoutes);
     }
+    
+    public void merge(RouteGroup group) {
+        group.getRegionRoutes().forEach(this::addRegionRoute);
+        group.getRoadRoutes().forEach(this::addRoadRoute);
+        group.getDepartmentRoutes().forEach(this::addDepartmentRoute);
+        group.getDcsRoutes().forEach(this::addDcsRoute);
+        group.getMcdRoutes().forEach(this::addMcdRoute);
+        group.getFollowRoutes().forEach(this::addFollowRoute);
+    }
 
     private <T extends Route> List<T> collectRoute(T route, List<T> collector) {
         if(collector == null)
             collector = new ArrayList<>();
 
         collector.add(route);
-        addNumbers(route, (short) collector.size());
+        route.serial = (short) collector.size();
         return collector;
-    }
-
-    private void addNumbers(Route route, Short serial) {
-        route.num = num;
-        route.serial = serial;
     }
 
     private <T extends Route> T getFirstRouteOrNull(List<T> routes) {

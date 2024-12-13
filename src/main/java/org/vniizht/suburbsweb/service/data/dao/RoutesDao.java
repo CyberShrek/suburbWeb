@@ -16,17 +16,17 @@ public class RoutesDao {
 
     private final Map<String, RouteGroup> routesCache = new HashMap<>();
 
-    public RouteGroup getRoutes(Short routeNum,
-                                String depStation,
-                                String arrStation,
-                                Date date) {
+    public RouteGroup getRouteGroup(Short routeNum,
+                                    String depStation,
+                                    String arrStation,
+                                    Date date) {
         String key = depStation + arrStation + date;
         if (!routesCache.containsKey(key)) {
-            RouteGroup routeGroup = new RouteGroup(routeNum);
-
+            RouteGroup group = new RouteGroup();
+            
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
                     routeNum, date, depStation, arrStation);
-
+            
             while (prigRS.next()){
                 int    narr     = prigRS.getInt("narr");
                 String st1      = prigRS.getString("sto");
@@ -36,89 +36,103 @@ public class RoutesDao {
                 int    pr_mcd   = prigRS.getInt("pr_mcd");
                 short  rst      = prigRS.getShort("rst_p");
 
-                boolean isStart = st1 != null && st1.equals(depStation);
-                boolean isEnd   = st2 != null && st2.equals(arrStation);
-
                 switch (narr) {
-                    case 1: routeGroup.addRegionRoute((RegionRoute) RegionRoute.builder()
-                            .regionStart(isStart ? obj_chr : null)
-                            .regionEnd(isEnd ? obj_chr : null)
+                    case 1: group.addRegionRoute((RegionRoute) RegionRoute.builder()
                             .region(obj_chr)
                             .okato(handbook.getOkatoByRegion(obj_chr, date))
                             .distance(rst)
                             .build());
                     break;
-                    case 2: routeGroup.addRoadRoute((RoadRoute) RoadRoute.builder()
-                            .roadStart(isStart ? obj_chr : null)
-                            .roadEnd(isEnd ? obj_chr : null)
+                    case 2: group.addRoadRoute((RoadRoute) RoadRoute.builder()
                             .road(obj_chr)
                             .distance(rst)
                             .build());
                     break;
-                    case 3: routeGroup.addDepartmentRoute((DepartmentRoute) DepartmentRoute.builder()
+                    case 3: group.addDepartmentRoute((DepartmentRoute) DepartmentRoute.builder()
                             .road(String.valueOf(obj_int))
                             .department(obj_chr)
-                            .departmentStart(isStart ? obj_chr : null)
-                            .departmentEnd(isEnd ? obj_chr : null)
                             .distance(rst)
                             .build());
                     break;
-                    case 4: routeGroup.addDcsRoute((DcsRoute) DcsRoute.builder()
+                    case 4: group.addDcsRoute((DcsRoute) DcsRoute.builder()
                             .road(String.valueOf(obj_int))
-                            .dcs(obj_chr)
+                            .code(obj_chr)
                             .distance(rst)
                             .build());
                     break;
                     case 5:
                         boolean isMcd = obj_chr != null && obj_chr.trim().equals("1");
-                        routeGroup.addMcdRoute((McdRoute) McdRoute.builder()
+                        group.addMcdRoute((McdRoute) McdRoute.builder()
                             .code(isMcd ? '1' : '0')
                             .distance(isMcd ? rst : 0)
                             .build());
                     break;
-                    case 6: routeGroup.addFollowRoute((FollowRoute) FollowRoute.builder()
+                    case 6: group.addFollowRoute((FollowRoute) FollowRoute.builder()
                             .road(String.valueOf(obj_int))
+                            .region(obj_chr)
                             .okato(handbook.getOkatoByRegion(obj_chr, date))
                             .distance(rst)
                             .build());
                 }
             }
-            routesCache.put(key, routeGroup);
+            routesCache.put(key, group);
         }
         return routesCache.get(key);
     }
 
-    public Route getRoute(String trainId, Character trainThread, Date trainDepartureDate,
-                          String depStation, String arrStation) {
+    public RouteGroup getRouteGroup(String trainId, Character trainThread, Date trainDepartureDate,
+                                    String depStation, String arrStation) {
         String key = trainId + trainThread + trainDepartureDate + depStation + arrStation;
         if (!routesCache.containsKey(key)) {
-            Route route = new Route();
+            RouteGroup group = new RouteGroup();
 
-            String queryForRoads       = "SELECT * FROM getfunction.passkm_estimate_for_gos_and_dor(?, ?, ?, 2, ?, ?)";
-            String queryForDepartments = "SELECT * FROM getfunction.passkm_estimate_for_otd(?, ?, ?, ?, ?)";
-            String queryForRegions     = "SELECT * FROM getfunction.passkm_estimate_for_stan_dcs_sf(?, ?, ?, 5, ?, ?)";
+            String roadsSql       = "SELECT * FROM getfunction.passkm_estimate_for_gos_and_dor(?, ?, ?, 2, ?, ?)";
+            String DepartmentsSql = "SELECT * FROM getfunction.passkm_estimate_for_otd(?, ?, ?, ?, ?)";
+            String miscSql        = "SELECT * FROM getfunction.passkm_estimate_for_stan_dcs_sf(?, ?, ?, ?, ?, ?)";
 
-            SqlRowSet roadsRS       = jdbcTemplate.queryForRowSet(queryForRoads,       trainId, trainThread, trainDepartureDate, depStation, arrStation);
-            SqlRowSet departmentsRS = jdbcTemplate.queryForRowSet(queryForDepartments, trainId, trainThread, trainDepartureDate, depStation, arrStation);
-            SqlRowSet regionsRS     = jdbcTemplate.queryForRowSet(queryForRegions,     trainId, trainThread, trainDepartureDate, depStation, arrStation);
+            SqlRowSet roadsRS       = jdbcTemplate.queryForRowSet(roadsSql,       trainId, trainThread, trainDepartureDate, depStation, arrStation);
+            SqlRowSet departmentsRS = jdbcTemplate.queryForRowSet(DepartmentsSql, trainId, trainThread, trainDepartureDate, depStation, arrStation);
+            SqlRowSet regionsRS     = jdbcTemplate.queryForRowSet(miscSql, trainId, trainThread, trainDepartureDate, 5, depStation, arrStation);
+            SqlRowSet followsRS     = jdbcTemplate.queryForRowSet(miscSql, trainId, trainThread, trainDepartureDate, 7, depStation, arrStation);
+            SqlRowSet dcsRS         = jdbcTemplate.queryForRowSet(miscSql, trainId, trainThread, trainDepartureDate, 4, depStation, arrStation);
 
             while (roadsRS.next()) {
-                String dor3 = roadsRS.getString("dor3");
-                if (roadsRS.isFirst()) route.setRoadStart(dor3);
-                else if (roadsRS.isLast()) route.setRoadEnd(dor3);
+                group.addRoadRoute((RoadRoute) RoadRoute.builder()
+                        .road(roadsRS.getString("dor3"))
+                        .build());
             }
             while (departmentsRS.next()) {
-                String otd = departmentsRS.getString("otd");
-                if (departmentsRS.isFirst()) route.setDepartmentStart(otd);
-                else if (departmentsRS.isLast()) route.setDepartmentEnd(otd);
+                group.addDepartmentRoute((DepartmentRoute) DepartmentRoute.builder()
+                        .road(roadsRS.getString("dor3"))
+                        .department(departmentsRS.getString("otd"))
+                        .distance(departmentsRS.getShort("km"))
+                        .build());
             }
             while (regionsRS.next()) {
                 String sf = regionsRS.getString("sf");
-                if (regionsRS.isFirst()) route.setRegionStart(sf);
-                else if (regionsRS.isLast()) route.setRegionEnd(sf);
+                group.addRegionRoute((RegionRoute) RegionRoute.builder()
+                        .region(sf)
+                        .okato(handbook.getOkatoByRegion(sf, trainDepartureDate))
+                        .distance(departmentsRS.getShort("km"))
+                        .build());
+            }
+            while (followsRS.next()) {
+                group.addFollowRoute((FollowRoute) FollowRoute.builder()
+                        .road(roadsRS.getString("dor3"))
+                        .region(followsRS.getString("sf"))
+                        .okato(handbook.getOkatoByRegion(followsRS.getString("sf"), trainDepartureDate))
+                        .distance(departmentsRS.getShort("km"))
+                        .build());
+            }
+            while (dcsRS.next()) {
+                group.addDcsRoute((DcsRoute) DcsRoute.builder()
+                        .road(roadsRS.getString("dor3"))
+                        .code(dcsRS.getString("dcs"))
+                        .distance(departmentsRS.getShort("km"))
+                        .build());
             }
 
-            routesCache.put(key, route);
+            routesCache.put(key, group);
         }
         return routesCache.get(key);
     }

@@ -8,8 +8,8 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @ToString
-public abstract class Route {
-    Short num;
+@SuperBuilder
+public class Route {
     Short serial;
     Short distance;
 

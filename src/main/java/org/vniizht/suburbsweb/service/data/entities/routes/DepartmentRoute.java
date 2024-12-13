@@ -10,9 +10,6 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @ToString
 @SuperBuilder
-public class DepartmentRoute extends Route {
-    private String    road;
+public class DepartmentRoute extends RoadRoute {
     private String    department;
-    private String    departmentStart;
-    private String    departmentEnd;
 }

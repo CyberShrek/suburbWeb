@@ -10,9 +10,9 @@ import javax.servlet.annotation.HandlesTypes;
 import java.io.Serializable;
 import java.util.Arrays;
 
-//@Entity
-@Table(schema = "prigl3",
-        name = "co22_t1")
+@Entity
+//@Table(schema = "prigl3",
+//        name = "co22_t1")
 @Getter
 @Setter
 @SuperBuilder(toBuilder=true)
@@ -41,7 +41,6 @@ public class T1 {
     private Long p49;
     private Long p50;
     private Long p51;
-    private Long[] idnums = new Long[0];
 
     public void add(T1 t1) {
         p33 += t1.p33;
@@ -63,7 +62,6 @@ public class T1 {
         p49 += t1.p49;
         p50 += t1.p50;
         p51 += t1.p51;
-        idnums = Util.concatArrays(idnums, t1.idnums);
     }
 
     @Embeddable
@@ -74,7 +72,6 @@ public class T1 {
     @ToString(callSuper = true)
     @NoArgsConstructor
     static public class Key extends L3Key implements Serializable {
-        private Short[]         routes;
         private String          p1;
         private Long            p2;
         private String          p3;

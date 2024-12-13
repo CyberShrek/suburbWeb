@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.result;
 import org.vniizht.suburbsweb.service.data.entities.routes.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
+import org.vniizht.suburbsweb.service.data.entities.routes.RouteGroup;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
@@ -37,15 +38,14 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected List<Route> getRouteGroups() {
-        List<Route> routes = new ArrayList<>();
-        routes.add(routesDao.getRoute(
+    protected RouteGroup getRouteGroup() {
+        return routesDao.getRouteGroup(
                 main.train_num,
                 main.train_thread,
                 main.departure_date,
                 main.departure_station,
-                main.arrival_station));
-        return routes;
+                main.arrival_station
+        );
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
-    protected Integer getYyyymm() {
+    protected Integer getYyyyMM() {
         return Integer.parseInt(Util.formatDate(main.oper_date, "yyyyMM"));
     }
 
@@ -624,5 +624,17 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     @Override
     protected Short getLgotP33() {
         return null;
+    }
+
+    @Override
+    protected double getRegionIncomePerKm(String region) {
+        // TODO
+        return 0;
+    }
+
+    @Override
+    protected double getRegionOutcomePerKm(String region) {
+        // TODO
+        return 0;
     }
 }

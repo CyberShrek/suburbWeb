@@ -11,7 +11,5 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuperBuilder
 public class RoadRoute extends Route {
-    private String    roadStart;
-    private String    roadEnd;
     private String    road;
 }

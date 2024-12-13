@@ -1,6 +1,5 @@
 package org.vniizht.suburbsweb.service.data.entities.routes;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,7 +9,6 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @ToString
 @SuperBuilder
-public class DcsRoute extends Route {
-    private String road;
-    private String dcs;
+public class DcsRoute extends RoadRoute {
+    private String code;
 }

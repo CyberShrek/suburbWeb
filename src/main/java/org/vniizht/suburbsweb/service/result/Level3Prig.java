@@ -25,14 +25,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                       Long initialT1Serial) {
         super(records, handbook, routes, initialT1Serial);
         this.trips = trips;
-        switch (getT1P21()) {
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5': isAbonement = true;
-            default : isAbonement = false;
-        }
 
         transform();
     }
@@ -42,6 +34,14 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         main     = record.getMain();
         costList = main.getCosts();
         adi      = main.getAdi();
+        switch (getT1P21()) {
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5': isAbonement = true;
+            default : isAbonement = false;
+        }
     }
     // Переменные для каждой записи
     private PrigMain       main;
@@ -54,8 +54,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected List<RouteGroup> getRouteGroups() {
-        List<RouteGroup> routes = new ArrayList<>();
+    protected RouteGroup getRouteGroup() {
+        RouteGroup routeGroup = new RouteGroup();
         Map<Short, List<PrigCost>> costsPerRouteNum = new LinkedHashMap<>();
         costList.forEach(cost -> {
             if (!costsPerRouteNum.containsKey(cost.route_num)) {
@@ -66,14 +66,14 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         costsPerRouteNum.forEach((routeNum, costs) -> {
             PrigCost firstCost = costs.get(0);
             PrigCost lastCost  = costs.get(costs.size() - 1);
-            routes.add(routesDao.getRoutes(
+            routeGroup.merge(routesDao.getRouteGroup(
                     routeNum,
                     firstCost.departure_station,
                     lastCost.arrival_station,
                     firstCost.requestDate
             ));
         });
-        return routes;
+        return routeGroup;
     }
 
     @Override
@@ -122,7 +122,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
-    protected Integer getYyyymm() {
+    protected Integer getYyyyMM() {
         return Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM"));
     }
 
@@ -719,6 +719,32 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected Short getLgotP33() {
         return main.carryon_weight;
+    }
+
+    @Override
+    protected double getRegionIncomePerKm(String region) {
+        int distance = 0;
+        long incomeSum = 0;
+        for (PrigCost cost : costList) {
+            if (cost.region_code.equals(region)) {
+                distance += cost.route_distance;
+                incomeSum += cost.tariff_sum;
+            }
+        }
+        return distance == 0 ? 0 : (double) incomeSum / distance;
+    }
+
+    @Override
+    protected double getRegionOutcomePerKm(String region) {
+        int distance = 0;
+        long outcomeSum = 0;
+        for (PrigCost cost : costList) {
+            if (cost.region_code.equals(region)) {
+                distance += cost.route_distance;
+                outcomeSum += cost.department_sum;
+            }
+        }
+        return distance == 0 ? 0 : (double) outcomeSum / distance;
     }
 
     private String getTSite(PrigMain main) {

@@ -183,9 +183,9 @@ public class Transformation {
         }) + "c");
     }
 
-//    @PostConstruct
+    @PostConstruct
     public void test() {
-        int yyyy = 2024, mm = 10, dd = 31;
+        int yyyy = 2024, mm = 02, dd = 05;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
                 true,

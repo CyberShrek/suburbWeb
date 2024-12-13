@@ -12,7 +12,6 @@ import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
@@ -31,10 +30,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Set<T1> multiplyT1(T1 t1);
 
     // Детали общие и метаданные
-    abstract protected Integer getYyyymm();
-    abstract protected Date    getRequestDate();
-    abstract protected List<RouteGroup> getRouteGroups();
-    abstract protected Long        getIdnum();
+    abstract protected Integer getYyyyMM();
+    abstract protected Date       getRequestDate();
+    abstract protected RouteGroup getRouteGroup();
+    abstract protected Long       getIdnum();
 
     // Проверка существования t1
     abstract protected boolean   t1Exists();
@@ -52,10 +51,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P10();
     abstract protected String    getT1P11();
     abstract protected String    getT1P12();
-             protected String    getT1P13(RoadRoute route)       {return route.getRoadStart();}
-             protected String    getT1P14(DepartmentRoute route) {return route.getDepartmentStart();}
+             protected String    getT1P13(RoadRoute route)       {return route.getRoad();}
+             protected String    getT1P14(DepartmentRoute route) {return route.getDepartment();}
     abstract protected String    getT1P15();
-             protected String    getT1P16(RegionRoute route)     {return route.getRegionStart();}
+             protected String    getT1P16(RegionRoute route)     {return route.getRegion();}
     abstract protected String    getT1P17();
     abstract protected String    getT1P18();
     abstract protected Character getT1P19();
@@ -66,9 +65,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P24();
     abstract protected Character getT1P25();
     abstract protected String    getT1P26();
-             protected String    getT1P27(RoadRoute route)       {return route.getRoadEnd();}
-             protected String    getT1P28(DepartmentRoute route) {return route.getDepartmentEnd();}
-             protected String    getT1P29(RegionRoute route)     {return route.getRegionEnd();}
+             protected String    getT1P27(RoadRoute route)       {return route.getRoad();}
+             protected String    getT1P28(DepartmentRoute route) {return route.getDepartment();}
+             protected String    getT1P29(RegionRoute route)     {return route.getRegion();}
     abstract protected String    getT1P30();
     abstract protected String    getT1P31();
     abstract protected Short     getT1P32();
@@ -154,6 +153,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String        getLgotP32();
     abstract protected Short         getLgotP33();
 
+    // Подсчёт средних стоимостей на километр по регионам
+    abstract protected double getRegionIncomePerKm(String region);
+    abstract protected double getRegionOutcomePerKm(String region);
+
     protected final Set<L2_RECORD> records;
     protected final Handbook handbook;
     protected final RoutesDao routesDao;
@@ -184,17 +187,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     private void transformRecord(L2_RECORD record) {
         assignVariablesForRecord(record);
         if(t1Exists()) {
-            AtomicReference<List<RouteGroup>> routeGroups = new AtomicReference<>();
-            routesSearchTime   += Util.measureTime(() -> routeGroups.set(getRouteGroups()));
+            AtomicReference<RouteGroup> routeGroup = new AtomicReference<>();
+            routesSearchTime   += Util.measureTime(() -> routeGroup.set(getRouteGroup()));
             transformationTime += Util.measureTime(() -> {
-                Set<T1> t1Set = multiplyT1(buildT1(routeGroups.get()));
+                Set<T1> t1Set = multiplyT1(buildT1(routeGroup.get()));
                 t1Set.forEach(t1 -> {
                     String key = t1.getKey().toString();
                     // Агрегация данных
                     if(co22Result.containsKey(key))
                         co22Result.get(key).t1.add(t1);
                     else
-                        co22Result.put(key, new CO22(t1, routeGroups.get()));
+                        co22Result.put(key, new CO22(t1, routeGroup.get()));
                 });
             });
         }
@@ -212,13 +215,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         routesSearchTime   = (float) Math.round(routesSearchTime   * 100) / 100;
     }
 
-    private T1 buildT1(List<RouteGroup> routeGroupList) {
+    private T1 buildT1(RouteGroup routeGroup) {
         T1 t1 = T1.builder()
-                .idnums(new Long[]{getIdnum()})
                 .key(T1.Key.builder()
                         .requestDate(getRequestDate())
-                        .yyyymm(getYyyymm())
-                        .routes(routeGroupList.stream().map(RouteGroup::getNum).toArray(Short[]::new))
+                        .yyyymm(getYyyyMM())
                         .p1(getT1P1())
                         .p2(getT1P2())
                         .p3(getT1P3())
@@ -278,24 +279,17 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p51(getT1P51())
                 .build();
 
-        if(routeGroupList.size() > 1) {
-            RouteGroup firstGroup = routeGroupList.get(0);
-            RouteGroup lastGroup  = routeGroupList.get(routeGroupList.size() - 1);
-            List<McdRoute> mcdRoutes = routeGroupList.stream()
-                    .map(group -> Optional.ofNullable(group.getMcdRoutes()).orElseGet(ArrayList::new))
-                    .flatMap(List::stream)
-                    .collect(Collectors.toList());
-            t1.setKey(t1.getKey().toBuilder()
-                    .p13(getT1P13(firstGroup.getFirstRoadRoute()))
-                    .p14(getT1P14(firstGroup.getFirstDepartmentRoute()))
-                    .p16(getT1P16(firstGroup.getFirstRegionRoute()))
-                    .p27(getT1P27(lastGroup.getLastRoadRoute()))
-                    .p28(getT1P28(lastGroup.getLastDepartmentRoute()))
-                    .p29(getT1P29(lastGroup.getLastRegionRoute()))
-                    .p62(getT1P62(mcdRoutes))
-                    .p63(getT1P63(mcdRoutes))
-                    .build());
-        }
+        t1.setKey(t1.getKey().toBuilder()
+                .p13(getT1P13(routeGroup.getFirstRoadRoute()))
+                .p14(getT1P14(routeGroup.getFirstDepartmentRoute()))
+                .p16(getT1P16(routeGroup.getFirstRegionRoute()))
+                .p27(getT1P27(routeGroup.getLastRoadRoute()))
+                .p28(getT1P28(routeGroup.getLastDepartmentRoute()))
+                .p29(getT1P29(routeGroup.getLastRegionRoute()))
+                .p62(getT1P62(routeGroup.getMcdRoutes()))
+                .p63(getT1P63(routeGroup.getMcdRoutes()))
+                .build());
+
         return t1;
     }
 
@@ -334,8 +328,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p4(route.getSerial())
                 .p5(route.getRoad())
                 .p6(route.getOkato())
-                .p7(hasCosts ? route.getCost() : 0)
-                .p8(hasCosts ? route.getLostCost() : 0)
+                .p7(hasCosts ? (long) (route.getDistance() * getRegionIncomePerKm(route.getRegion())) : 0)
+                .p8(hasCosts ? (long) (route.getDistance() * getRegionOutcomePerKm(route.getRegion())) : 0)
                 .p9(route.getDistance())
                 .build();
     }
@@ -348,7 +342,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p3(null)
                 .p4(route.getSerial())
                 .p5(route.getRoad())
-                .p6(route.getDcs())
+                .p6(route.getCode())
                 .p7(route.getDistance())
                 .build();
     }
@@ -357,7 +351,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         return Lgot.builder()
                 .key(Lgot.Key.builder()
                         .requestDate(getRequestDate())
-                        .yyyymm(getYyyymm())
+                        .yyyymm(getYyyyMM())
                         .list(getLgotList())
                         .p1(getLgotP1())
                         .p2(getLgotP2())
@@ -405,14 +399,14 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         private final List<T4> t4 = new ArrayList<>();
         private final List<T6> t6 = new ArrayList<>();
 
-        CO22(T1 t1, List<RouteGroup> routeGroupList) {
+        CO22(T1 t1, RouteGroup routeGroup) {
             this.t1 = t1;
-            routeGroupList.forEach(routeGroup -> {
-                routeGroup.getDepartmentRoutes().forEach(route   -> t2.add(buildT2(route)));
-                routeGroup.getRegionRoutes().forEach(regionRoute -> t3.add(buildT3(regionRoute)));
-                routeGroup.getFollowRoutes().forEach(route       -> t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4()))));
-                routeGroup.getDcsRoutes().forEach(route          -> t6.add(buildT6(route)));
-            });
+            routeGroup.getDepartmentRoutes().forEach(route   -> t2.add(buildT2(route)));
+            routeGroup.getRegionRoutes().forEach(regionRoute -> t3.add(buildT3(regionRoute)));
+            routeGroup.getFollowRoutes().forEach(route       -> t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4()))));
+            routeGroup.getDcsRoutes().forEach(route          -> t6.add(buildT6(route)));
+
+            arrangeCosts();
         }
 
         public void add(CO22 co22) {
@@ -426,6 +420,14 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t4.forEach(t -> t.setP3(t1Serial));
             t6.forEach(t -> t.setP3(t1Serial));
             t1Serial++;
+        }
+
+        private void arrangeCosts() {
+            long incomeDelta = t1.getP36() - t4.stream().mapToLong(T4::getP7).sum();
+            long outcomeDelta = t1.getP44() - t4.stream().mapToLong(T4::getP8).sum();
+            T4 lastT4 = t4.get(t4.size() - 1);
+            lastT4.setP7(lastT4.getP7() + incomeDelta);
+            lastT4.setP8(lastT4.getP8() + outcomeDelta);
         }
     }
 }

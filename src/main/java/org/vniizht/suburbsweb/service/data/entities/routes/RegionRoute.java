@@ -1,9 +1,6 @@
 package org.vniizht.suburbsweb.service.data.entities.routes;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Getter
@@ -11,8 +8,10 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuperBuilder
 public class RegionRoute extends Route {
-    private String    regionStart;
-    private String    regionEnd;
     private String    region;
     private String    okato;
+
+//    public RegionRoute() {
+//        super();
+//    }
 }
