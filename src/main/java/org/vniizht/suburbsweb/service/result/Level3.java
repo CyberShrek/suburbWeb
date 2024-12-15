@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.result;
 import lombok.Getter;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
+import org.vniizht.suburbsweb.service.data.entities.level3.meta.Meta;
 import org.vniizht.suburbsweb.service.data.entities.routes.*;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
@@ -18,6 +19,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Конечные результаты - трансформированные записи второго уровня, готовые к записи в базу данных
     @Getter private final Map<String, CO22> co22Result = new HashMap<>();
     @Getter private final List<Lgot>        lgotResult = new ArrayList<>();
+    @Getter private final List<Meta>        metaResult = new ArrayList<>();
 
     // Подсчитанное время на сопутствующие операции (с)
     @Getter private float transformationTime   = 0;
@@ -51,10 +53,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P10();
     abstract protected String    getT1P11();
     abstract protected String    getT1P12();
-             protected String    getT1P13(RoadRoute route)       {return route.getRoad();}
-             protected String    getT1P14(DepartmentRoute route) {return route.getDepartment();}
+             protected String    getT1P13(RoadRoute route)       {return route != null ? route.getRoad() : null;}
+             protected String    getT1P14(DepartmentRoute route) {return route != null ? route.getDepartment() : null;}
     abstract protected String    getT1P15();
-             protected String    getT1P16(RegionRoute route)     {return route.getRegion();}
+             protected String    getT1P16(RegionRoute route)     {return route != null ? route.getRegion() : null;}
     abstract protected String    getT1P17();
     abstract protected String    getT1P18();
     abstract protected Character getT1P19();
@@ -65,9 +67,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String    getT1P24();
     abstract protected Character getT1P25();
     abstract protected String    getT1P26();
-             protected String    getT1P27(RoadRoute route)       {return route.getRoad();}
-             protected String    getT1P28(DepartmentRoute route) {return route.getDepartment();}
-             protected String    getT1P29(RegionRoute route)     {return route.getRegion();}
+             protected String    getT1P27(RoadRoute route)       {return route != null ? route.getRoad() : null;}
+             protected String    getT1P28(DepartmentRoute route) {return route != null ? route.getDepartment() : null;}
+             protected String    getT1P29(RegionRoute route)     {return route != null ? route.getRegion() : null;}
     abstract protected String    getT1P30();
     abstract protected String    getT1P31();
     abstract protected Short     getT1P32();
@@ -156,6 +158,9 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Подсчёт средних стоимостей на километр по регионам
     abstract protected double getRegionIncomePerKm(String region);
     abstract protected double getRegionOutcomePerKm(String region);
+
+    // Сбор мета данных
+    abstract protected Meta getMeta();
 
     protected final Set<L2_RECORD> records;
     protected final Handbook handbook;
@@ -423,6 +428,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         }
 
         private void arrangeCosts() {
+            if (t4.isEmpty()) return;
             long incomeDelta = t1.getP36() - t4.stream().mapToLong(T4::getP7).sum();
             long outcomeDelta = t1.getP44() - t4.stream().mapToLong(T4::getP8).sum();
             T4 lastT4 = t4.get(t4.size() - 1);

@@ -4,8 +4,8 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Getter
 public class RouteGroup {
 
     private List<RoadRoute>       roadRoutes;
@@ -14,6 +14,30 @@ public class RouteGroup {
     private List<DcsRoute>        dcsRoutes;
     private List<McdRoute>        mcdRoutes;
     private List<FollowRoute>     followRoutes;
+
+    public List<RoadRoute> getRoadRoutes() {
+        return getRoutesOrEmptyList(roadRoutes);
+    }
+
+    public List<DepartmentRoute> getDepartmentRoutes() {
+        return getRoutesOrEmptyList(departmentRoutes);
+    }
+
+    public List<RegionRoute> getRegionRoutes() {
+        return getRoutesOrEmptyList(regionRoutes);
+    }
+
+    public List<DcsRoute> getDcsRoutes() {
+        return getRoutesOrEmptyList(dcsRoutes);
+    }
+
+    public List<McdRoute> getMcdRoutes() {
+        return getRoutesOrEmptyList(mcdRoutes);
+    }
+
+    public List<FollowRoute> getFollowRoutes() {
+        return getRoutesOrEmptyList(followRoutes);
+    }
     
     public void addRoadRoute(RoadRoute route) {
         roadRoutes = collectRoute(route, roadRoutes);
@@ -82,12 +106,16 @@ public class RouteGroup {
     }
     
     public void merge(RouteGroup group) {
-        group.getRegionRoutes().forEach(this::addRegionRoute);
-        group.getRoadRoutes().forEach(this::addRoadRoute);
-        group.getDepartmentRoutes().forEach(this::addDepartmentRoute);
-        group.getDcsRoutes().forEach(this::addDcsRoute);
-        group.getMcdRoutes().forEach(this::addMcdRoute);
-        group.getFollowRoutes().forEach(this::addFollowRoute);
+        Optional.ofNullable(group.getRegionRoutes()).orElse(new ArrayList<>()).forEach(this::addRegionRoute);
+        Optional.ofNullable(group.getRoadRoutes()).orElse(new ArrayList<>()).forEach(this::addRoadRoute);
+        Optional.ofNullable(group.getDepartmentRoutes()).orElse(new ArrayList<>()).forEach(this::addDepartmentRoute);
+        Optional.ofNullable(group.getDcsRoutes()).orElse(new ArrayList<>()).forEach(this::addDcsRoute);
+        Optional.ofNullable(group.getMcdRoutes()).orElse(new ArrayList<>()).forEach(this::addMcdRoute);
+        Optional.ofNullable(group.getFollowRoutes()).orElse(new ArrayList<>()).forEach(this::addFollowRoute);
+    }
+
+    private <T extends Route> List<T> getRoutesOrEmptyList(List<T> routes) {
+        return routes == null ? new ArrayList<>() : routes;
     }
 
     private <T extends Route> List<T> collectRoute(T route, List<T> collector) {
