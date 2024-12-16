@@ -1,5 +1,6 @@
 package org.vniizht.suburbsweb.service.result;
 
+import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
 import org.vniizht.suburbsweb.service.data.entities.routes.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
@@ -33,11 +34,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private PassEx         ex;
 
     @Override
-    protected Long getIdnum() {
-        return main.idnum;
-    }
-
-    @Override
     protected RouteGroup getRouteGroup() {
         return routesDao.getRouteGroup(
                 main.train_num,
@@ -62,6 +58,14 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
             );
         }
         return result;
+    }
+
+    @Override
+    protected CO22Meta getMeta() {
+        return CO22Meta.builder()
+                .requestDate(main.requestDate)
+                .passIdnum(main.idnum)
+                .build();
     }
 
     @Override

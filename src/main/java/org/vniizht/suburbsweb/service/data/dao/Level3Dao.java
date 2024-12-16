@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
+import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
 import org.vniizht.suburbsweb.service.data.repository.level3.LgotRepo;
 import org.vniizht.suburbsweb.service.data.repository.level3.T1Repo;
 import org.vniizht.suburbsweb.websocket.LogWS;
@@ -15,14 +16,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class Level3Dao {
 
-    private static final String T1_TABLE   = "prigl3.co22_t1";
-    private static final String T2_TABLE   = "prigl3.co22_t2";
-    private static final String T3_TABLE   = "prigl3.co22_t3";
-    private static final String T4_TABLE   = "prigl3.co22_t4";
-    private static final String T5_TABLE   = "prigl3.co22_t5";
-    private static final String T6_TABLE   = "prigl3.co22_t6";
-    private static final String LGOT_TABLE = "prigl3.lgot";
-    private static final int BATCH_SIZE    = 500;
+    private static final String T1_TABLE        = "prigl3.co22_t1";
+    private static final String T2_TABLE        = "prigl3.co22_t2";
+    private static final String T3_TABLE        = "prigl3.co22_t3";
+    private static final String T4_TABLE        = "prigl3.co22_t4";
+    private static final String T5_TABLE        = "prigl3.co22_t5";
+    private static final String T6_TABLE        = "prigl3.co22_t6";
+    private static final String CO22_META_TABLE = "prigl3.co22_meta";
+    private static final String LGOT_TABLE      = "prigl3.lgot";
+    private static final int    BATCH_SIZE      = 500;
 
     @Autowired private   T1Repo   t1Repo;
     @Autowired private LgotRepo lgotRepo;
@@ -43,12 +45,14 @@ public class Level3Dao {
     }
 
     public void deleteForDate(Date date){
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t1 WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t2 WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t3 WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t4 WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t6 WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.lgot    WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.co22_t1   WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.co22_t2   WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.co22_t3   WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.co22_t4   WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.co22_t6   WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.co22_meta WHERE request_date = ?", date);
+        jdbcTemplate.update("DELETE FROM prigl3.lgot      WHERE request_date = ?", date);
+
     }
 
     public void saveT1s(Set<T1> t1Set){
@@ -65,6 +69,9 @@ public class Level3Dao {
     }
     public void saveT6s(Set<T6> t6Set){
         insertT6s(new ArrayList<>(t6Set));
+    }
+    public void saveCO22Metas(Set<CO22Meta> co22MetaSet){
+        insertCO22Metas(new ArrayList<>(co22MetaSet));
     }
     public void saveLgots(Set<Lgot> lgotSet){
         insertLgots(new ArrayList<>(lgotSet));
@@ -105,14 +112,6 @@ public class Level3Dao {
                 t1List,
                 BATCH_SIZE,
                 (ps, t1) -> {
-                    //                    t1.getKey().getYyyymm(), t1.getKey().getRequestDate(),
-//                            t1.getKey().getP1(), t1.getKey().getP3(), t1.getKey().getP4(), t1.getKey().getP5(), t1.getKey().getP6(), t1.getKey().getP7(), t1.getKey().getP8(), t1.getKey().getP9(), t1.getKey().getP10(),
-//                            t1.getKey().getP11(), t1.getKey().getP12(), t1.getKey().getP13(), t1.getKey().getP14(), t1.getKey().getP15(), t1.getKey().getP16(), t1.getKey().getP17(), t1.getKey().getP18(), t1.getKey().getP19(), t1.getKey().getP20(),
-//                            t1.getKey().getP21(), t1.getKey().getP22(), t1.getKey().getP23(), t1.getKey().getP24(), t1.getKey().getP25(), t1.getKey().getP26(), t1.getKey().getP27(), t1.getKey().getP28(), t1.getKey().getP29(), t1.getKey().getP30(),
-//                            t1.getKey().getP31(), t1.getKey().getP32(), t1.getP33(), t1.getP34(), t1.getP35(), t1.getP36(), t1.getP37(), t1.getP38(), t1.getP39(), t1.getP40(),
-//                            t1.getP41(), t1.getP42(), t1.getP43(), t1.getP44(), t1.getP45(), t1.getP46(), t1.getP47(), t1.getP48(), t1.getP49(), t1.getP50(),
-//                            t1.getP51(), t1.getKey().getP52(), t1.getKey().getP53(), t1.getKey().getP54(), t1.getKey().getP55(), t1.getKey().getP56(), t1.getKey().getP57(), t1.getKey().getP58(), t1.getKey().getP59(), t1.getKey().getP60(),
-//                            t1.getKey().getP61(), t1.getKey().getP62(), t1.getKey().getP63()
                     ps.setObject(1, t1.getKey().getYyyymm());
                     ps.setObject(2, t1.getKey().getRequestDate());
                     ps.setObject(3, t1.getKey().getP1());
@@ -251,7 +250,7 @@ public class Level3Dao {
     private void insertT6s(List<T6> t6List){
         AtomicInteger progress = new AtomicInteger();
         jdbcTemplate.batchUpdate("INSERT INTO " + T6_TABLE + " VALUES (\ndefault," +
-                        "?::char(4), ?::char(3), ?::bigint, ?::char(6), ?::char(2), ?::int, ?::int, ?::date)",
+                        "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::char(2), ?::int, ?::date)",
                 t6List,
                 BATCH_SIZE,
                 (ps, t3) -> {
@@ -265,6 +264,21 @@ public class Level3Dao {
                     ps.setObject(8, t3.getRequestDate());
                     progress.getAndIncrement();
                     LogWS.spreadProgress((int) (((float) progress.get()) / t6List.size() * 100));
+                });
+    }
+
+    private void insertCO22Metas(List<CO22Meta> metaList){
+        AtomicInteger progress = new AtomicInteger();
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_META_TABLE + " VALUES (\ndefault, ?, ?, ?, ?)",
+                metaList,
+                BATCH_SIZE,
+                (ps, meta) -> {
+                    ps.setObject(1, meta.getT1id());
+                    ps.setObject(2, meta.getPrigIdnum());
+                    ps.setObject(3, meta.getPassIdnum());
+                    ps.setObject(4, meta.getRequestDate());
+                    progress.getAndIncrement();
+                    LogWS.spreadProgress((int) (((float) progress.get()) / metaList.size() * 100));
                 });
     }
 

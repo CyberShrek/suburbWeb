@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.vniizht.suburbsweb.model.TransformationOptions;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.service.data.dao.TripsDao;
@@ -19,7 +20,6 @@ import org.vniizht.suburbsweb.util.Util;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -27,50 +27,51 @@ import java.util.stream.Stream;
 
 @Service
 @Scope("singleton")
+@Transactional
 public class Transformation {
 
     @Autowired private Level2Dao level2;
     @Autowired private Level3Dao level3;
-    @Autowired private Handbook handbook;
+    @Autowired private Handbook  handbook;
     @Autowired private RoutesDao routes;
-    @Autowired private TripsDao trips;
+    @Autowired private TripsDao  trips;
 
-    @Transactional
-    public synchronized String transform(TransformationOptions options) {
+    public synchronized void transform(TransformationOptions options) throws Exception {
+        System.out.println("Start transform");
+        Date startTime = new Date();
         Log log = new Log();
-        return log.sumUp("Итоговое время: " + Util.measureTime(() -> {
-            try {
-                if(!options.pass && !options.prig) return;
-                if(options.date == null) {
-                    options.date = getRequestDate(log);
-                    if(options.date == null) return;
-                }
-
-                log.addTimeLine("Выполняю трансформацию записей за "
-                        + Util.formatDate(options.date, "dd.MM.yyyy"));
-                log.sumUp((options.prig ? " l2_prig" : "") + (options.pass ? " l2_pass" : ""));
-
-                log.addTimeLine("Получаю справочники...");
-                LogWS.spreadProgress(0);
-                handbook.loadCache();
-                log.addTimeLine("Справочники загружены.");
-                log.sumUp();
-                complete(
-                        options.date,
-                        options.prig ? transformPrig(options.date, log) : null,
-                        options.pass ? transformPass(options.date, log) : null,
-                        log
-                );
-            } catch (Exception e) {
-                log.sumUp(e.getLocalizedMessage());
-                LogWS.spreadProgress(-1);
-                e.printStackTrace();
-            } finally {
-                handbook.clearCache();
-                routes.clearCache();
-                LogWS.spreadProgress(-1);
+        try {
+            if(!options.pass && !options.prig) return;
+            if(options.date == null) {
+                options.date = getRequestDate(log);
+                if(options.date == null) return;
             }
-        }) + "c");
+
+            log.addTimeLine("Выполняю трансформацию записей за "
+                    + Util.formatDate(options.date, "dd.MM.yyyy"));
+            log.sumUp((options.prig ? " l2_prig" : "") + (options.pass ? " l2_pass" : ""));
+
+            log.addTimeLine("Получаю справочники...");
+            LogWS.spreadProgress(0);
+            handbook.loadCache();
+            log.addTimeLine("Справочники загружены.");
+            log.sumUp();
+            complete(
+                    options.date,
+                    options.prig ? transformPrig(options.date, log) : null,
+                    options.pass ? transformPass(options.date, log) : null,
+                    log
+            );
+        } catch (Exception e) {
+            log.sumUp(e.getLocalizedMessage());
+            throw e;
+        } finally {
+            handbook.clearCache();
+            routes.clearCache();
+            LogWS.spreadProgress(-1);
+        }
+        log.sumUp("Итоговое время выполнения: " +
+                (new Date().getTime() - startTime.getTime()) / 1000 + "с");
     }
 
     private Level3Prig transformPrig(Date requestDate, Log log) throws Exception {
@@ -177,15 +178,17 @@ public class Transformation {
             Set<T6> t6Set = new HashSet<>();
             co22Set.forEach(co22 -> t6Set.addAll(co22.getT6()));
             level3.saveT6s(t6Set);
+            log.addTimeLine("Записываю Метаданные ЦО-22...");
+            level3.saveCO22Metas(co22Set.stream().map(Level3.CO22::getMeta).collect(Collectors.toSet()));
             log.addTimeLine("Записываю Lgot...");
             level3.saveLgots(lgotSet);
             log.addTimeLine("Записи успешно обновлены.");
         }) + "c");
     }
 
-    @PostConstruct
-    public void test() {
-        int yyyy = 2024, mm = 02, dd = 05;
+//    @PostConstruct
+    public void test() throws Exception {
+        int yyyy = 2024, mm = 10, dd = 28;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
                 true,

@@ -4,6 +4,7 @@ import org.vniizht.suburbsweb.service.data.entities.level2.PrigAdi;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigCost;
 import org.vniizht.suburbsweb.service.data.entities.level2.PrigMain;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
+import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
 import org.vniizht.suburbsweb.service.data.entities.routes.RouteGroup;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
@@ -47,11 +48,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     private PrigMain       main;
     private List<PrigCost> costList;
     private PrigAdi        adi;
-
-    @Override
-    protected Long getIdnum() {
-        return main.idnum;
-    }
 
     @Override
     protected RouteGroup getRouteGroup() {
@@ -114,6 +110,14 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
 
         return t1Set;
+    }
+
+    @Override
+    protected CO22Meta getMeta() {
+        return CO22Meta.builder()
+                .requestDate(main.requestDate)
+                .prigIdnum(main.idnum)
+                .build();
     }
 
     @Override
@@ -495,7 +499,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     protected Character getT1P61() {
         return main.train_num.matches("^\\d {5}")
                 ? main.train_num.trim().charAt(0)
-                : 0;
+                : '0';
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.vniizht.suburbsweb.service.result;
 import lombok.Getter;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
-import org.vniizht.suburbsweb.service.data.entities.level3.meta.Meta;
+import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
 import org.vniizht.suburbsweb.service.data.entities.routes.*;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
 import org.vniizht.suburbsweb.service.data.dao.Level2Dao;
@@ -19,7 +19,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Конечные результаты - трансформированные записи второго уровня, готовые к записи в базу данных
     @Getter private final Map<String, CO22> co22Result = new HashMap<>();
     @Getter private final List<Lgot>        lgotResult = new ArrayList<>();
-    @Getter private final List<Meta>        metaResult = new ArrayList<>();
 
     // Подсчитанное время на сопутствующие операции (с)
     @Getter private float transformationTime   = 0;
@@ -32,10 +31,10 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Set<T1> multiplyT1(T1 t1);
 
     // Детали общие и метаданные
-    abstract protected Integer getYyyyMM();
+    abstract protected Integer    getYyyyMM();
     abstract protected Date       getRequestDate();
     abstract protected RouteGroup getRouteGroup();
-    abstract protected Long       getIdnum();
+    abstract protected CO22Meta         getMeta();
 
     // Проверка существования t1
     abstract protected boolean   t1Exists();
@@ -158,9 +157,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Подсчёт средних стоимостей на километр по регионам
     abstract protected double getRegionIncomePerKm(String region);
     abstract protected double getRegionOutcomePerKm(String region);
-
-    // Сбор мета данных
-    abstract protected Meta getMeta();
 
     protected final Set<L2_RECORD> records;
     protected final Handbook handbook;
@@ -403,6 +399,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         private final List<T3> t3 = new ArrayList<>();
         private final List<T4> t4 = new ArrayList<>();
         private final List<T6> t6 = new ArrayList<>();
+        private final CO22Meta meta = Level3.this.getMeta();
 
         CO22(T1 t1, RouteGroup routeGroup) {
             this.t1 = t1;
@@ -424,6 +421,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t3.forEach(t -> t.setP3(t1Serial));
             t4.forEach(t -> t.setP3(t1Serial));
             t6.forEach(t -> t.setP3(t1Serial));
+            meta.setT1id(t1Serial);
             t1Serial++;
         }
 

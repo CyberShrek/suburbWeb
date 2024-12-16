@@ -39,6 +39,7 @@ public class Handbook {
     }
 
     public String getOkatoByRegion(String regionCode, Date date) {
+        if(regionCode == null) return "00000";
         Sf sf = cache.findSf(Integer.valueOf(regionCode), date);
         if (sf == null) {
             return "00000";
@@ -50,6 +51,7 @@ public class Handbook {
     }
 
     public String getOkatoByStation(String stationCode, Date date) {
+        if(stationCode == null) return "00000";
         return getOkatoByRegion(getRegion(stationCode, date), date);
     }
 
