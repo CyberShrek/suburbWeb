@@ -8,6 +8,7 @@ import org.vniizht.suburbsweb.model.TransformationOptions;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.service.data.dao.TripsDao;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
+import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
 import org.vniizht.suburbsweb.service.result.Level3;
 import org.vniizht.suburbsweb.service.result.Level3Pass;
 import org.vniizht.suburbsweb.service.result.Level3Prig;
@@ -126,11 +127,11 @@ public class Transformation {
                           Level3Pass level3Pass,
                           Log log) {
 
-        Set<Level3.CO22>    co22Set   = aggregateCO22(
-                level3Prig == null ? new HashMap<>() : level3Prig.getCo22Result(),
-                level3Pass == null ? new HashMap<>() : level3Pass.getCo22Result());
+        Set<Level3.CO22>       co22Set = new HashSet<>();
+        if(level3Prig != null) co22Set.addAll(level3Prig.getCo22Result().values());
+        if(level3Pass != null) co22Set.addAll(level3Pass.getCo22Result().values());
 
-        Set<Lgot>  lgotSet = Stream.concat(
+        Set<Lgot> lgotSet = Stream.concat(
                 level3Prig == null ? Stream.empty() : level3Prig.getLgotResult().stream(),
                 level3Pass == null ? Stream.empty() : level3Pass.getLgotResult().stream())
                 .collect(Collectors.toSet());
@@ -141,21 +142,9 @@ public class Transformation {
         update(date, co22Set, lgotSet, log);
     }
 
-    // TODO refactor
-    private Set<Level3.CO22> aggregateCO22(Map<String, Level3Prig.CO22> prigMap,
-                                           Map<String, Level3Pass.CO22> passMap)
-    {
-        Set<Level3.CO22> co22Set = new HashSet<>();
-        prigMap.forEach((co22Key, co22) -> {
-            co22Set.add(co22);
-        });
-        passMap.forEach((co22Key, co22) -> {
-            co22Set.add(co22);
-        });
-        return co22Set;
-    }
-
-    private void update(Date date, Set<Level3.CO22> co22Set, Set<Lgot> lgotSet, Log log) {
+    private void update(Date date,
+                        Set<Level3.CO22> co22Set,
+                        Set<Lgot> lgotSet, Log log) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
             log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(date, "dd.MM.yyyy") + "...");
             LogWS.spreadProgress(0);
@@ -178,9 +167,11 @@ public class Transformation {
             Set<T6> t6Set = new HashSet<>();
             co22Set.forEach(co22 -> t6Set.addAll(co22.getT6()));
             level3.saveT6s(t6Set);
-            log.addTimeLine("Записываю Метаданные ЦО-22...");
-            level3.saveCO22Metas(co22Set.stream().map(Level3.CO22::getMeta).collect(Collectors.toSet()));
-            log.addTimeLine("Записываю Lgot...");
+            log.addTimeLine("Записываю метаданные ЦО-22...");
+            Set<CO22Meta> co22MetaSet = new HashSet<>();
+            co22Set.forEach(co22 -> co22MetaSet.addAll(co22.getMetas()));
+            level3.saveCO22Metas(co22MetaSet);
+            log.addTimeLine("Записываю льготников...");
             level3.saveLgots(lgotSet);
             log.addTimeLine("Записи успешно обновлены.");
         }) + "c");
@@ -188,7 +179,7 @@ public class Transformation {
 
 //    @PostConstruct
     public void test() throws Exception {
-        int yyyy = 2024, mm = 10, dd = 28;
+        int yyyy = 2024, mm = 2, dd = 5;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
                 true,

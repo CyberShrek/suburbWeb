@@ -18,9 +18,9 @@ public class CO22Meta {
     private Long id;
     @Setter
     private Long t1id;
-    private Long prigIdnum;
-    private Long passIdnum;
     private Date requestDate;
+    private Long l2PrigIdnum;
+    private Long l2PassIdnum;
 
     public CO22Meta() {}
 }

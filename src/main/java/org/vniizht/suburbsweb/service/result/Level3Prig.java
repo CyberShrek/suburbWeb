@@ -40,7 +40,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case '2':
             case '3':
             case '4':
-            case '5': isAbonement = true;
+            case '5': isAbonement = true; break;
             default : isAbonement = false;
         }
     }
@@ -116,7 +116,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     protected CO22Meta getMeta() {
         return CO22Meta.builder()
                 .requestDate(main.requestDate)
-                .prigIdnum(main.idnum)
+                .l2PrigIdnum(main.idnum)
                 .build();
     }
 
@@ -416,7 +416,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 1:  return '2';
             default: return '5';
         }
-        return tSite.trim().charAt(0);
+        return tSite.trim().charAt(1);
     }
 
     @Override
@@ -497,7 +497,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Character getT1P61() {
-        return main.train_num.matches("^\\d {5}")
+        return main.train_num.matches("^\\d {4}")
                 ? main.train_num.trim().charAt(0)
                 : '0';
     }
@@ -509,7 +509,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected boolean lgotExists() {
-        return t1Exists() && main.benefit_code.equals("00");
+        return t1Exists() && !main.benefit_code.equals("00") && !main.benefitgroup_code.equals("21");
     }
 
     @Override
@@ -735,6 +735,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 incomeSum += cost.tariff_sum;
             }
         }
+        incomeSum = incomeSum == 0 ? main.tariff_sum : incomeSum;
         return distance == 0 ? 0 : (double) incomeSum / distance;
     }
 
@@ -748,6 +749,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 outcomeSum += cost.department_sum;
             }
         }
+        outcomeSum = outcomeSum == 0 ? main.department_sum : outcomeSum;
         return distance == 0 ? 0 : (double) outcomeSum / distance;
     }
 

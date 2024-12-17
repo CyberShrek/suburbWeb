@@ -34,7 +34,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected Integer    getYyyyMM();
     abstract protected Date       getRequestDate();
     abstract protected RouteGroup getRouteGroup();
-    abstract protected CO22Meta         getMeta();
+    abstract protected CO22Meta getMeta();
 
     // Проверка существования t1
     abstract protected boolean   t1Exists();
@@ -194,11 +194,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 Set<T1> t1Set = multiplyT1(buildT1(routeGroup.get()));
                 t1Set.forEach(t1 -> {
                     String key = t1.getKey().toString();
-                    // Агрегация данных
+                    CO22 co22 = new CO22(t1, routeGroup.get());
                     if(co22Result.containsKey(key))
-                        co22Result.get(key).t1.add(t1);
+                        co22Result.get(key).merge(co22);
                     else
-                        co22Result.put(key, new CO22(t1, routeGroup.get()));
+                        co22Result.put(key, co22);
                 });
             });
         }
@@ -395,11 +395,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // ЦО22 включая все дочерние записи
     @Getter public class CO22 {
         private final T1 t1;
-        private final List<T2> t2 = new ArrayList<>();
-        private final List<T3> t3 = new ArrayList<>();
-        private final List<T4> t4 = new ArrayList<>();
-        private final List<T6> t6 = new ArrayList<>();
-        private final CO22Meta meta = Level3.this.getMeta();
+        private final List<T2>       t2 = new ArrayList<>();
+        private final List<T3>       t3 = new ArrayList<>();
+        private final List<T4>       t4 = new ArrayList<>();
+        private final List<T6>       t6 = new ArrayList<>();
+        private final Set<CO22Meta> metas = new HashSet<>();
 
         CO22(T1 t1, RouteGroup routeGroup) {
             this.t1 = t1;
@@ -407,12 +407,19 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             routeGroup.getRegionRoutes().forEach(regionRoute -> t3.add(buildT3(regionRoute)));
             routeGroup.getFollowRoutes().forEach(route       -> t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4()))));
             routeGroup.getDcsRoutes().forEach(route          -> t6.add(buildT6(route)));
+            metas.add(getMeta());
 
             arrangeCosts();
         }
 
-        public void add(CO22 co22) {
-            t1.add(co22.t1);
+        public void merge(CO22 co22) {
+            // Агрегация
+            t1.merge(co22.t1);
+            t2.addAll(co22.t2);
+            t3.addAll(co22.t3);
+            t4.addAll(co22.t4);
+            t6.addAll(co22.t6);
+            metas.addAll(co22.metas);
         }
 
         void assignSerials() {
@@ -421,7 +428,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t3.forEach(t -> t.setP3(t1Serial));
             t4.forEach(t -> t.setP3(t1Serial));
             t6.forEach(t -> t.setP3(t1Serial));
-            meta.setT1id(t1Serial);
+            metas.forEach(t -> t.setT1id(t1Serial++));
             t1Serial++;
         }
 

@@ -92,14 +92,18 @@ public class TripsDao {
 
         handbookCache.load();
 
+        short ticketCode = abonementType2ticketCode('0', "1  ");
+
+        System.out.println("ticketCode = " + ticketCode);
+
         calculateTripsPerMonth(
                 handbookCache.findTrip(
-                        (short) 9,
-                        (short) 90
+                        ticketCode,
+                        (short) 60
                 ),
-                new Date(2024 - 1900, Calendar.MAY, 10),
-                new Date(2024 - 1900, Calendar.JUNE, 27),
-                new Date(2024 - 1900, Calendar.OCTOBER, 24))
+                new Date(2024 - 1900, Calendar.OCTOBER, 31),
+                new Date(2024 - 1900, Calendar.OCTOBER, 29),
+                new Date(2025 - 1900, Calendar.FEBRUARY, 25))
                 .forEach((k, v) -> System.out.println(k + " " + v));
     }
 }

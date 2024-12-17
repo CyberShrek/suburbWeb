@@ -45,14 +45,19 @@ public class Level3Dao {
     }
 
     public void deleteForDate(Date date){
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t1   WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t2   WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t3   WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t4   WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_t6   WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.co22_meta WHERE request_date = ?", date);
-        jdbcTemplate.update("DELETE FROM prigl3.lgot      WHERE request_date = ?", date);
-
+        deleteForDate(date,
+                T1_TABLE,
+                T2_TABLE,
+                T3_TABLE,
+                T4_TABLE,
+                T6_TABLE,
+                CO22_META_TABLE,
+                LGOT_TABLE);
+    }
+    private void deleteForDate(Date date, String ...tables){
+        for(String table : tables) {
+            jdbcTemplate.update("DELETE FROM " + table + " WHERE request_date = ?", date);
+        }
     }
 
     public void saveT1s(Set<T1> t1Set){
@@ -70,8 +75,8 @@ public class Level3Dao {
     public void saveT6s(Set<T6> t6Set){
         insertT6s(new ArrayList<>(t6Set));
     }
-    public void saveCO22Metas(Set<CO22Meta> co22MetaSet){
-        insertCO22Metas(new ArrayList<>(co22MetaSet));
+    public void saveCO22Metas(Set<CO22Meta> CO22MetaSet){
+        insertL2Metas(new ArrayList<>(CO22MetaSet));
     }
     public void saveLgots(Set<Lgot> lgotSet){
         insertLgots(new ArrayList<>(lgotSet));
@@ -267,16 +272,17 @@ public class Level3Dao {
                 });
     }
 
-    private void insertCO22Metas(List<CO22Meta> metaList){
+    private void insertL2Metas(List<CO22Meta> metaList){
         AtomicInteger progress = new AtomicInteger();
         jdbcTemplate.batchUpdate("INSERT INTO " + CO22_META_TABLE + " VALUES (\ndefault, ?, ?, ?, ?)",
                 metaList,
                 BATCH_SIZE,
                 (ps, meta) -> {
                     ps.setObject(1, meta.getT1id());
-                    ps.setObject(2, meta.getPrigIdnum());
-                    ps.setObject(3, meta.getPassIdnum());
-                    ps.setObject(4, meta.getRequestDate());
+                    ps.setObject(2, meta.getRequestDate());
+                    ps.setObject(3, meta.getL2PrigIdnum());
+                    ps.setObject(4, meta.getL2PassIdnum());
+
                     progress.getAndIncrement();
                     LogWS.spreadProgress((int) (((float) progress.get()) / metaList.size() * 100));
                 });

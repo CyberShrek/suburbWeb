@@ -1,7 +1,6 @@
 package org.vniizht.suburbsweb.service.result;
 
 import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
-import org.vniizht.suburbsweb.service.data.entities.routes.Route;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.T1;
 import org.vniizht.suburbsweb.service.data.entities.routes.RouteGroup;
@@ -64,7 +63,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected CO22Meta getMeta() {
         return CO22Meta.builder()
                 .requestDate(main.requestDate)
-                .passIdnum(main.idnum)
+                .l2PassIdnum(main.idnum)
                 .build();
     }
 
