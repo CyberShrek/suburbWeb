@@ -79,6 +79,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         if (isAbonement) {
             trips.calculateTripsPerMonth(main)
                     .forEach((yyyymm, trips) -> {
+                        System.out.println("yyyymm, trips = " + yyyymm + ", " + trips);
                         boolean isActual = t1.getKey().getYyyymm() == Integer.parseInt(yyyymm);
                         t1Set.add(t1.toBuilder()
                                 .key(t1.getKey().toBuilder()
@@ -155,7 +156,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected String getT1P8() {
-        return "00" + main.sale_station;
+        return main.sale_station;
     }
 
     @Override
@@ -229,7 +230,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected Character getT1P21() {
         if(main.flg_fee_onboard == '1') return '8'; // Квитанция за оформление в поезде
-        if(main.carryon_type    == '1') return '6'; // Перевозочный документ (для багажа)
+        if(main.flg_carryon     == '1') return '6'; // Перевозочный документ (для багажа)
         switch (main.abonement_type.charAt(0)) {
             case '5': case '6': return '4';         // Билет выходного дня
             case '0': return main.flg_2wayticket == '1'
@@ -514,7 +515,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected String getLgotP2() {
-        return handbook.getRoad2(
+        return getLgotP4() + handbook.getRoad2(
                 main.sale_station,
                 main.operation_date
         );
@@ -619,16 +620,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Byte getLgotP16() {
-        return (byte) (main.abonement_type.equals("0 ")
-                ?
-                (main.oper_g == 'G'
-                        ? -1
-                        :
-                        (main.oper == 'V'
-                                ? 0 : 1
-                                ))
-                : 0
-        );
+        return (byte) (main.abonement_type.equals("0  ")
+                        ? (short) main.pass_qty
+                        : 0);
     }
 
     @Override
@@ -638,12 +632,16 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Byte getLgotP18() {
-        return getLgotP16();
+        return (byte) (!main.abonement_type.equals("0  ")
+                ? (short) main.pass_qty
+                : 0);
     }
 
     @Override
     protected Short getLgotP19() {
-        return main.pass_qty;
+        return getLgotP20() == '9'
+                ? main.seatstick_limit
+                : 0;
     }
 
     @Override
@@ -656,13 +654,13 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case "5": return '2';
             case "7": return '4';
             case "8": return '5';
-            default: return null;
+            default: return  '0';
         }
     }
 
     @Override
     protected Short getLgotP21() {
-        return main.seatstick_limit;
+        return getLgotP20() != '9' && getLgotP16() != 0 ? main.seatstick_limit : 0;
     }
 
     @Override
@@ -677,7 +675,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected String getLgotP24() {
-        return main.ticket_ser.substring(0, 2) + main.ticket_num;
+        return main.ticket_ser + Util.addLeadingZeros(String.valueOf(main.ticket_num), 6);
     }
 
     @Override
@@ -697,7 +695,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected Double  getLgotP28() {
-        return (double) (main.tariff_sum - main.department_sum);
+        return (double) (main.total_sum);
     }
 
     @Override
@@ -712,7 +710,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected String getLgotP31() {
-        return main.server_reqnum == null ? null : main.server_reqnum.toString();
+        return Util.addLeadingZeros(main.server_reqnum == null ? null : main.server_reqnum.toString(), 7);
     }
 
     @Override

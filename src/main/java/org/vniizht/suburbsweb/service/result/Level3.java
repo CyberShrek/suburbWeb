@@ -301,7 +301,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRoad())
+                .p5(Util.addLeadingZeros(route.getRoad(), 3))
                 .p6(route.getDepartment())
                 .p7(route.getDistance())
                 .build();
@@ -327,7 +327,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRoad())
+                .p5(Util.addLeadingZeros(route.getRoad(), 3))
                 .p6(route.getOkato())
                 .p7(hasCosts ? (long) (route.getDistance() * getRegionIncomePerKm(route.getRegion())) : 0)
                 .p8(hasCosts ? (long) (route.getDistance() * getRegionOutcomePerKm(route.getRegion())) : 0)
@@ -342,8 +342,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                 .p2("017")
                 .p3(null)
                 .p4(route.getSerial())
-                .p5(route.getRoad())
-                .p6(route.getCode())
+                .p5(Util.addLeadingZeros(route.getRoad(), 3))
+                .p6(Integer.valueOf(route.getDcs()))
                 .p7(route.getDistance())
                 .build();
     }
@@ -361,12 +361,12 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
                         .p5(getLgotP5())
                         .p6(getLgotP6())
                         .p7(getLgotP7())
-                        .p8(getLgotP8())
+                        .p8(Util.addLeadingZeros(getLgotP8(), 4))
                         .p9(getLgotP9())
                         .p10(getLgotP10())
-                        .p11(getLgotP11())
-                        .p12(getLgotP12())
-                        .p13(getLgotP13())
+                        .p11(Util.addLeadingZeros(getLgotP11(), 5))
+                        .p12(Util.addLeadingZeros(getLgotP12(), 10))
+                        .p13(getLgotP13() == null ? '0' : getLgotP13())
                         .p14(getLgotP14())
                         .p15(getLgotP15())
                         .p16(getLgotP16())
@@ -402,14 +402,16 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         private final Set<CO22Meta> metas = new HashSet<>();
 
         CO22(T1 t1, RouteGroup routeGroup) {
+            boolean hasCosts = t1.getKey().getYyyymm().equals(getT1P3() + getT1P4());
             this.t1 = t1;
             routeGroup.getDepartmentRoutes().forEach(route   -> t2.add(buildT2(route)));
             routeGroup.getRegionRoutes().forEach(regionRoute -> t3.add(buildT3(regionRoute)));
-            routeGroup.getFollowRoutes().forEach(route       -> t4.add(buildT4(route, t1.getKey().getYyyymm().equals(getT1P3() + getT1P4()))));
+            routeGroup.getFollowRoutes().forEach(route       -> t4.add(buildT4(route, hasCosts)));
             routeGroup.getDcsRoutes().forEach(route          -> t6.add(buildT6(route)));
             metas.add(getMeta());
 
-            arrangeCosts();
+            if(hasCosts)
+                arrangeCosts();
         }
 
         public void merge(CO22 co22) {
@@ -428,7 +430,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t3.forEach(t -> t.setP3(t1Serial));
             t4.forEach(t -> t.setP3(t1Serial));
             t6.forEach(t -> t.setP3(t1Serial));
-            metas.forEach(t -> t.setT1id(t1Serial++));
+            metas.forEach(t -> t.setT1id(t1Serial));
             t1Serial++;
         }
 

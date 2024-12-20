@@ -87,23 +87,23 @@ public class TripsDao {
         return Util.formatDate(date, "yyyyMM");
     }
 
-//    @PostConstruct
+    @PostConstruct
     private void test() {
 
         handbookCache.load();
 
-        short ticketCode = abonementType2ticketCode('0', "1  ");
+        short ticketCode = abonementType2ticketCode('0', "7  ");
 
         System.out.println("ticketCode = " + ticketCode);
 
         calculateTripsPerMonth(
                 handbookCache.findTrip(
                         ticketCode,
-                        (short) 60
+                        (short) 1
                 ),
-                new Date(2024 - 1900, Calendar.OCTOBER, 31),
                 new Date(2024 - 1900, Calendar.OCTOBER, 29),
-                new Date(2025 - 1900, Calendar.FEBRUARY, 25))
+                new Date(2024 - 1900, Calendar.OCTOBER, 31),
+                new Date(2024 - 1900, Calendar.NOVEMBER, 29))
                 .forEach((k, v) -> System.out.println(k + " " + v));
     }
 }

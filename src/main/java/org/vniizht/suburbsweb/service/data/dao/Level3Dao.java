@@ -102,7 +102,7 @@ public class Level3Dao {
         jdbcTemplate.batchUpdate("INSERT INTO " + T1_TABLE + " VALUES (\n" +
                 "?::integer    , ?::date       ,\n" +
                 "?::char(4)    , ?::bigint     , ?::char(4)    , ?::char(2)    , ?::char(3)    ,\n" +
-                "?::char(3)    , ?::char(3)    , ?::char(9)    , ?::char(9)    , ?::char(2)    ,\n" +
+                "?::char(3)    , ?::char(3)    , ?::char(7)    , ?::char(9)    , ?::char(2)    ,\n" +
                 "?::char(5)    , ?::char(4)    , ?::char(3)    , ?::char(2)    , ?::char(7)    ,\n" +
                 "?::char(2)    , ?::char(5)    , ?::char(3)    , ?::char       , ?::char(2)    ,\n" +
                 "?::char       , ?::char       , ?::char       , ?::char(4)    , ?::char       ,\n" +
@@ -255,7 +255,7 @@ public class Level3Dao {
     private void insertT6s(List<T6> t6List){
         AtomicInteger progress = new AtomicInteger();
         jdbcTemplate.batchUpdate("INSERT INTO " + T6_TABLE + " VALUES (\ndefault," +
-                        "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::char(2), ?::int, ?::date)",
+                        "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::int, ?::int, ?::date)",
                 t6List,
                 BATCH_SIZE,
                 (ps, t3) -> {
@@ -296,9 +296,9 @@ public class Level3Dao {
                 "?::char       , ?::char(4)    , ?::char(4)    , ?::char(5)    , ?::char(14)   ,\n" +
                 "?::char(5)    , ?::char(10)   , ?::char       , ?::char(45)   , ?::char(20)   ,\n" +
                 "?::numeric(3) , ?::boolean    , ?::numeric(3) , ?::integer    , ?::char       ,\n" +
-                "?::numeric(2) , ?::date       , ?::date       , ?::char(8)    , ?::char(7)    ,\n" +
-                "?::char(7)    , ?::real       , ?::real       , ?::char(7)    , ?::char(10)   ,\n" +
-                "?::char(7)    , ?::char(11)   , ?::real       ,\n" +
+                "?::numeric(2) , ?::date       , ?::date       , ?::char(9)    , ?::char(7)    ,\n" +
+                "?::char(7)    , ?::numeric(11), ?::numeric(11), ?::char(5)    , ?::char(10)   ,\n" +
+                "?::char(7)    , ?::char(11)   , ?::smallint   ,\n" +
                 "?::date       )",
                 lgotList,
                 BATCH_SIZE,

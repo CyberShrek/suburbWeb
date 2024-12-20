@@ -18,6 +18,6 @@ public class T6 {
     private Long            p3;
     private Short           p4;
     private String          p5;
-    private String          p6;
+    private Integer         p6;
     private Short           p7;
 }

@@ -24,4 +24,24 @@ public class Util {
         System.arraycopy(array2, 0, result, array1.length, array2.length);
         return result;
     }
+
+    // Доводит строку до нужной длины лидирующими нулями
+    public static String addLeadingZeros(String str, int length) {
+        if(str == null) str = "";
+        StringBuilder zeros = new StringBuilder();
+        for (int i = 0; i < length - str.length(); i++) {
+            zeros.append('0');
+        }
+        return zeros.append(str).toString();
+    }
+
+    // Доводит строку до нужной длины нулями с конца
+    public static String addTrailingZeros(String str, int length) {
+        if(str == null) str = "";
+        StringBuilder stringBuilder = new StringBuilder(str);
+        while (stringBuilder.length() < length) {
+            stringBuilder.append('0');
+        }
+        return stringBuilder.toString();
+    }
 }

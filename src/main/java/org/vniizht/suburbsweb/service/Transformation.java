@@ -179,7 +179,7 @@ public class Transformation {
 
 //    @PostConstruct
     public void test() throws Exception {
-        int yyyy = 2024, mm = 2, dd = 5;
+        int yyyy = 2024, mm = 10, dd = 29;
         transform(new TransformationOptions(
                 new Date(yyyy - 1900, mm - 1, dd),
                 true,

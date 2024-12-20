@@ -56,7 +56,7 @@ public class RoutesDao {
                     break;
                     case 4: group.addDcsRoute((DcsRoute) DcsRoute.builder()
                             .road(String.valueOf(obj_int))
-                            .code(obj_chr)
+                            .dcs(obj_chr)
                             .distance(rst)
                             .build());
                     break;
@@ -127,7 +127,7 @@ public class RoutesDao {
             while (dcsRS.next()) {
                 group.addDcsRoute((DcsRoute) DcsRoute.builder()
                         .road(roadsRS.getString("dor3"))
-                        .code(dcsRS.getString("dcs"))
+                        .dcs(dcsRS.getString("dcs"))
                         .distance(departmentsRS.getShort("km"))
                         .build());
             }

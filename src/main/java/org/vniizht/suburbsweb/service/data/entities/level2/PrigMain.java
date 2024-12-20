@@ -55,6 +55,7 @@ public class PrigMain extends L2Key {
     public String      benefitgroup_code;
     public Long        fee_sum;
     public Long        refundfee_sum;
+    public Long        total_sum;
     public Long        tariff_sum;
     public Long        department_sum;
 

@@ -10,5 +10,5 @@ import lombok.experimental.SuperBuilder;
 @ToString
 @SuperBuilder
 public class DcsRoute extends RoadRoute {
-    private String code;
+    private String dcs;
 }
