@@ -402,7 +402,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         private final Set<CO22Meta> metas = new HashSet<>();
 
         CO22(T1 t1, RouteGroup routeGroup) {
-            boolean hasCosts = t1.getKey().getYyyymm().equals(getT1P3() + getT1P4());
+            boolean hasCosts = String.valueOf(t1.getKey().getYyyymm()).equals(getT1P3() + getT1P4());
             this.t1 = t1;
             routeGroup.getDepartmentRoutes().forEach(route   -> t2.add(buildT2(route)));
             routeGroup.getRegionRoutes().forEach(regionRoute -> t3.add(buildT3(regionRoute)));

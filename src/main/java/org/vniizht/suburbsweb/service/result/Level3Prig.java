@@ -79,7 +79,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         if (isAbonement) {
             trips.calculateTripsPerMonth(main)
                     .forEach((yyyymm, trips) -> {
-                        System.out.println("yyyymm, trips = " + yyyymm + ", " + trips);
                         boolean isActual = t1.getKey().getYyyymm() == Integer.parseInt(yyyymm);
                         t1Set.add(t1.toBuilder()
                                 .key(t1.getKey().toBuilder()

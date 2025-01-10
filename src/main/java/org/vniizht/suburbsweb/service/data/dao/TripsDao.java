@@ -36,13 +36,16 @@ public class TripsDao {
 
         Map<String, Integer> totalTripsPerMonth = new LinkedHashMap<>();
         calculateDaysWithTripsPerMonth(saleDate, begDate, endDate)
-                .forEach((yyyymm, daysWithTrips) ->
-                        totalTripsPerMonth
-                                .put(yyyymm, seasonTrip == null ? 0 :
-                                        Math.round(((float) seasonTrip.getKol__round_trips() / 2)
-                                                * ((float) daysWithTrips / 31))
-                                )
-                );
+                .forEach((yyyymm, daysWithTrips) -> {
+                    int trips = seasonTrip == null ? 0 :
+                            Math.round(((float) seasonTrip.getKol__round_trips() / 2)
+                                    * ((float) daysWithTrips / 31));
+
+                    if(trips == 0 && Util.formatDate(begDate, "yyyyMM").equals(yyyymm))
+                        trips = 1;
+
+                    totalTripsPerMonth.put(yyyymm, trips);
+                });
 
         return totalTripsPerMonth;
     }
@@ -87,23 +90,23 @@ public class TripsDao {
         return Util.formatDate(date, "yyyyMM");
     }
 
-    @PostConstruct
+//    @PostConstruct
     private void test() {
 
         handbookCache.load();
 
-        short ticketCode = abonementType2ticketCode('0', "7  ");
+        short ticketCode = abonementType2ticketCode('0', "1  ");
 
         System.out.println("ticketCode = " + ticketCode);
 
         calculateTripsPerMonth(
                 handbookCache.findTrip(
                         ticketCode,
-                        (short) 1
+                        (short) 0
                 ),
                 new Date(2024 - 1900, Calendar.OCTOBER, 29),
-                new Date(2024 - 1900, Calendar.OCTOBER, 31),
-                new Date(2024 - 1900, Calendar.NOVEMBER, 29))
+                new Date(2024 - 1900, Calendar.OCTOBER, 29),
+                new Date(2024 - 1900, Calendar.NOVEMBER, 27))
                 .forEach((k, v) -> System.out.println(k + " " + v));
     }
 }
