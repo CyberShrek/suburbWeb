@@ -298,7 +298,7 @@ public class Level3Dao {
                 "?::numeric(3) , ?::boolean    , ?::numeric(3) , ?::integer    , ?::char       ,\n" +
                 "?::numeric(2) , ?::date       , ?::date       , ?::char(9)    , ?::char(7)    ,\n" +
                 "?::char(7)    , ?::numeric(11), ?::numeric(11), ?::char(5)    , ?::char(10)   ,\n" +
-                "?::char(7)    , ?::char(11)   , ?::smallint   ,\n" +
+                "?::char(7)    , ?::char(11)   , ?::smallint   , ?::char(7)    , ?::char(4)    ,\n" +
                 "?::date       )",
                 lgotList,
                 BATCH_SIZE,
@@ -337,7 +337,9 @@ public class Level3Dao {
                     ps.setObject(32, lgot.getKey().getP31());
                     ps.setObject(33, lgot.getKey().getP32());
                     ps.setObject(34, lgot.getP33());
-                    ps.setObject(35, lgot.getKey().getRequestDate());
+                    ps.setObject(35, lgot.getKey().getP34());
+                    ps.setObject(36, lgot.getKey().getP35());
+                    ps.setObject(37, lgot.getKey().getRequestDate());
                     progress.getAndIncrement();
                     LogWS.spreadProgress((int) (((float) progress.get()) / lgotList.size() * 100));
                 });

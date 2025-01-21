@@ -153,6 +153,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected String        getLgotP31();
     abstract protected String        getLgotP32();
     abstract protected Short         getLgotP33();
+    abstract protected String        getLgotP34();
+    abstract protected String        getLgotP35();
 
     // Подсчёт средних стоимостей на километр по регионам
     abstract protected double getRegionIncomePerKm(String region);

@@ -68,5 +68,7 @@ public class Lgot {
         private String      p30;
         private String      p31;
         private String      p32;
+        private String      p34;
+        private String      p35;
     }
 }

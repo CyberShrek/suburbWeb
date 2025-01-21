@@ -630,6 +630,16 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     @Override
+    protected String getLgotP35() {
+        return main.sale_station;
+    }
+
+    @Override
+    protected String getLgotP34() {
+        return main.agent_code == null ? null : String.valueOf(main.agent_code);
+    }
+
+    @Override
     protected double getRegionIncomePerKm(String region) {
         // TODO
         return 0;

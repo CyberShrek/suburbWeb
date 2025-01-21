@@ -723,6 +723,16 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     @Override
+    protected String getLgotP34() {
+        return main.sale_station;
+    }
+
+    @Override
+    protected String getLgotP35() {
+        return main.agent_code == null ? null : String.valueOf(main.agent_code);
+    }
+
+    @Override
     protected double getRegionIncomePerKm(String region) {
         int distance = 0;
         long incomeSum = 0;
