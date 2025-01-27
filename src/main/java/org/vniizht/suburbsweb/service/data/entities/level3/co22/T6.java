@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.vniizht.suburbsweb.service.data.entities.routes.DcsRoute;
+import org.vniizht.suburbsweb.util.Util;
 
 import java.util.Date;
 
@@ -11,13 +13,15 @@ import java.util.Date;
 @Setter
 @Builder
 @ToString
-public class T6 {
-    private Date   requestDate;
-    private String          p1;
-    private String          p2;
-    private Long            p3;
-    private Short           p4;
+public class T6 extends T2T6Abstract {
     private String          p5;
     private Integer         p6;
     private Short           p7;
+
+    public T6(Date requestDate, DcsRoute route) {
+        super("tab6", requestDate, route);
+        p5 = Util.addLeadingZeros(route.getRoad(), 3);
+        p6 = Integer.valueOf(route.getDcs());
+        p7 = route.getDistance();
+    }
 }

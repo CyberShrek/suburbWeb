@@ -3,6 +3,7 @@ package org.vniizht.suburbsweb.service.data.entities.level3.co22;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.vniizht.suburbsweb.service.data.entities.level3.L3Key;
+import org.vniizht.suburbsweb.service.result.Level3;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -14,7 +15,6 @@ import java.io.Serializable;
 @Setter
 @SuperBuilder(toBuilder=true)
 @ToString
-@NoArgsConstructor
 public class T1 {
 
     @EmbeddedId
@@ -39,26 +39,10 @@ public class T1 {
     private Long p50;
     private Long p51;
 
-    public void merge(T1 t1) {
-        p33 += t1.p33;
-        p34 += t1.p34;
-        p35 += t1.p35;
-        p36 += t1.p36;
-        p37 += t1.p37;
-        p38 += t1.p38;
-        p39 += t1.p39;
-        p40 += t1.p40;
-        p41 += t1.p41;
-        p42 += t1.p42;
-        p43 += t1.p43;
-        p44 += t1.p44;
-        p45 += t1.p45;
-        p46 += t1.p46;
-        p47 += t1.p47;
-        p48 += t1.p48;
-        p49 += t1.p49;
-        p50 += t1.p50;
-        p51 += t1.p51;
+    public T1(T1Options options) {
+        key.setP1("tab1");
+        key.setP5("017");
+        key.setP7(key.getP6());
     }
 
     @Embeddable
@@ -114,5 +98,27 @@ public class T1 {
         private Character       p61;
         private Short           p62;
         private Character       p63;
+    }
+
+    public void merge(T1 t1) {
+        p33 += t1.p33;
+        p34 += t1.p34;
+        p35 += t1.p35;
+        p36 += t1.p36;
+        p37 += t1.p37;
+        p38 += t1.p38;
+        p39 += t1.p39;
+        p40 += t1.p40;
+        p41 += t1.p41;
+        p42 += t1.p42;
+        p43 += t1.p43;
+        p44 += t1.p44;
+        p45 += t1.p45;
+        p46 += t1.p46;
+        p47 += t1.p47;
+        p48 += t1.p48;
+        p49 += t1.p49;
+        p50 += t1.p50;
+        p51 += t1.p51;
     }
 }
