@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
-@SuperBuilder(toBuilder=true)
+@SuperBuilder
 @EqualsAndHashCode
 @NoArgsConstructor
 @MappedSuperclass

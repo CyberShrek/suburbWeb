@@ -1,13 +1,16 @@
 package org.vniizht.suburbsweb.service.data.entities.level3.co22;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.vniizht.suburbsweb.service.data.entities.routes.Route;
 
 import java.util.Date;
 
 @Getter
 @Setter
+@SuperBuilder
 public abstract class T2T6Abstract {
     protected Date   requestDate;
     protected String          p1;

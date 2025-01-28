@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.vniizht.suburbsweb.service.data.entities.routes.FollowRoute;
 import org.vniizht.suburbsweb.util.Util;
 
@@ -11,7 +12,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @ToString
 public class T4 extends T2T6Abstract {
     private String          p5;

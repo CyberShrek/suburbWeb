@@ -27,6 +27,12 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Функция обработки каждой записи второго уровня
     abstract protected void next(L2_RECORD record);
 
+    // Проверка существования t1
+    abstract protected boolean   t1Exists();
+
+    // Проверка существования льгот
+    abstract protected boolean lgotExists();
+
     abstract protected T1        getT1();
     abstract protected Lgot      getLgot();
 
@@ -36,33 +42,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     // Детали общие и метаданные
     abstract protected RouteGroup getRouteGroup();
     abstract protected CO22Meta getMeta();
-
-    // Проверка существования t1
-    abstract protected boolean   t1Exists();
-
-    // Компоненты T1
-             protected String    getT1P13(RoadRoute route)       {return route != null ? route.getRoad() : null;}
-             protected String    getT1P14(DepartmentRoute route) {return route != null ? route.getDepartment() : null;}
-             protected String    getT1P16(RegionRoute route)     {return route != null ? route.getRegion() : null;}
-             protected String    getT1P27(RoadRoute route)       {return route != null ? route.getRoad() : null;}
-             protected String    getT1P28(DepartmentRoute route) {return route != null ? route.getDepartment() : null;}
-             protected String    getT1P29(RegionRoute route)     {return route != null ? route.getRegion() : null;}
-             protected Short     getT1P62(List<McdRoute> routes) {
-                 return (short) routes.stream().mapToInt(McdRoute::getDistance).sum();
-             }
-             protected Character getT1P63(List<McdRoute> routes) {
-                 if (routes.stream().anyMatch(mcdRoute -> mcdRoute.getCode() == '1')) {
-                     switch (routes.size()) {
-                         case 1:  return '1';
-                         case 2:  return routes.get(0).getCode() == 0 ? '2' : '3';
-                         default: return '4';
-                     }
-                 }
-                 return '0';
-             }
-
-    // Проверка существования льготы
-    abstract protected boolean lgotExists();
 
     // Подсчёт средних стоимостей на километр по регионам
     abstract protected double getRegionIncomePerKm(String region);
@@ -101,10 +80,12 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             AtomicReference<RouteGroup> routeGroup = new AtomicReference<>();
             routesSearchTime   += Util.measureTime(() -> routeGroup.set(getRouteGroup()));
             transformationTime += Util.measureTime(() -> {
-                Set<T1> t1Set = multiplyT1(buildT1(routeGroup.get()));
-                t1Set.forEach(t1 -> {
-                    String key = t1.getKey().toString();
-                    CO22 co22 = new CO22(t1, routeGroup.get());
+                T1 t1 = getT1();
+                t1.setRoutes(routeGroup.get());
+                Set<T1> t1Set = multiplyT1(t1);
+                t1Set.forEach(t1Copy -> {
+                    String key = t1Copy.getKey().toString();
+                    CO22 co22 = new CO22(t1Copy, routeGroup.get());
                     if(co22Result.containsKey(key))
                         co22Result.get(key).merge(co22);
                     else
@@ -113,7 +94,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             });
         }
         if(lgotExists()) {
-            transformationTime += Util.measureTime(() -> lgotResult.add(buildLgot()));
+            transformationTime += Util.measureTime(() -> lgotResult.add(getLgot()));
         }
     }
 
@@ -124,27 +105,6 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     private void roundTimes() {
         transformationTime = (float) Math.round(transformationTime * 100) / 100;
         routesSearchTime   = (float) Math.round(routesSearchTime   * 100) / 100;
-    }
-
-    private T1 buildT1(RouteGroup routeGroup) {
-        T1 t1 = getT1();
-
-        t1.setKey(t1.getKey().toBuilder()
-                .p13(getT1P13(routeGroup.getFirstRoadRoute()))
-                .p14(getT1P14(routeGroup.getFirstDepartmentRoute()))
-                .p16(getT1P16(routeGroup.getFirstRegionRoute()))
-                .p27(getT1P27(routeGroup.getLastRoadRoute()))
-                .p28(getT1P28(routeGroup.getLastDepartmentRoute()))
-                .p29(getT1P29(routeGroup.getLastRegionRoute()))
-                .p62(getT1P62(routeGroup.getMcdRoutes()))
-                .p63(getT1P63(routeGroup.getMcdRoutes()))
-                .build());
-
-        return t1;
-    }
-
-    private Lgot buildLgot() {
-        return getLgot();
     }
 
     // ЦО22 включая все дочерние записи

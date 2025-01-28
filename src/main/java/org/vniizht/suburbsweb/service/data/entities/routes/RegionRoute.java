@@ -6,7 +6,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @ToString
-@SuperBuilder
+@SuperBuilder(toBuilder=true)
 public class RegionRoute extends Route {
     private String    region;
     private String    okato;

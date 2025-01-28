@@ -3,7 +3,7 @@ package org.vniizht.suburbsweb.service.data.entities.level3.co22;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.vniizht.suburbsweb.service.data.entities.level3.L3Key;
-import org.vniizht.suburbsweb.service.result.Level3;
+import org.vniizht.suburbsweb.service.data.entities.routes.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 //        name = "co22_t1")
 @Getter
 @Setter
-@SuperBuilder(toBuilder=true)
+@Builder(toBuilder=true)
 @ToString
 public class T1 {
 
@@ -39,11 +39,37 @@ public class T1 {
     private Long p50;
     private Long p51;
 
-    public T1(T1Options options) {
+    public T1() {
         key.setP1("tab1");
         key.setP5("017");
         key.setP7(key.getP6());
     }
+
+    public void setRoutes(RouteGroup routeGroup){
+
+        key.setP13(routeGroup.getFirstRoadRoute() != null ? routeGroup.getFirstRoadRoute().getRoad() : null);
+        key.setP14(routeGroup.getFirstDepartmentRoute() != null ? routeGroup.getFirstDepartmentRoute().getDepartment() : null);
+        key.setP16(routeGroup.getFirstRegionRoute() != null ? routeGroup.getFirstRegionRoute().getRegion() : null);
+        key.setP27(routeGroup.getLastRoadRoute() != null ? routeGroup.getLastRoadRoute().getRoad() : null);
+        key.setP28(routeGroup.getLastDepartmentRoute() != null ? routeGroup.getLastDepartmentRoute().getDepartment() : null);
+        key.setP29(routeGroup.getLastRegionRoute() != null ? routeGroup.getLastRegionRoute().getRegion() : null);
+        key.setP62((short) routeGroup.getMcdRoutes().stream().mapToInt(McdRoute::getDistance).sum());
+
+        if (routeGroup.getMcdRoutes().stream().anyMatch(mcdRoute -> mcdRoute.getCode() == '1')) {
+            switch (routeGroup.getMcdRoutes().size()) {
+                case 1:  key.setP63('1');
+                    break;
+                case 2:  key.setP63(routeGroup.getMcdRoutes().get(0).getCode() == 0 ? '2' : '3');
+                    break;
+                default: key.setP63('4');
+                    break;
+            }
+        } else {
+            key.setP63('0');
+        }
+    }
+
+
 
     @Embeddable
     @SuperBuilder(toBuilder=true)
