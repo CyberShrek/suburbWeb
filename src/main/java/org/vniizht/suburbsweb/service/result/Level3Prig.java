@@ -66,13 +66,17 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected T1 getT1() {
+        String saleRoad = handbook.getRoad3(main.sale_station, main.operation_date);
         return T1.builder()
                 .key(T1.Key.builder()
                         .requestDate(main.requestDate)
                         .yyyymm(yyyyMM)
+                        .p1("tab1")
                         .p3(Util.formatDate(main.operation_date, "yyyy"))
                         .p4(Util.formatDate(main.operation_date, "MM"))
-                        .p6(handbook.getRoad3(main.sale_station, main.operation_date))
+                        .p5("017")
+                        .p6(saleRoad)
+                        .p7(saleRoad)
                         .p8(main.sale_station)
                         .p9(String.format("%09d", main.carriage_code))
                         .p10(main.region_code)
@@ -211,6 +215,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         t1Set.add(t1.toBuilder()
                                 .key(t1.getKey().toBuilder()
                                         .yyyymm(Integer.parseInt(yyyymm))
+                                        .p12(yyyymm.substring(2))
                                         .build())
                                 .p33(Long.valueOf(trips))
                                 // Стоимости
@@ -292,7 +297,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 'А': return '8';           // рельсовые автобусы 6000-е
             case 'Б': return '7';           // рельсовые автобусы 7000-е
             case 'Г': return '9';           // городские линии
-            case '1': case 'М': return '4'; // скорые пригородные с предоставлением мест (7XXX(8xx-c АМГ))
+            case '1':   case 'М': return '4'; // скорые пригородные с предоставлением мест (7XXX(8xx-c АМГ))
             default: return '1';            // пригородные пассажирские
         }
     }

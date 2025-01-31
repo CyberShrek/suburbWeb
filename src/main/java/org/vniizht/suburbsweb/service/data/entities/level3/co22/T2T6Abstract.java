@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-@SuperBuilder
+@SuperBuilder(toBuilder=true)
 public abstract class T2T6Abstract {
     protected Date   requestDate;
     protected String          p1;

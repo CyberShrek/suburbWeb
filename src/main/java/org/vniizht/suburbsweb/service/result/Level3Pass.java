@@ -47,13 +47,17 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected T1 getT1() {
+        String saleRoad = handbook.getRoad3(main.sale_station, main.oper_date);
         return T1.builder()
                 .key(T1.Key.builder()
                         .requestDate(main.requestDate)
                         .yyyymm(yyyyMM)
+                        .p1("tab1")
                         .p3(Util.formatDate(main.oper_date, "yyyy"))
                         .p4(Util.formatDate(main.oper_date, "MM"))
-                        .p6(handbook.getRoad3(main.sale_station, main.oper_date))
+                        .p5("017")
+                        .p6(saleRoad)
+                        .p7(saleRoad)
                         .p8("00" + main.sale_station)
                         .p9(String.format("%09d", main.carrier_code))
                         .p10(main.saleregion_code)

@@ -15,6 +15,7 @@ import java.io.Serializable;
 @Setter
 @Builder(toBuilder=true)
 @ToString
+@AllArgsConstructor
 public class T1 {
 
     @EmbeddedId
@@ -40,9 +41,7 @@ public class T1 {
     private Long p51;
 
     public T1() {
-        key.setP1("tab1");
-        key.setP5("017");
-        key.setP7(key.getP6());
+
     }
 
     public void setRoutes(RouteGroup routeGroup){
