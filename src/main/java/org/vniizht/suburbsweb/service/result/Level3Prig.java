@@ -287,7 +287,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case '2': case '3': case '5':
                 return Util.formatDate(main.ticket_begdate, "yyMM");
         }
-        return String.valueOf(main.yyyymm/10000*10000); // yymm
+        return main.yyyymm.toString().substring(2); // yymm
     }
 
     private Character getT1P19() {
