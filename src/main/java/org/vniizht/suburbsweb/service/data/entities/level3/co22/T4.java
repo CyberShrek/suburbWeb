@@ -17,8 +17,8 @@ import java.util.Date;
 public class T4 extends T2T6Abstract {
     private String          p5;
     private String          p6;
-    private Long            p7;
-    private Long            p8;
+    private Float           p7;
+    private Float           p8;
     private Short           p9;
 
     public T4(Date requestDate, FollowRoute route,
@@ -27,8 +27,8 @@ public class T4 extends T2T6Abstract {
         super("tab4", requestDate, route);
         p5 = Util.addLeadingZeros(route.getRoad(), 3);
         p6 = route.getOkato();
-        p7 = (long) (route.getDistance() * regionIncomePerKm);
-        p8 = (long) (route.getDistance() * regionOutcomePerKm);
+        p7 = (float) (route.getDistance() * regionIncomePerKm);
+        p8 = (float) (route.getDistance() * regionOutcomePerKm);
         p9 = route.getDistance();
     }
 }

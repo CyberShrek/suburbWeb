@@ -21,23 +21,23 @@ public class T1 {
     @EmbeddedId
     private Key key;
     private Long p33;
-    private Long p34;
-    private Long p35;
-    private Long p36;
-    private Long p37;
-    private Long p38;
-    private Long p39;
-    private Long p40;
-    private Long p41;
-    private Long p42;
-    private Long p43;
-    private Long p44;
-    private Long p45;
-    private Long p46;
-    private Long p47;
-    private Long p48;
-    private Long p49;
-    private Long p50;
+    private Float p34;
+    private Float p35;
+    private Float p36;
+    private Float p37;
+    private Float p38;
+    private Float p39;
+    private Float p40;
+    private Float p41;
+    private Float p42;
+    private Float p43;
+    private Float p44;
+    private Float p45;
+    private Float p46;
+    private Float p47;
+    private Float p48;
+    private Float p49;
+    private Float p50;
     private Long p51;
 
     public T1() {

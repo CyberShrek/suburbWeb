@@ -154,8 +154,8 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
         private void arrangeCosts() {
             if (t4.isEmpty()) return;
-            long incomeDelta = t1.getP36() - t4.stream().mapToLong(T4::getP7).sum();
-            long outcomeDelta = t1.getP44() - t4.stream().mapToLong(T4::getP8).sum();
+            float incomeDelta = t1.getP36() - t4.stream().mapToLong(T4::getP7).sum();
+            float outcomeDelta = t1.getP44() - t4.stream().mapToLong(T4::getP8).sum();
             T4 lastT4 = t4.get(t4.size() - 1);
             lastT4.setP7(lastT4.getP7() + incomeDelta);
             lastT4.setP8(lastT4.getP8() + outcomeDelta);

@@ -107,10 +107,10 @@ public class Level3Dao {
                 "?::char(2)    , ?::char(5)    , ?::char(3)    , ?::char       , ?::char(2)    ,\n" +
                 "?::char       , ?::char       , ?::char       , ?::char(4)    , ?::char       ,\n" +
                 "?::char(2)    , ?::char(3)    , ?::char(2)    , ?::char(2)    , ?::char(5)    ,\n" +
-                "?::char(3)    , ?::integer    , ?::numeric(9) , ?::numeric(11), ?::numeric(11),\n" +
-                "?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11),\n" +
-                "?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11),\n" +
-                "?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11), ?::numeric(11),\n" +
+                "?::char(3)    , ?::integer    , ?::numeric(9) , ?::numeric(11,2), ?::numeric(11,2),\n" +
+                "?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2),\n" +
+                "?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2),\n" +
+                "?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2), ?::numeric(11,2),\n" +
                 "?::numeric(9) , ?::char       , ?::char(4)    , ?::char(7)    , ?::char       ,\n" +
                 "?::char(3)    , ?::char       , ?::char       , ?::char       , ?::char(3)    ,\n" +
                 "?::char       , ?::integer    , ?::char)",
@@ -231,7 +231,7 @@ public class Level3Dao {
     private void insertT4s(List<T4> t4List){
         AtomicInteger progress = new AtomicInteger();
         jdbcTemplate.batchUpdate("INSERT INTO " + T4_TABLE + " VALUES (\ndefault," +
-                "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::char(5), ?::numeric(11), ?::numeric(11), ?::int, ?::date)",
+                "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::char(5), ?::numeric(11,2), ?::numeric(11,2), ?::int, ?::date)",
                 t4List,
                 BATCH_SIZE,
                 (ps, t4) -> {
@@ -295,9 +295,9 @@ public class Level3Dao {
                 "default       , ?::char(3)    , ?::char(2)    , ?::char       , ?::char       ,\n" +
                 "?::char       , ?::char(4)    , ?::char(4)    , ?::char(5)    , ?::char(14)   ,\n" +
                 "?::char(5)    , ?::char(10)   , ?::char       , ?::char(45)   , ?::char(20)   ,\n" +
-                "?::numeric(3) , ?::boolean    , ?::numeric(3) , ?::integer    , ?::char       ,\n" +
-                "?::numeric(2) , ?::date       , ?::date       , ?::char(9)    , ?::char(7)    ,\n" +
-                "?::char(7)    , ?::numeric(11), ?::numeric(11), ?::char(5)    , ?::char(10)   ,\n" +
+                "?::numeric(3) , ?::boolean    , ?::numeric(3) , ?::numeric(3)    , ?::char       ,\n" +
+                "?::smallint , ?::date       , ?::date       , ?::char(9)    , ?::char(7)    ,\n" +
+                "?::char(7)    , ?::numeric(11,2), ?::numeric(11,2), ?::char(5)    , ?::char(10)   ,\n" +
                 "?::char(7)    , ?::char(11)   , ?::smallint   , ?::char(7)    , ?::char(4)    ,\n" +
                 "?::date       )",
                 lgotList,

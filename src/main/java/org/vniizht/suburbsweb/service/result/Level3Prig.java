@@ -109,23 +109,23 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .build()
                 )
                 .p33((long) (isAbonement ? main.pass_qty : main.carryon_weight))
-                .p34(0L)
-                .p35(0L)
-                .p36(main.tariff_sum)
-                .p37(0L)
-                .p38(0L)
+                .p34(0F)
+                .p35(0F)
+                .p36(Float.valueOf(main.tariff_sum))
+                .p37(0F)
+                .p38(0F)
                 .p39(getT1P39())
-                .p40(0L)
-                .p41(0L)
-                .p42(0L)
-                .p43(0L)
-                .p44(main.department_sum)
-                .p45(0L)
-                .p46(0L)
-                .p47(0L)
-                .p48(0L)
-                .p49(0L)
-                .p50(0L)
+                .p40(0F)
+                .p41(0F)
+                .p42(0F)
+                .p43(0F)
+                .p44(Float.valueOf(main.department_sum))
+                .p45(0F)
+                .p46(0F)
+                .p47(0F)
+                .p48(0F)
+                .p49(0F)
+                .p50(0F)
                 .p51(getT1P51())
                 .build();
     }
@@ -336,12 +336,12 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
     }
 
-    private Long getT1P39() {
+    private Float getT1P39() {
         switch (main.oper){
-            case 'O': return main.fee_sum;
-            case 'V': return main.refundfee_sum;
+            case 'O': return Float.valueOf(main.fee_sum);
+            case 'V': return Float.valueOf(main.refundfee_sum);
         }
-        return 0L;
+        return 0F;
     }
 
     private Long getT1P51() {
