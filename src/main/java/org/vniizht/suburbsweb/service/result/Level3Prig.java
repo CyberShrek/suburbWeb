@@ -104,7 +104,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p57(getT1P57())
                         .p58(getT1P58())
                         .p59(getT1P59())
-                        .p60( "000")
+                        .p60("000")
                         .p61(main.train_num.matches("^\\d {4}") ? main.train_num.trim().charAt(0) : '0')
                         .build()
                 )
@@ -250,13 +250,16 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         return CO22Meta.builder()
                 .requestDate(main.requestDate)
                 .l2PrigIdnum(main.idnum)
+                .operationDate(main.operation_date)
+                .ticketBegDate(main.ticket_begdate)
+                .ticketEndDate(main.ticket_enddate)
                 .build();
     }
 
     @Override
     protected double getRegionIncomePerKm(String region) {
         int distance = 0;
-        long incomeSum = 0;
+        float incomeSum = 0;
         for (PrigCost cost : costList) {
             if (cost.region_code.equals(region)) {
                 distance += cost.route_distance;
@@ -270,7 +273,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     @Override
     protected double getRegionOutcomePerKm(String region) {
         int distance = 0;
-        long outcomeSum = 0;
+        float outcomeSum = 0;
         for (PrigCost cost : costList) {
             if (cost.region_code.equals(region)) {
                 distance += cost.route_distance;
@@ -359,6 +362,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 1:  return '2';
             default: return '5';
         }
+        else if(main.request_type == 64)
+            return '4';
+
         return tSite.trim().charAt(1);
     }
 

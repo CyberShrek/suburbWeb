@@ -274,7 +274,7 @@ public class Level3Dao {
 
     private void insertL2Metas(List<CO22Meta> metaList){
         AtomicInteger progress = new AtomicInteger();
-        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_META_TABLE + " VALUES (\ndefault, ?, ?, ?, ?)",
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_META_TABLE + " VALUES (\ndefault, ?, ?, ?, ?, ?, ?, ?)",
                 metaList,
                 BATCH_SIZE,
                 (ps, meta) -> {
@@ -282,6 +282,9 @@ public class Level3Dao {
                     ps.setObject(2, meta.getRequestDate());
                     ps.setObject(3, meta.getL2PrigIdnum());
                     ps.setObject(4, meta.getL2PassIdnum());
+                    ps.setObject(5, meta.getOperationDate());
+                    ps.setObject(6, meta.getTicketBegDate());
+                    ps.setObject(7, meta.getTicketEndDate());
 
                     progress.getAndIncrement();
                     LogWS.spreadProgress((int) (((float) progress.get()) / metaList.size() * 100));

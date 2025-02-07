@@ -35,13 +35,13 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     abstract protected T1        getT1();
     abstract protected Lgot      getLgot();
+    abstract protected CO22Meta  getMeta();
 
     // Мультипликатор
     abstract protected Set<T1> multiplyT1(T1 t1);
 
-    // Детали общие и метаданные
+    // Маршруты
     abstract protected RouteGroup getRouteGroup();
-    abstract protected CO22Meta getMeta();
 
     // Подсчёт средних стоимостей на километр по регионам
     abstract protected double getRegionIncomePerKm(String region);
@@ -70,7 +70,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             progress++;
             LogWS.spreadProgress((int) ((float) progress / records.size() * 100));
         }
-        assignSerials();
+        arrangeResult();
         roundTimes();
     }
 
@@ -80,16 +80,14 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             AtomicReference<RouteGroup> routeGroup = new AtomicReference<>();
             routesSearchTime   += Util.measureTime(() -> routeGroup.set(getRouteGroup()));
             transformationTime += Util.measureTime(() -> {
-                T1 t1 = getT1();
+                T1 t1           = getT1();
                 t1.setRoutes(routeGroup.get());
-                Set<T1> t1Set = multiplyT1(t1);
-                t1Set.forEach(t1Copy -> {
+                multiplyT1(t1).forEach(t1Copy -> {
                     String key = t1Copy.getKey().toString();
-                    CO22 co22 = new CO22(t1Copy, routeGroup.get());
                     if(co22Result.containsKey(key))
-                        co22Result.get(key).merge(co22);
+                        co22Result.get(key).merge(t1Copy);
                     else
-                        co22Result.put(key, co22);
+                        co22Result.put(key, new CO22(t1Copy, routeGroup.get()));
                 });
             });
         }
@@ -98,8 +96,11 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         }
     }
 
-    private void assignSerials() {
-        co22Result.values().forEach(CO22::assignSerials);
+    private void arrangeResult() {
+        co22Result.values().forEach(co22 -> {
+            co22.assignSerials();
+            co22.arrangeCosts();
+        });
     }
 
     private void roundTimes() {
@@ -117,29 +118,20 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
         private final Set<CO22Meta> metas = new HashSet<>();
 
         CO22(T1 t1, RouteGroup routeGroup) {
-            boolean hasCosts = String.valueOf(t1.getKey().getYyyymm()).equals(t1.getKey().getP3() + t1.getKey().getP4());
             Date requestDate = t1.getKey().getRequestDate();
             this.t1 = t1;
             routeGroup.getDepartmentRoutes().forEach(route  -> t2.add(new T2(requestDate, route)));
             routeGroup.getRegionRoutes().forEach(route      -> t3.add(new T3(requestDate, route)));
             routeGroup.getFollowRoutes().forEach(route      -> t4.add(new T4(requestDate, route,
-                    hasCosts ? (long) getRegionIncomePerKm(route.getRegion()) : 0,
-                    hasCosts ? (long) getRegionOutcomePerKm(route.getRegion()) : 0)));
+                    (long) getRegionIncomePerKm(route.getRegion()),
+                    (long) getRegionOutcomePerKm(route.getRegion()))));
             routeGroup.getDcsRoutes().forEach(route         -> t6.add(new T6(requestDate, route)));
             metas.add(getMeta());
-
-            if(hasCosts)
-                arrangeCosts();
         }
 
-        public void merge(CO22 co22) {
-            // Агрегация
-            t1.merge(co22.t1);
-            t2.addAll(co22.t2);
-            t3.addAll(co22.t3);
-            t4.addAll(co22.t4);
-            t6.addAll(co22.t6);
-            metas.addAll(co22.metas);
+        void merge(T1 t1) {
+            this.t1.merge(t1);
+            metas.add(getMeta());
         }
 
         void assignSerials() {
@@ -152,13 +144,13 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t1Serial++;
         }
 
-        private void arrangeCosts() {
+        void arrangeCosts() {
             if (t4.isEmpty()) return;
-            float incomeDelta = t1.getP36() - t4.stream().mapToLong(T4::getP7).sum();
-            float outcomeDelta = t1.getP44() - t4.stream().mapToLong(T4::getP8).sum();
-            T4 lastT4 = t4.get(t4.size() - 1);
-            lastT4.setP7(lastT4.getP7() + incomeDelta);
-            lastT4.setP8(lastT4.getP8() + outcomeDelta);
+            float incomeDelta  = (float) (t1.getP36() - t4.stream().mapToDouble(T4::getP7).sum());
+            float outcomeDelta = (float) (t1.getP44() - t4.stream().mapToDouble(T4::getP8).sum());
+            T4 edgeT4 = t1.getKey().getP21() == '6' ? t4.get(0) : t4.get(t4.size() - 1);
+            edgeT4.setP7(edgeT4.getP7() + incomeDelta);
+            edgeT4.setP8(edgeT4.getP8() + outcomeDelta);
         }
     }
 }

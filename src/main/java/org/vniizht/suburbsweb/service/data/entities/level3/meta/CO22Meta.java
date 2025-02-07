@@ -21,6 +21,9 @@ public class CO22Meta {
     private Date requestDate;
     private Long l2PrigIdnum;
     private Long l2PassIdnum;
+    private Date operationDate;
+    private Date ticketBegDate;
+    private Date ticketEndDate;
 
     public CO22Meta() {}
 }

@@ -19,6 +19,7 @@ import java.util.Set;
 @ToString(callSuper=true)
 public class PrigMain extends L2Key {
     public Long        id;
+    public Short       request_type;
     public Short       request_subtype;
     public Character   oper;
     public Character   oper_g;
@@ -53,11 +54,11 @@ public class PrigMain extends L2Key {
     public String      benefit_region;
     public String      benefit_code;
     public String      benefitgroup_code;
-    public Long        fee_sum;
-    public Long        refundfee_sum;
-    public Long        total_sum;
-    public Long        tariff_sum;
-    public Long        department_sum;
+    public Float       fee_sum;
+    public Float       refundfee_sum;
+    public Float       total_sum;
+    public Float       tariff_sum;
+    public Float       department_sum;
 
     public String      server_datetime;
     public Integer     server_reqnum;

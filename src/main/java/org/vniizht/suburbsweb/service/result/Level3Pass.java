@@ -87,23 +87,23 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .build()
                 )
                 .p33(Long.valueOf(main.seats_qty))
-                .p34(0L)
-                .p35(0L)
-                .p36((long) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum() * 10)
-                .p37(0L)
-                .p38(0L)
+                .p34(0F)
+                .p35(0F)
+                .p36((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum())
+                .p37(0F)
+                .p38(0F)
                 .p39(getT1P39())
                 .p40(getT1P40())
-                .p41(0L)
-                .p42(0L)
-                .p43(0L)
+                .p41(0F)
+                .p42(0F)
+                .p43(0F)
                 .p44(getT1P44())
-                .p45(0L)
-                .p46(0L)
+                .p45(0F)
+                .p46(0F)
                 .p47(getT1P47())
                 .p48(getT1P48())
-                .p49(0L)
-                .p50(0L)
+                .p49(0F)
+                .p50(0F)
                 .p51(getT1P51())
                 .build();
     }
@@ -177,19 +177,20 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         return CO22Meta.builder()
                 .requestDate(main.requestDate)
                 .l2PassIdnum(main.idnum)
+                .operationDate(main.oper_date)
                 .build();
     }
 
     @Override
     protected double getRegionIncomePerKm(String region) {
         // TODO
-        return 0;
+        return main.getCosts().stream().mapToDouble(cost -> cost.sum_nde).sum() / main.distance;
     }
 
     @Override
     protected double getRegionOutcomePerKm(String region) {
         // TODO
-        return 0;
+        return main.getCosts().stream().mapToDouble(cost -> cost.sum_te).sum() / main.distance;
     }
 
     private Character getT1P22() {
@@ -225,59 +226,59 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         main.benefit_code, main.oper_date);
     }
 
-    private Long getT1P39() {
-        return costList.stream().mapToLong(costListItem -> {
-            switch (costListItem.sum_code) {
-                case 104: case 105: case 106:
-                    return Math.round(costListItem.sum_nde);
-                default: return 0L;
-            }}
-        ).sum() * 10;
+    private Float getT1P39() {
+        return (float) costList.stream().mapToDouble(costListItem -> {
+                    switch (costListItem.sum_code) {
+                        case 104: case 105: case 106:
+                            return costListItem.sum_nde;
+                        default: return 0F;
+                    }}
+                ).sum();
     }
 
-    private Long getT1P40() {
-        return costList.stream().mapToLong(
-                costListItem -> costListItem.sum_code == 101
-                        ? (long) Math.round(costListItem.sum_nde)
-                        : 0L
-        ).sum() * 10;
+    private Float getT1P40() {
+        return (float) costList.stream().mapToDouble(
+                        costListItem -> costListItem.sum_code == 101
+                                ? costListItem.sum_nde
+                                : 0F
+                ).sum();
     }
 
-    private Long getT1P44() {
-        return costList.stream().mapToLong(costListItem -> {
-            switch (costListItem.sum_code) {
-                case 101: case 116: {
-                    switch (main.paymenttype) {
-                        case 'Б': case 'В': case 'Ж': case '9':
-                            return Math.round(costListItem.sum_nde);
+    private Float getT1P44() {
+        return (float) costList.stream().mapToDouble(costListItem -> {
+                    switch (costListItem.sum_code) {
+                        case 101: case 116: {
+                            switch (main.paymenttype) {
+                                case 'Б': case 'В': case 'Ж': case '9':
+                                    return costListItem.sum_nde;
+                            }
+                        }
                     }
-                }
-            }
-            return 0L;
-        }).sum() * 10;
+                    return 0F;
+                }).sum();
     }
 
-    private Long getT1P47() {
-        return costList.stream().mapToLong(costListItem -> {
-            switch (costListItem.sum_code) {
-                case 104: case 105: case 106:
-                    switch (main.paymenttype) {
-                        case 'Б': case 'В': case 'Ж': case '9':
-                            return Math.round(costListItem.sum_nde);
+    private Float getT1P47() {
+        return (float) costList.stream().mapToDouble(costListItem -> {
+                    switch (costListItem.sum_code) {
+                        case 104: case 105: case 106:
+                            switch (main.paymenttype) {
+                                case 'Б': case 'В': case 'Ж': case '9':
+                                    return costListItem.sum_nde;
+                            }
                     }
-            }
-            return 0L;
-        }).sum() * 10;
+                    return 0F;
+                }).sum();
     }
 
-    private Long getT1P48() {
-        return costList.stream().mapToLong(costListItem -> {
-            if (costListItem.sum_code == 101) switch (main.paymenttype) {
-                case 'Б': case 'В': case 'Ж': case '9':
-                    return Math.round(costListItem.sum_nde);
-            }
-            return 0L;
-        }).sum() * 10;
+    private Float getT1P48() {
+        return (float) costList.stream().mapToDouble(costListItem -> {
+                    if (costListItem.sum_code == 101) switch (main.paymenttype) {
+                        case 'Б': case 'В': case 'Ж': case '9':
+                            return costListItem.sum_nde;
+                    }
+                    return 0F;
+                }).sum();
     }
 
     private Long getT1P51() {
