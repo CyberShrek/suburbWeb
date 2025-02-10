@@ -44,4 +44,22 @@ public class Util {
         }
         return stringBuilder.toString();
     }
+
+    // Парсит массив boolean из Postgres в виде строки в массив boolean
+    public static boolean[] parsePostgresBooleanArray(String input) {
+        if (input == null || input.isEmpty()) {
+            return new boolean[0];
+        }
+
+        // Убираем фигурные скобки и разделяем элементы по запятым
+        String[] elements = input.replace("{", "").replace("}", "").split(",");
+
+        boolean[] result = new boolean[elements.length];
+        for (int i = 0; i < elements.length; i++) {
+            // Преобразуем "t" в true, "f" в false
+            result[i] = elements[i].trim().equalsIgnoreCase("t");
+        }
+
+        return result;
+    }
 }

@@ -27,7 +27,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                       Long initialT1Serial) {
         super(records, handbook, routes, initialT1Serial);
         this.trips = trips;
-
         transform();
     }
 

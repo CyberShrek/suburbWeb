@@ -37,24 +37,24 @@ public class RoutesDao {
                 short  rst      = prigRS.getShort("rst_p");
 
                 switch (narr) {
-                    case 1: group.addRegionRoute((RegionRoute) RegionRoute.builder()
+                    case 1: group.addRegionRoute(RegionRoute.builder()
                             .region(obj_chr)
                             .okato(handbook.getOkatoByRegion(obj_chr, date))
                             .distance(rst)
                             .build());
                     break;
-                    case 2: group.addRoadRoute((RoadRoute) RoadRoute.builder()
+                    case 2: group.addRoadRoute(RoadRoute.builder()
                             .road(obj_chr)
                             .distance(rst)
                             .build());
                     break;
-                    case 3: group.addDepartmentRoute((DepartmentRoute) DepartmentRoute.builder()
+                    case 3: group.addDepartmentRoute(DepartmentRoute.builder()
                             .road(String.valueOf(obj_int))
                             .department(obj_chr)
                             .distance(rst)
                             .build());
                     break;
-                    case 4: group.addDcsRoute((DcsRoute) DcsRoute.builder()
+                    case 4: group.addDcsRoute(DcsRoute.builder()
                             .road(String.valueOf(obj_int))
                             .dcs(obj_chr)
                             .distance(rst)
@@ -62,12 +62,12 @@ public class RoutesDao {
                     break;
                     case 5:
                         boolean isMcd = obj_chr != null && obj_chr.trim().equals("1");
-                        group.addMcdRoute((McdRoute) McdRoute.builder()
+                        group.addMcdRoute(McdRoute.builder()
                             .code(isMcd ? '1' : '0')
                             .distance(isMcd ? rst : 0)
                             .build());
                     break;
-                    case 6: group.addFollowRoute((FollowRoute) FollowRoute.builder()
+                    case 6: group.addFollowRoute(FollowRoute.builder()
                             .road(String.valueOf(obj_int))
                             .region(obj_chr)
                             .okato(handbook.getOkatoByRegion(obj_chr, date))
@@ -97,38 +97,38 @@ public class RoutesDao {
             SqlRowSet dcsRS         = jdbcTemplate.queryForRowSet(miscSql, trainId, trainThread, trainDepartureDate, 4, depStation, arrStation);
 
             while (roadsRS.next()) {
-                group.addRoadRoute((RoadRoute) RoadRoute.builder()
+                group.addRoadRoute(RoadRoute.builder()
                         .road(roadsRS.getString("dor3"))
                         .build());
             }
             while (departmentsRS.next()) {
-                group.addDepartmentRoute((DepartmentRoute) DepartmentRoute.builder()
-                        .road(roadsRS.getString("dor3"))
+                group.addDepartmentRoute(DepartmentRoute.builder()
+                        .road(departmentsRS.getString("dor3"))
                         .department(departmentsRS.getString("otd"))
                         .distance(departmentsRS.getShort("km"))
                         .build());
             }
             while (regionsRS.next()) {
                 String sf = regionsRS.getString("sf");
-                group.addRegionRoute((RegionRoute) RegionRoute.builder()
+                group.addRegionRoute(RegionRoute.builder()
                         .region(sf)
                         .okato(handbook.getOkatoByRegion(sf, trainDepartureDate))
-                        .distance(departmentsRS.getShort("km"))
+                        .distance(regionsRS.getShort("km"))
                         .build());
             }
             while (followsRS.next()) {
-                group.addFollowRoute((FollowRoute) FollowRoute.builder()
-                        .road(roadsRS.getString("dor3"))
+                group.addFollowRoute(FollowRoute.builder()
+                        .road(followsRS.getString("dor3"))
                         .region(followsRS.getString("sf"))
                         .okato(handbook.getOkatoByRegion(followsRS.getString("sf"), trainDepartureDate))
-                        .distance(departmentsRS.getShort("km"))
+                        .distance(followsRS.getShort("km"))
                         .build());
             }
             while (dcsRS.next()) {
-                group.addDcsRoute((DcsRoute) DcsRoute.builder()
-                        .road(roadsRS.getString("dor3"))
+                group.addDcsRoute(DcsRoute.builder()
+                        .road(dcsRS.getString("dor3"))
                         .dcs(dcsRS.getString("dcs"))
-                        .distance(departmentsRS.getShort("km"))
+                        .distance(dcsRS.getShort("km"))
                         .build());
             }
 

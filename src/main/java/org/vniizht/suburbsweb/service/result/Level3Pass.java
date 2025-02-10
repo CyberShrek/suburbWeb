@@ -37,12 +37,14 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected boolean t1Exists() {
-        return main.f_r10af3[8] == '1';
+        return Util.parsePostgresBooleanArray(main.f_r10af3)[7];
     }
 
     @Override
     protected boolean lgotExists() {
-        return t1Exists() && main.benefit_code.equals("00");
+        return t1Exists()
+                && !main.benefit_code.equals("000")
+                && !main.benefit_code.equals("021");
     }
 
     @Override
@@ -113,6 +115,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         return Lgot.builder().key(
                         Lgot.Key.builder()
                                 .requestDate(main.requestDate)
+                                .yyyymm(yyyyMM)
                                 .list("R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
                                 .p2(handbook.getRoad2(main.sale_station, main.oper_date))
                                 .p3(handbook.getDepartment(main.sale_station, main.oper_date))
@@ -158,7 +161,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected Set<T1> multiplyT1(T1 t1) {
-        Set<T1> result = new HashSet<>();
+        Set<T1> result = new LinkedHashSet<>();
         result.add(t1);
         if (!main.oper_date.equals(main.departure_date)) {
             result.add(t1.toBuilder()
@@ -194,9 +197,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Character getT1P22() {
-        return Objects.requireNonNull(main.f_tick).length > 2 && main.f_tick[2] == 1 ? '2'                                        // Детский
-                : !main.benefit_code.equals("000") || main.f_tick.length > 4 && main.f_tick[4] == 1 ? '3'  // Льготный
-                :  main.f_tick.length > 1 && main.f_tick[1] == 1 ? '1'                                     // Полный
+        boolean[] f_tick = Util.parsePostgresBooleanArray(main.f_tick);
+        return Objects.requireNonNull(f_tick).length > 2 && f_tick[2] ? '2'                                        // Детский
+                : !main.benefit_code.equals("000") || f_tick.length > 4 && f_tick[4] ? '3'  // Льготный
+                :  f_tick.length > 1 && f_tick[1] ? '1'                                     // Полный
                 : '4' ;
     }
 

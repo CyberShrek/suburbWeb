@@ -144,13 +144,28 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             t1Serial++;
         }
 
-        void arrangeCosts() {
+        void arrangeCosts() {arrangeCosts(false);}
+        void arrangeCosts(boolean edgeOnly) {
             if (t4.isEmpty()) return;
-            float incomeDelta  = (float) (t1.getP36() - t4.stream().mapToDouble(T4::getP7).sum());
-            float outcomeDelta = (float) (t1.getP44() - t4.stream().mapToDouble(T4::getP8).sum());
-            T4 edgeT4 = t1.getKey().getP21() == '6' ? t4.get(0) : t4.get(t4.size() - 1);
-            edgeT4.setP7(edgeT4.getP7() + incomeDelta);
-            edgeT4.setP8(edgeT4.getP8() + outcomeDelta);
+            double incomeDelta  = t1.getP36() - t4.stream().mapToDouble(T4::getP7).sum();
+            double outcomeDelta = t1.getP44() - t4.stream().mapToDouble(T4::getP8).sum();
+
+            if(edgeOnly || t1.getKey().getP21() == '6') {
+                // Добавление разницы в первую запись
+                T4 firstT4 = t4.get(0);
+                firstT4.setP7((float) (firstT4.getP7() + incomeDelta));
+                firstT4.setP8((float) (firstT4.getP8() + outcomeDelta));
+            } else {
+                // Распределение разницы по всем записям в зависимости от километража
+                int totalDistance = t4.stream().mapToInt(T4::getP9).sum();
+                for (T4 t4Item : t4) {
+                    t4Item.setP7((float) Math.round((t4Item.getP7() + incomeDelta * t4Item.getP9() / totalDistance) * 100) / 100);
+                    t4Item.setP8((float) Math.round((t4Item.getP8() + outcomeDelta * t4Item.getP9() / totalDistance) * 100) / 100);
+                }
+
+                // Возможный остаток при распределении добавляется в первую запись
+                arrangeCosts(true);
+            }
         }
     }
 }
