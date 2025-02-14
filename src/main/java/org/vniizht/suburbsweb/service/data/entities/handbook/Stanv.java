@@ -27,4 +27,6 @@ public class Stanv {
     private String    kodokato;
     private Date        datand;
     private Date        datakd;
+    private Date        datani;
+    private Date        dataki;
 }

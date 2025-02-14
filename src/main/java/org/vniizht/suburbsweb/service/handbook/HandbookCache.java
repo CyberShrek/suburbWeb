@@ -11,16 +11,31 @@ import java.util.*;
 //@SessionScope
 public class HandbookCache {
 
-    public Dor findDor(Character kodd, String kodg) {
-        return dorMap.get(kodd + kodg);
+    public Dor findDor(Character kodd, String kodg, Date date) {
+        if(date != null && dorMap.containsKey(kodd + kodg)) {
+            Date serverDate = new Date();
+            for (Dor dor : dorMap.get(kodd + kodg))
+                if (dor != null
+                        && date.compareTo(dor.getDatan()) >= 0
+                        && date.compareTo(dor.getDatak()) <= 0
+                        && serverDate.compareTo(dor.getDatani()) >= 0
+                        && serverDate.compareTo(dor.getDataki()) <= 0
+                ) return dor;
+        }
+        return null;
     }
 
     public Stanv findStanv(String stan, Date date) {
-        if(date != null && stanvMap.containsKey(stan))
-            for(Stanv stanv : stanvMap.get(stan))
-                if (stanv != null && date.compareTo(stanv.getDatand()) >= 0 && date.compareTo(stanv.getDatakd()) <= 0)
-                    return stanv;
-
+        if(date != null && stanvMap.containsKey(stan)) {
+            Date serverDate = new Date();
+            for (Stanv stanv : stanvMap.get(stan))
+                if (stanv != null
+                        && date.compareTo(stanv.getDatand()) >= 0
+                        && date.compareTo(stanv.getDatakd()) <= 0
+                        && serverDate.compareTo(stanv.getDatani()) >= 0
+                        && serverDate.compareTo(stanv.getDataki()) <= 0
+                ) return stanv;
+        }
         return null;
     }
 
@@ -76,7 +91,7 @@ public class HandbookCache {
     }
 
     // Key is used for codes. Multiple codes will be concatenated
-    private final Map<String, Dor>    dorMap           = new HashMap<>();
+    private final Map<String, List<Dor>>    dorMap           = new HashMap<>();
     // List is used to hold range of days as indices to provide quick access by date in the range
     private final Map<String,  List<Stanv>> stanvMap = new HashMap<>();
     private final Map<String,  List<Site>>  siteMap  = new HashMap<>();
@@ -103,9 +118,12 @@ public class HandbookCache {
         List<Sf>    sfList    = sfRepo   .findAllByOrderByDatanDesc();
         List<SeasonTrip>  tripsList = tripsRepo.findAllByOrderByDateStartDesc();
 
-        dorList  .forEach(dor   -> dorMap  .put(dor.getKod() +
-                "20"//dor.getKodg()
-                ,       dor));
+        dorList  .forEach(dor   -> {
+            String key = dor.getKod() + "20";
+            List<Dor> list = Optional.ofNullable(dorMap.get(key)).orElse(new ArrayList<>());
+            list.add(dor);
+            dorMap.put(key, list);
+        });
         stanvList.forEach(stanv -> {
             List<Stanv> list = Optional.ofNullable(stanvMap.get(stanv.getStan())).orElse(new ArrayList<>());
             list.add(stanv);
