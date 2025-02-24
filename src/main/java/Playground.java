@@ -1,13 +1,7 @@
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.List;
+import org.vniizht.suburbsweb.util.Util;
 
 public class Playground {
-
     public static void main(String[] args) {
-        int int1 = 1;
-        int int5 = 5;
-        System.out.println( 1 /(float) 5);
-
+        System.out.println("123456789".substring(0, 3));
     }
 }

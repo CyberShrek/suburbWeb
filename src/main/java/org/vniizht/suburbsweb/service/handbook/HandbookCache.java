@@ -2,7 +2,7 @@ package org.vniizht.suburbsweb.service.handbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vniizht.suburbsweb.model.handbook.*;
+import org.vniizht.suburbsweb.service.data.entities.handbook.*;
 
 import java.util.Date;
 import java.util.*;
@@ -11,16 +11,31 @@ import java.util.*;
 //@SessionScope
 public class HandbookCache {
 
-    public Dor findDor(Character kodd, String kodg) {
-        return dorMap.get(kodd + kodg);
+    public Dor findDor(Character kodd, String kodg, Date date) {
+        if(date != null && dorMap.containsKey(kodd + kodg)) {
+            Date serverDate = new Date();
+            for (Dor dor : dorMap.get(kodd + kodg))
+                if (dor != null
+                        && date.compareTo(dor.getDatan()) >= 0
+                        && date.compareTo(dor.getDatak()) <= 0
+                        && serverDate.compareTo(dor.getDatani()) >= 0
+                        && serverDate.compareTo(dor.getDataki()) <= 0
+                ) return dor;
+        }
+        return null;
     }
 
     public Stanv findStanv(String stan, Date date) {
-        if(date != null && stanvMap.containsKey(stan))
-            for(Stanv stanv : stanvMap.get(stan))
-                if (stanv != null && date.compareTo(stanv.getDatand()) >= 0 && date.compareTo(stanv.getDatakd()) <= 0)
-                    return stanv;
-
+        if(date != null && stanvMap.containsKey(stan)) {
+            Date serverDate = new Date();
+            for (Stanv stanv : stanvMap.get(stan))
+                if (stanv != null
+                        && date.compareTo(stanv.getDatand()) >= 0
+                        && date.compareTo(stanv.getDatakd()) <= 0
+                        && serverDate.compareTo(stanv.getDatani()) >= 0
+                        && serverDate.compareTo(stanv.getDataki()) <= 0
+                ) return stanv;
+        }
         return null;
     }
 
@@ -71,9 +86,12 @@ public class HandbookCache {
 
         return null;
     }
+    public SeasonTrip findTrip(Short season_tick_code, Short period) {
+        return findTrip(season_tick_code, period, new Date());
+    }
 
     // Key is used for codes. Multiple codes will be concatenated
-    private final Map<String, Dor>    dorMap           = new HashMap<>();
+    private final Map<String, List<Dor>>    dorMap           = new HashMap<>();
     // List is used to hold range of days as indices to provide quick access by date in the range
     private final Map<String,  List<Stanv>> stanvMap = new HashMap<>();
     private final Map<String,  List<Site>>  siteMap  = new HashMap<>();
@@ -91,11 +109,7 @@ public class HandbookCache {
     @Autowired private TripsRepository  tripsRepo;
 
 //    @PostConstruct
-    public void init() {
-        java.util.Date startDate = new java.util.Date();
-
-        System.out.println("Загружаю справочники в память...");
-
+    public void load() {
         List<Dor>   dorList   = dorRepo  .findAll();
         List<Stanv> stanvList = stanvRepo.findAllByOrderByDatandDesc();
         List<Site>  siteList  = siteRepo .findAllByOrderByDatanDesc();
@@ -104,51 +118,45 @@ public class HandbookCache {
         List<Sf>    sfList    = sfRepo   .findAllByOrderByDatanDesc();
         List<SeasonTrip>  tripsList = tripsRepo.findAllByOrderByDateStartDesc();
 
-        System.out.println("Получены списки справочников. Заполняю память...");
-
-        dorList  .forEach(dor   -> dorMap  .put(dor.getKodd() + dor.getKodg(),       dor));
-        System.out.println("Загружено " + dorMap.size() + " множеств dor");
+        dorList  .forEach(dor   -> {
+            String key = dor.getKod() + "20";
+            List<Dor> list = Optional.ofNullable(dorMap.get(key)).orElse(new ArrayList<>());
+            list.add(dor);
+            dorMap.put(key, list);
+        });
         stanvList.forEach(stanv -> {
             List<Stanv> list = Optional.ofNullable(stanvMap.get(stanv.getStan())).orElse(new ArrayList<>());
             list.add(stanv);
             stanvMap.put(stanv.getStan(), list);
         });
-        System.out.println("Загружено " + stanvMap.size() + " множеств stanv");
-        siteList.forEach(site  -> {
+        siteList.forEach(site  -> { 
             String key = site.getIdsite() + site.getGos();
             List<Site> list = Optional.ofNullable(siteMap.get(site.getIdsite() + site.getGos())).orElse(new ArrayList<>());
             list.add(site);
             siteMap.put(key, list);
         });
-        System.out.println("Загружено " + siteMap.size() + " множеств site");
         plagnList.forEach(plagn -> {
             String key = plagn.getIdplagn() + plagn.getGos();
             List<Plagn> list = Optional.ofNullable(plagnMap.get(plagn.getIdplagn() + plagn.getGos())).orElse(new ArrayList<>());
             list.add(plagn);
             plagnMap.put(key, list);
         });
-        System.out.println("Загружено " + plagnMap.size() + " множеств plagn");
         sublxList.forEach(sublx -> {
             List<Sublx> list = Optional.ofNullable(sublxMap.get(sublx.getLg())).orElse(new ArrayList<>());
             list.add(sublx);
             sublxMap.put(sublx.getLg(), list);
         });
-        System.out.println("Загружено " + sublxMap.size() + " множеств sublx");
         sfList   .forEach(sf    -> {
             List<Sf> list = Optional.ofNullable(sfMap.get(sf.getVid())).orElse(new ArrayList<>());
             list.add(sf);
             sfMap.put(sf.getVid(), list);
         });
-        System.out.println("Загружено " + sfMap.size() + " множеств sf");
         tripsList.forEach(seasonTrip -> {
             String key = seasonTrip.getGos() + seasonTrip.getSeason_tick_code() + seasonTrip.getPeriod();
             List<SeasonTrip> list = Optional.ofNullable(tripsMap.get(key)).orElse(new ArrayList<>());
             list.add(seasonTrip);
             tripsMap.put(key, list);
         });
-        System.out.println("Загружено " + tripsMap.size() + " множеств trips");
-
-        System.out.println("Загрузка справочников завершена. Время загрузки: " + (new java.util.Date().getTime() - startDate.getTime()) + " мс.");
     }
 
     public void clear() {
