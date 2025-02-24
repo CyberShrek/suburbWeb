@@ -9,9 +9,11 @@ import java.util.List;
 
 @Repository
 public interface PassMainRepo extends Level2Repo<PassMain, Long> {
+
     @Query("SELECT pm FROM PassMain pm " +
             "LEFT OUTER JOIN FETCH pm.ex " +
             "LEFT OUTER JOIN FETCH pm.costs " +
             "WHERE pm.requestDate = ?1")
+
     List<PassMain> findAllByRequestDate(Date date);
 }

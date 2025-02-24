@@ -183,7 +183,7 @@ public class Transformation {
         }) + "c");
     }
 
-//    @PostConstruct
+    @PostConstruct
     public void test() throws Exception {
         int yyyy = 2024, mm = 2, dd = 9;
         transform(new TransformationOptions(

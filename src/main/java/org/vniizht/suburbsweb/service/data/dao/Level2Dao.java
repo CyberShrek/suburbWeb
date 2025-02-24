@@ -38,13 +38,8 @@ public class Level2Dao {
     public Set<PassRecord> findPassRecords(Date requestDate) {
         Map<Long, PassRecord> collector = new LinkedHashMap<>();
         List<PassMain> mainList = passMainRepo.findAllByRequestDate(requestDate);
-
         mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));
         return new LinkedHashSet<>(collector.values());
-    }
-
-    public Date getFirstRequestDate() {
-        return prigMainRepo.findByOrderByRequestDateAsc().requestDate;
     }
 
     @Getter
