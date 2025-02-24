@@ -110,7 +110,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 .p33((long) (isAbonement ? main.pass_qty : main.carryon_weight))
                 .p34(0F)
                 .p35(0F)
-                .p36(Float.valueOf(main.tariff_sum))
+                .p36(main.tariff_sum)
                 .p37(0F)
                 .p38(0F)
                 .p39(getT1P39())
@@ -118,7 +118,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 .p41(0F)
                 .p42(0F)
                 .p43(0F)
-                .p44(Float.valueOf(main.department_sum))
+                .p44(main.department_sum)
                 .p45(0F)
                 .p46(0F)
                 .p47(0F)
@@ -171,6 +171,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p30(main.server_datetime)
                         .p31(Util.addLeadingZeros(main.server_reqnum == null ? null : main.server_reqnum.toString(), 7))
                         .p32(adi == null ? null : adi.snils)
+                        .p34(main.agent_code == null ? null : String.valueOf(main.agent_code))
+                        .p35(main.sale_station)
                         .build()
                 )
                 .p19(getLgotP20() == '9' ? main.seatstick_limit : 0)
@@ -356,13 +358,15 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private Character getT1P52() {
         String tSite = getTSite(main);
-        if(tSite.equals("  ")) switch (main.request_subtype / 256){
-            case 0:  return '3';
-            case 1:  return '2';
-            default: return '5';
+        if(tSite.equals("  ")) {
+            if(main.request_type == 64)
+                return '1';
+            switch (main.request_subtype / 256) {
+                case 0: return '3';
+                case 1: return '2';
+                default: return '5';
+            }
         }
-        else if(main.request_type == 64)
-            return '4';
 
         return tSite.trim().charAt(1);
     }
@@ -424,11 +428,12 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private Character getLgotP4() {
-        switch (main.request_subtype / 256){
-            case 0:  return '2';
+        if (main.request_type != 64) switch (main.request_subtype / 256){
             case 1:  return '1';
-            default: return '0';
+            case 0:
+            case 2:  return '2';
         }
+        return '0';
     }
 
     private Character getLgotP5() {

@@ -1,9 +1,11 @@
 package org.vniizht.suburbsweb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@ConditionalOnWebApplication
 public class ResourcesController {
 
 //    @PostMapping("/{formName}/form")

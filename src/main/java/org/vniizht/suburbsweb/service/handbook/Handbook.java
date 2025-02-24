@@ -16,13 +16,13 @@ public class Handbook {
 
     public String getRoad2(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
-        Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos());
+        Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos(), date);
         return dor == null ? null : dor.getNom2();
     }
 
     public String getRoad3(String stationCode, Date date) {
         Stanv stanv = cache.findStanv(stationCode, date);
-        Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos());
+        Dor dor = stanv == null ? null : cache.findDor(stanv.getDor(), stanv.getGos(), date);
         return dor == null ? null : dor.getNom3();
     }
 

@@ -37,6 +37,12 @@ public class Transformation {
     @Autowired private RoutesDao routes;
     @Autowired private TripsDao  trips;
 
+    public synchronized void transform() throws Exception {
+        Date yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        transform(new TransformationOptions(yesterday, true, true));
+    }
+
     public synchronized void transform(TransformationOptions options) throws Exception {
         System.out.println("Start transform");
         Date startTime = new Date();

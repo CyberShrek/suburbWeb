@@ -8,6 +8,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.sql.Date;
 
 @Entity
 @Table(schema = "nsi",
@@ -22,5 +23,9 @@ public class Dor {
     @Column(name = "d_nom3")  private String    nom3;
     @Column(name = "d_kod")   private Character kod;
     @Column(name = "d_kodvc") private Character vc;
+    @Column(name = "d_datan") private Date datan;
+    @Column(name = "d_datak") private Date datak;
+    @Column(name = "d_datani") private Date datani;
+    @Column(name = "d_dataki") private Date dataki;
 //    @Column(name = "d_nom3")  private String    kodg;
 }
