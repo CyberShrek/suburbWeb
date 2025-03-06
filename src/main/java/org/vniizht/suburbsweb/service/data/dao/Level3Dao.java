@@ -6,10 +6,12 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
-import org.vniizht.suburbsweb.service.data.repository.level3.LgotRepo;
-import org.vniizht.suburbsweb.service.data.repository.level3.T1Repo;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,15 +28,13 @@ public class Level3Dao {
     private static final String LGOT_TABLE      = "prigl3.lgot";
     private static final int    BATCH_SIZE      = 500;
 
-    @Autowired private   T1Repo   t1Repo;
-    @Autowired private LgotRepo lgotRepo;
     @Autowired private JdbcTemplate jdbcTemplate;
 
-
     public Date getNextRequestDate(){
-        T1 t1 = t1Repo.findByOrderByKeyRequestDateDesc();
-        if(t1 == null || t1.getKey() == null) return null;
-        Date lastRequestDate = t1.getKey().getRequestDate();
+
+        Date lastRequestDate =
+                jdbcTemplate.queryForObject(
+                        "SELECT request_date FROM " + T1_TABLE + " ORDER BY request_date DESC LIMIT 1", Date.class);
 
         // + 1 day
         return new Date(lastRequestDate.getTime() + 24*60*60*1000);
