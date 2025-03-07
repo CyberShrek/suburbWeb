@@ -1,6 +1,5 @@
 package org.vniizht.suburbsweb.ng_logger;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jndi.JndiObjectFactoryBean;
@@ -19,6 +18,7 @@ import java.util.Objects;
 @Service
 public class NgLoggerJdbc {
 
+    @Qualifier("ngLoggerJdbcTemplate")
     private final JdbcTemplate jdbcTemplate;
 
     private final String systemName = "suburbWeb";
