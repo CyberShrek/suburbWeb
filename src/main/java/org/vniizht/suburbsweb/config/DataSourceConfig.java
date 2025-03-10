@@ -22,31 +22,39 @@ public class DataSourceConfig {
 
     private static final String primaryJndiDS = "java:/ModelsDS";
     private static final String loggerJndiDS = "java:/LogDS";
-    private static final String xmlConfigLocation = "/opt/read/datab/DEFAULTX.XML";
-    private static final String primaryXmlName = "models";
-    private static final String loggerXmlName = "monitor";
+    private static final String xmlConfigLocation = "/home/master/Development/projects/suburbWeb/DEFAULTX.XML";
+//    private static final String xmlConfigLocation = "/opt/read/datab/DEFAULTX.XML";
+    private static final String primaryXmlDS = "NGDS";
+    private static final String loggerXmlDS = "LogDS";
 
-    @Bean
+    @Bean(name = "jdbcTemplate")
     @Primary
+    @Profile("war")
     public JdbcTemplate jdbcTemplate() throws NamingException {
+        System.out.println("primaryJndiDS = " + primaryJndiDS);
         return new JdbcTemplate(getJndiDataSource(primaryJndiDS));
     }
 
-    @Bean
-    @Profile("console")
-    public JdbcTemplate consoleJdbcTemplate() throws Exception {
-        return new JdbcTemplate(getXmlDataSource(primaryXmlName));
-    }
-
     @Bean(name = "ngLoggerJdbcTemplate")
+    @Profile("war")
     public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
+        System.out.println("loggerJndiDS = " + loggerJndiDS);
         return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
     }
 
+    @Bean(name = "jdbcTemplate")
+    @Primary
+    @Profile("jar")
+    public JdbcTemplate consoleJdbcTemplate() throws Exception {
+        System.out.println("primaryXmlDS = " + primaryXmlDS);
+        return new JdbcTemplate(getXmlDataSource(primaryXmlDS));
+    }
+
     @Bean(name = "ngLoggerJdbcTemplate")
-    @Profile("console")
+    @Profile("jar")
     public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
-        return new JdbcTemplate(getXmlDataSource(loggerXmlName));
+        System.out.println("loggerXmlDS = " + loggerXmlDS);
+        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
     }
 
     private DataSource getJndiDataSource(String jndiName) throws NamingException {
@@ -56,7 +64,9 @@ public class DataSourceConfig {
         return (DataSource) bean.getObject();
     }
 
-    private DataSource getXmlDataSource(String xmlName) throws Exception {
+    private DataSource getXmlDataSource(String dsName) throws Exception {
+
+        System.out.println("dsName = " + dsName);
 
         File xmlFile = new File(xmlConfigLocation);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -64,34 +74,22 @@ public class DataSourceConfig {
         Document doc = builder.parse(xmlFile);
         doc.getDocumentElement().normalize();
 
-        NodeList databases = doc.getElementsByTagName("database");
-        for (int i = 0; i < databases.getLength(); i++) {
-            Element dbElement = (Element) databases.item(i);
-            String name = dbElement.getAttribute("name");
-
-            if (xmlName.equals(name)) {
-                String url = getTextContentByTag(dbElement, "url");
-                String username = getTextContentByTag(dbElement, "username");
-                String password = getTextContentByTag(dbElement, "password");
-                String driverClassName = getTextContentByTag(dbElement, "driver-class");
-
-                DriverManagerDataSource dataSource = new DriverManagerDataSource();
-                dataSource.setUrl(url);
-                dataSource.setUsername(username);
-                dataSource.setPassword(password);
-                dataSource.setDriverClassName(driverClassName);
-
-                return dataSource;
+        NodeList tasks = doc.getElementsByTagName("task");
+        for (int i = 0; i < tasks.getLength(); i++) {
+            Element task = (Element) tasks.item(i);
+            if (dsName.equals(task.getAttribute("datasource"))) {
+                return getDriverManagerDataSource(task);
             }
         }
-        throw new IllegalArgumentException("Database config '" + xmlName + "' not found in XML");
+        throw new IllegalArgumentException("Database config '" + dsName + "' not found in XML");
     }
 
-    private String getTextContentByTag(Element parent, String tagName) {
-        NodeList nodeList = parent.getElementsByTagName(tagName);
-        if (nodeList.getLength() == 0) {
-            throw new IllegalArgumentException("Missing required tag: " + tagName);
-        }
-        return nodeList.item(0).getTextContent();
+    private static DriverManagerDataSource getDriverManagerDataSource(Element task) {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setUrl(              task.getAttribute("jdbcString"));
+        dataSource.setUsername(         task.getAttribute("nameuser"));
+        dataSource.setPassword(         task.getAttribute("pass"));
+        dataSource.setDriverClassName(  task.getAttribute("driverName"));
+        return dataSource;
     }
 }

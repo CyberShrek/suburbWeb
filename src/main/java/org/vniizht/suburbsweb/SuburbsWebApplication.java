@@ -17,10 +17,8 @@ public class SuburbsWebApplication {
     public static void main(String[] args) throws Exception {
         SpringApplication app = new SpringApplication(SuburbsWebApplication.class);
 
-        // Активируем профиль "console", если запущено из JAR
-        if (isRunningFromJar()) {
-            app.setAdditionalProfiles("console");
-        }
+        // Активируем профиль "jar", если запущено из JAR
+        app.setAdditionalProfiles(isRunningFromJar() ? "jar" : "war");
 
         ConfigurableApplicationContext context = app.run(args);
 
