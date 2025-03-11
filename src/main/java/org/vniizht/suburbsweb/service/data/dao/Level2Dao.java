@@ -15,11 +15,7 @@ import java.util.*;
 public class Level2Dao {
 
     @Autowired private PrigMainRepo prigMainRepo;
-    @Autowired private PrigCostRepo prigCostRepo;
-    @Autowired private PrigAdiRepo prigAdiRepo;
     @Autowired private PassMainRepo passMainRepo;
-    @Autowired private PassCostRepo passCostRepo;
-    @Autowired private PassExRepo passExRepo;
 
     public Set<PrigRecord> findPrigRecords(Date requestDate) {
         Map<Long, PrigRecord> collector = new LinkedHashMap<>();

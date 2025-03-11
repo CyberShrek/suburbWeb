@@ -1,12 +1,21 @@
 package org.vniizht.suburbsweb.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jndi.JndiObjectFactoryBean;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -16,29 +25,42 @@ import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.util.Properties;
 
 @Configuration
+//@EnableAutoConfiguration(exclude = {
+//        DataSourceAutoConfiguration.class,
+//        DataSourceTransactionManagerAutoConfiguration.class,
+//        JdbcTemplateAutoConfiguration.class,
+//})
+//@EnableTransactionManagement
+//@EnableJpaRepositories(
+//        basePackages = {
+//                "org.vniizht.suburbsweb.service.data.repository.level2",
+//                "org.vniizht.suburbsweb.service.data.repository.level3",
+//                "org.vniizht.suburbsweb.service.handbook"
+//        },
+//        entityManagerFactoryRef = "entityManagerFactory",
+//        transactionManagerRef = "transactionManager"
+//)
 public class DataSourceConfig {
 
     private static final String primaryJndiDS = "java:/ModelsDS";
     private static final String loggerJndiDS = "java:/LogDS";
-    private static final String xmlConfigLocation = "/home/master/Development/projects/suburbWeb/DEFAULTX.XML";
-//    private static final String xmlConfigLocation = "/opt/read/datab/DEFAULTX.XML";
+    private static final String xmlConfigLocation = "/opt/read/datab/DEFAULTX.XML";
     private static final String primaryXmlDS = "NGDS";
     private static final String loggerXmlDS = "LogDS";
 
     @Bean(name = "jdbcTemplate")
     @Primary
     @Profile("war")
-    public JdbcTemplate jdbcTemplate() throws NamingException {
-        System.out.println("primaryJndiDS = " + primaryJndiDS);
-        return new JdbcTemplate(getJndiDataSource(primaryJndiDS));
+    public JdbcTemplate jdbcTemplate(DataSource primaryDataSource) {
+        return new JdbcTemplate(primaryDataSource);
     }
 
     @Bean(name = "ngLoggerJdbcTemplate")
     @Profile("war")
     public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
-        System.out.println("loggerJndiDS = " + loggerJndiDS);
         return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
     }
 
@@ -46,15 +68,25 @@ public class DataSourceConfig {
     @Primary
     @Profile("jar")
     public JdbcTemplate consoleJdbcTemplate() throws Exception {
-        System.out.println("primaryXmlDS = " + primaryXmlDS);
         return new JdbcTemplate(getXmlDataSource(primaryXmlDS));
     }
 
     @Bean(name = "ngLoggerJdbcTemplate")
     @Profile("jar")
     public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
-        System.out.println("loggerXmlDS = " + loggerXmlDS);
         return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
+    }
+
+    @Bean
+    @Profile("war")
+    public DataSource dataSource() throws NamingException {
+        return getJndiDataSource(primaryJndiDS);
+    }
+
+    @Bean
+    @Profile("jar")
+    public DataSource consoleDataSource() throws Exception {
+        return getXmlDataSource(primaryXmlDS);
     }
 
     private DataSource getJndiDataSource(String jndiName) throws NamingException {
@@ -65,8 +97,6 @@ public class DataSourceConfig {
     }
 
     private DataSource getXmlDataSource(String dsName) throws Exception {
-
-        System.out.println("dsName = " + dsName);
 
         File xmlFile = new File(xmlConfigLocation);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -92,4 +122,25 @@ public class DataSourceConfig {
         dataSource.setDriverClassName(  task.getAttribute("driverName"));
         return dataSource;
     }
+
+//    @Bean(name = "entityManagerFactory") // Явное указание имени бина
+//    @Primary
+//    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+//            DataSource dataSource) {
+//
+//        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+//        em.setDataSource(dataSource);
+//        em.setPackagesToScan("org.vniizht.suburbsweb.model"); // Укажите пакет с Entity-классами
+//
+//        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+//        em.setJpaVendorAdapter(vendorAdapter);
+//
+//        Properties properties = new Properties();
+//        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+//        properties.put("hibernate.hbm2ddl.auto", "validate"); // или update, если нужно
+//        properties.put("hibernate.show_sql", "true");
+//        em.setJpaProperties(properties);
+//
+//        return em;
+//    }
 }

@@ -15,14 +15,14 @@ import java.net.UnknownHostException;
 public class NgLogger {
 
     @Autowired
-    private NgLoggerJdbc jdbc;
+    private NgLoggerJdbc ngLoggerJdbc;
 
     private String processId = "0";
     private boolean wasError = false;
 
     public void initProcessStart() throws UnknownHostException {
-        jdbc.addProcess();
-        processId = jdbc.getLastProcessId();
+        ngLoggerJdbc.addProcess();
+        processId = ngLoggerJdbc.getLastProcessId();
     }
 
     public void writeInfo(String message) {
@@ -44,7 +44,7 @@ public class NgLogger {
     }
 
     public void initProcessEnd() {
-        jdbc.endProcess(processId, wasError);
+        ngLoggerJdbc.endProcess(processId, wasError);
         processId = "0";
         wasError = false;
     }
@@ -52,7 +52,7 @@ public class NgLogger {
     @SneakyThrows
     private void writeLog(String code, String message) {
         StackTraceElement traceElement = Thread.currentThread().getStackTrace()[3];
-        jdbc.insertLog(NgLog.builder()
+        ngLoggerJdbc.insertLog(NgLog.builder()
                 .messageCode(code)
                 .messageText(message)
                 .processName(traceElement.getMethodName())
