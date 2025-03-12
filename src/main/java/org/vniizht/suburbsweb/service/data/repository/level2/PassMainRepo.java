@@ -10,11 +10,11 @@ import java.util.List;
 @Repository
 public interface PassMainRepo extends Level2Repo<PassMain, Long> {
 
-    @Query("SELECT pm FROM PassMain pm " +
-            "LEFT OUTER JOIN FETCH pm.ex " +
-            "LEFT OUTER JOIN FETCH pm.costs " +
-            "WHERE pm.requestDate = ?1 " +
-            "AND function('array_get', pm.f_r10af3, 8) = true")
+    @Query(value = "SELECT pm.* FROM zzz_rawdl2.l2_pass_main pm " +
+            "LEFT JOIN zzz_rawdl2.l2_pass_ex ex      ON pm.idnum = ex.idnum " +
+            "LEFT JOIN zzz_rawdl2.l2_pass_cost costs ON pm.id = costs.idnum " +
+            "WHERE pm.request_date = ?1 " +
+            "AND pm.f_r10af3[8] = true", nativeQuery = true)
 
     List<PassMain> findAllByRequestDate(Date date);
 }
