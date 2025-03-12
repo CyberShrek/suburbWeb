@@ -11,8 +11,8 @@
     <groupId>org.vniizht</groupId>
     <artifactId>suburbWeb</artifactId>
     <version>SNAPSHOT</version>
-<!--    <packaging>jar</packaging>-->
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
+<!--    <packaging>war</packaging>-->
     <name>suburbWeb</name>
     <description>suburbWeb</description>
     <properties>
@@ -90,10 +90,10 @@
 
     <build>
         <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
