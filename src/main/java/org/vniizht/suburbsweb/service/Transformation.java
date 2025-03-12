@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vniizht.suburbsweb.model.TransformationOptions;
+import org.vniizht.suburbsweb.ng_logger.NgLogger;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
 import org.vniizht.suburbsweb.service.data.dao.TripsDao;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
@@ -28,7 +29,6 @@ import java.util.stream.Stream;
 
 @Service
 @Scope("singleton")
-@Transactional
 public class Transformation {
 
     @Autowired private Level2Dao level2;
@@ -37,18 +37,17 @@ public class Transformation {
     @Autowired private RoutesDao routes;
     @Autowired private TripsDao  trips;
 
-    public synchronized void transform() throws Exception {
-        Date yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        transform(new TransformationOptions(yesterday, true, true));
-    }
+    @Autowired private NgLogger ngLogger;
 
     public synchronized void transform(TransformationOptions options) throws Exception {
-        System.out.println("Start transform");
+
         Date startTime = new Date();
-        Log log = new Log();
+        Log log = new Log(ngLogger);
         try {
-            if(!options.pass && !options.prig) return;
+            if(!options.pass && !options.prig) {
+                options.pass = true;
+                options.prig = true;
+            }
             if(options.date == null) {
                 options.date = getRequestDate(log);
                 if(options.date == null) return;
@@ -70,15 +69,14 @@ public class Transformation {
                     log
             );
         } catch (Exception e) {
-            log.sumUp(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
             throw e;
         } finally {
             handbook.clearCache();
             routes.clearCache();
             LogWS.spreadProgress(-1);
+            log.finish("Итоговое время выполнения: " + (new Date().getTime() - startTime.getTime()) / 1000 + "с");
         }
-        log.sumUp("Итоговое время выполнения: " +
-                (new Date().getTime() - startTime.getTime()) / 1000 + "с");
     }
 
     private Level3Prig transformPrig(Date requestDate, Log log) throws Exception {

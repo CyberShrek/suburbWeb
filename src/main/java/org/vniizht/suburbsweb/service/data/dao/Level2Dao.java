@@ -15,11 +15,7 @@ import java.util.*;
 public class Level2Dao {
 
     @Autowired private PrigMainRepo prigMainRepo;
-    @Autowired private PrigCostRepo prigCostRepo;
-    @Autowired private PrigAdiRepo prigAdiRepo;
     @Autowired private PassMainRepo passMainRepo;
-    @Autowired private PassCostRepo passCostRepo;
-    @Autowired private PassExRepo passExRepo;
 
     public Set<PrigRecord> findPrigRecords(Date requestDate) {
         Map<Long, PrigRecord> collector = new LinkedHashMap<>();
@@ -38,13 +34,8 @@ public class Level2Dao {
     public Set<PassRecord> findPassRecords(Date requestDate) {
         Map<Long, PassRecord> collector = new LinkedHashMap<>();
         List<PassMain> mainList = passMainRepo.findAllByRequestDate(requestDate);
-
         mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));
         return new LinkedHashSet<>(collector.values());
-    }
-
-    public Date getFirstRequestDate() {
-        return prigMainRepo.findByOrderByRequestDateAsc().requestDate;
     }
 
     @Getter
