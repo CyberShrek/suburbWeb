@@ -13,7 +13,8 @@ public interface PassMainRepo extends Level2Repo<PassMain, Long> {
     @Query("SELECT pm FROM PassMain pm " +
             "LEFT OUTER JOIN FETCH pm.ex " +
             "LEFT OUTER JOIN FETCH pm.costs " +
-            "WHERE pm.requestDate = ?1")
+            "WHERE pm.requestDate = ?1 " +
+            "AND function('array_get', pm.f_r10af3, 8) = true")
 
     List<PassMain> findAllByRequestDate(Date date);
 }

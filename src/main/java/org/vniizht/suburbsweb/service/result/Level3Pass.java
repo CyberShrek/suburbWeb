@@ -37,7 +37,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected boolean t1Exists() {
-        return Util.parsePostgresBooleanArray(main.f_r10af3)[7];
+        return true;
     }
 
     @Override
