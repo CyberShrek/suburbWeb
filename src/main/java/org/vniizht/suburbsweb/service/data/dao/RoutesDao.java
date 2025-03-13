@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.routes.*;
 import org.vniizht.suburbsweb.service.handbook.Handbook;
+import org.vniizht.suburbsweb.util.Log;
 
 import java.util.*;
 
@@ -23,7 +24,10 @@ public class RoutesDao {
         String key = depStation + arrStation + date;
         if (!routesCache.containsKey(key)) {
             RouteGroup group = new RouteGroup();
-            
+
+             System.out.println("SELECT * FROM getfunction.estimate_km_suburb(" + routeNum + ", '" + date + "', '" + depStation + "', '" + arrStation + "')");
+
+
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",
                     routeNum, date, depStation, arrStation);
             

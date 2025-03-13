@@ -51,17 +51,17 @@ public class DataSourceConfig {
     private static final String primaryXmlDS = "NGDS";
     private static final String loggerXmlDS = "LogDS";
 
-//    @Bean
-//    @Profile("war")
-//    public DataSource dataSource() throws NamingException {
-//        return getJndiDataSource(primaryJndiDS);
-//    }
-//
-//    @Bean
-//    @Profile("jar")
-//    public DataSource consoleDataSource() throws Exception {
-//        return getXmlDataSource(primaryXmlDS);
-//    }
+    @Bean
+    @Profile("war")
+    public DataSource dataSource() throws NamingException {
+        return getJndiDataSource(primaryJndiDS);
+    }
+
+    @Bean
+    @Profile("jar")
+    public DataSource consoleDataSource() throws Exception {
+        return getXmlDataSource(primaryXmlDS);
+    }
 
     @Bean(name = "jdbcTemplate")
     @Primary
@@ -69,23 +69,17 @@ public class DataSourceConfig {
         return new JdbcTemplate(primaryDataSource);
     }
 
-    @Bean(name = "ngLoggerJdbcTemplate")
-    public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
-        return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
-    }
-
-//    @Bean(name = "jdbcTemplate")
-//    @Primary
-//    @Profile("jar")
-//    public JdbcTemplate consoleJdbcTemplate() throws Exception {
-//        return new JdbcTemplate(getXmlDataSource(primaryXmlDS));
-//    }
-//
 //    @Bean(name = "ngLoggerJdbcTemplate")
-//    @Profile("jar")
-//    public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
-//        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
+////    @Profile("war")
+//    public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
+//        return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
 //    }
+
+    @Bean(name = "ngLoggerJdbcTemplate")
+    @Profile("jar")
+    public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
+        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
+    }
 
     private DataSource getJndiDataSource(String jndiName) throws NamingException {
         JndiObjectFactoryBean bean = new JndiObjectFactoryBean();

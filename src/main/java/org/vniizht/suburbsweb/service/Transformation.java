@@ -3,7 +3,6 @@ package org.vniizht.suburbsweb.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.vniizht.suburbsweb.model.TransformationOptions;
 import org.vniizht.suburbsweb.ng_logger.NgLogger;
 import org.vniizht.suburbsweb.service.data.dao.RoutesDao;
@@ -21,7 +20,6 @@ import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -60,14 +58,13 @@ public class Transformation {
             log.addTimeLine("Получаю справочники...");
             LogWS.spreadProgress(0);
             handbook.loadCache();
-            log.addTimeLine("Справочники загружены.");
+            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
+            LogWS.spreadProgress(0);
+            level3.deleteForDate(options.date);
             log.sumUp();
-            complete(
-                    options.date,
-                    options.prig ? transformPrig(options.date, log) : null,
-                    options.pass ? transformPass(options.date, log) : null,
-                    log
-            );
+            if (options.prig) complete(options.date, transformPrig(options.date, log), log);
+            if (options.pass) complete(options.date, transformPass(options.date, log), log);
+            log.addTimeLine("Трансформация завершена успешно.");
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
             throw e;
@@ -127,32 +124,22 @@ public class Transformation {
     }
 
     private void complete(Date date,
-                          Level3Prig level3Prig,
-                          Level3Pass level3Pass,
+                          Level3 level3,
                           Log log) {
 
         Set<Level3.CO22>       co22Set = new HashSet<>();
-        if(level3Prig != null) co22Set.addAll(level3Prig.getCo22Result().values());
-        if(level3Pass != null) co22Set.addAll(level3Pass.getCo22Result().values());
-
-        Set<Lgot> lgotSet = Stream.concat(
-                level3Prig == null ? Stream.empty() : level3Prig.getLgotResult().stream(),
-                level3Pass == null ? Stream.empty() : level3Pass.getLgotResult().stream())
-                .collect(Collectors.toSet());
+        co22Set.addAll(level3.getCo22Result().values());
 
         log.sumUp("Сформировано записей ЦО-22:      " + co22Set.size(),
-                "Сформировано записей Льготников: " + lgotSet.size());
+                "Сформировано записей Льготников: " + level3.getLgotResult().size());
 
-        update(date, co22Set, lgotSet, log);
+        update(date, co22Set, level3.getLgotResult(), log);
     }
 
     private void update(Date date,
                         Set<Level3.CO22> co22Set,
                         Set<Lgot> lgotSet, Log log) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
-            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(date, "dd.MM.yyyy") + "...");
-            LogWS.spreadProgress(0);
-            level3.deleteForDate(date);
             log.addTimeLine("Записываю T1...");
             level3.saveT1s(co22Set.stream().map(Level3.CO22::getT1).collect(Collectors.toSet()));
             log.addTimeLine("Записываю T2...");
@@ -177,7 +164,6 @@ public class Transformation {
             level3.saveCO22Metas(co22MetaSet);
             log.addTimeLine("Записываю льготников...");
             level3.saveLgots(lgotSet);
-            log.addTimeLine("Записи успешно обновлены.");
         }) + "c");
     }
 
