@@ -18,7 +18,7 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
 
     // Конечные результаты - трансформированные записи второго уровня, готовые к записи в базу данных
     @Getter private final Map<String, CO22> co22Result = new HashMap<>();
-    @Getter private final List<Lgot>        lgotResult = new ArrayList<>();
+    @Getter private final Set<Lgot>         lgotResult = new HashSet<>();
 
     // Подсчитанное время на сопутствующие операции (с)
     @Getter private float transformationTime   = 0;
