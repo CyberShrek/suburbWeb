@@ -27,13 +27,21 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         main     = record.getMain();
         costList = main.getCosts();
         ex       = main.getEx();
-        yyyyMM = Integer.parseInt(Util.formatDate(main.oper_date, "yyyyMM"));
+        isRefund = main.oper_g == 'N' && main.oper == 'V';
+        operationDate = isRefund
+                && main.getRefund() != null
+                && main.getRefund().flg_retil == '1'
+                ? main.requestDate
+                : main.oper_date;
+        yyyyMM   = Integer.parseInt(Util.formatDate(operationDate, "yyyyMM"));
     }
     // Переменные для каждой записи
     private Integer yyyyMM;
     private PassMain       main;
     private List<PassCost> costList;
     private PassEx         ex;
+    private Boolean        isRefund;
+    private Date           operationDate;
 
     @Override
     protected boolean t1Exists() {
@@ -49,25 +57,25 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected T1 getT1() {
-        String saleRoad = handbook.getRoad3(main.sale_station, main.oper_date);
+        String saleRoad = handbook.getRoad3(main.sale_station, operationDate);
         return T1.builder()
                 .key(T1.Key.builder()
                         .requestDate(main.requestDate)
                         .yyyymm(yyyyMM)
                         .p1("tab1")
-                        .p3(Util.formatDate(main.oper_date, "yyyy"))
-                        .p4(Util.formatDate(main.oper_date, "MM"))
+                        .p3(Util.formatDate(operationDate, "yyyy"))
+                        .p4(Util.formatDate(operationDate, "MM"))
                         .p5("017")
                         .p6(saleRoad)
                         .p7(saleRoad)
                         .p8(main.sale_station)
                         .p9(String.format("%09d", main.carrier_code))
                         .p10(main.saleregion_code)
-                        .p11(handbook.getOkatoByStation(main.sale_station, main.oper_date))
+                        .p11(handbook.getOkatoByStation(main.sale_station, operationDate))
                         .p12(Util.formatDate(main.departure_date, "yyMM"))
                         .p15(main.departure_station)
-                        .p17(handbook.getOkatoByStation(main.departure_station, main.oper_date))
-                        .p18(handbook.getArea(main.departure_station, main.oper_date))
+                        .p17(handbook.getOkatoByStation(main.departure_station, operationDate))
+                        .p18(handbook.getArea(main.departure_station, operationDate))
                         .p19('4')
                         .p20("0" + main.carriage_class)
                         .p21('1')
@@ -88,27 +96,30 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p60(String.valueOf(main.subagent_code))
                         .build()
                 )
-                .p33(Long.valueOf(main.seats_qty))
+                .p33(arrangeRefund(Long.valueOf(main.seats_qty)))
                 .p34(0F)
                 .p35(0F)
-                .p36((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum())
+                .p36(arrangeRefund((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum()))
                 .p37(0F)
                 .p38(0F)
-                .p39(getT1P39())
-                .p40(getT1P40())
+                .p39(arrangeRefund(getT1P39()))
+                .p40(arrangeRefund(getT1P40()))
                 .p41(0F)
                 .p42(0F)
                 .p43(0F)
-                .p44(getT1P44())
+                .p44(arrangeRefund(getT1P44()))
                 .p45(0F)
                 .p46(0F)
-                .p47(getT1P47())
-                .p48(getT1P48())
+                .p47(arrangeRefund(getT1P47()))
+                .p48(arrangeRefund(getT1P48()))
                 .p49(0F)
                 .p50(0F)
                 .p51(getT1P51())
                 .build();
     }
+
+    private Float arrangeRefund(Float value) {return isRefund ? -value : value;}
+    private Long  arrangeRefund(Long value)  {return isRefund ? -value : value;}
 
     @Override
     protected Lgot getLgot() {
@@ -117,14 +128,14 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .requestDate(main.requestDate)
                                 .yyyymm(yyyyMM)
                                 .list("R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
-                                .p2(handbook.getRoad3(main.sale_station, main.oper_date))
-                                .p3(handbook.getDepartment(main.sale_station, main.oper_date))
+                                .p2(handbook.getRoad3(main.sale_station, operationDate))
+                                .p3(handbook.getDepartment(main.sale_station, operationDate))
                                 .p4('0')
                                 .p5(getLgotP5())
                                 .p6('1')
                                 .p7(getT1P24())
                                 .p8(String.valueOf(main.carrier_code))
-                                .p9(handbook.getOkatoByRegion(main.benefitcnt_code, main.oper_date))
+                                .p9(handbook.getOkatoByRegion(main.benefitcnt_code, operationDate))
                                 .p10(ex != null && ex.lgot_info != null ? ex.nomlgud : null)
                                 .p11(getLgotP11())
                                 .p12(getLgotP12())
@@ -132,7 +143,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p14(getLgotP14())
                                 .p16((byte) (main.oper_g == 'G' ? -1 : (main.oper == 'V' ? 0 : 1)))
                                 .p17(main.trip_direction == '3')
-                                .p22(main.oper_date)
+                                .p22(operationDate)
                                 .p23(main.departure_date)
                                 .p24(ex == null ? null : ex.ticket_ser.substring(0, 2) + ex.ticket_num)
                                 .p25(main.departure_station)
@@ -163,7 +174,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected Set<T1> multiplyT1(T1 t1) {
         Set<T1> result = new LinkedHashSet<>();
         result.add(t1);
-        if (!main.oper_date.equals(main.departure_date)) {
+        if (!operationDate.equals(main.departure_date)) {
             result.add(t1.toBuilder()
                     .key(t1.getKey().toBuilder()
                             .yyyymm(Integer.parseInt(Util.formatDate(main.departure_date, "yyyyMM")))
@@ -180,7 +191,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         return CO22Meta.builder()
                 .requestDate(main.requestDate)
                 .l2PassIdnum(main.idnum)
-                .operationDate(main.oper_date)
+                .operationDate(operationDate)
                 .build();
     }
 
@@ -227,7 +238,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 :
                 handbook.getGvc(
                         ex.lgot_info.substring(0, 2),
-                        main.benefit_code, main.oper_date);
+                        main.benefit_code, operationDate);
     }
 
     private Float getT1P39() {

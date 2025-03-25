@@ -23,7 +23,6 @@ import org.vniizht.suburbsweb.websocket.LogWS;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Scope("singleton")
@@ -62,8 +61,8 @@ public class Transformation {
             LogWS.spreadProgress(0);
             level3.deleteForDate(options.date);
             log.sumUp();
-            if (options.prig) complete(options.date, transformPrig(options.date, log), log);
-            if (options.pass) complete(options.date, transformPass(options.date, log), log);
+            if (options.prig) complete(transformPrigOrNull(options.date, log), log);
+            if (options.pass) complete(transformPassOrNull(options.date, log), log);
             log.addTimeLine("Трансформация завершена успешно.");
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
@@ -76,21 +75,21 @@ public class Transformation {
         }
     }
 
-    private Level3Prig transformPrig(Date requestDate, Log log) throws Exception {
+    private Level3Prig transformPrigOrNull(Date requestDate, Log log) throws Exception {
         Set<Level2Dao.PrigRecord> records = loadRecords(
                 () -> level2.findPrigRecords(requestDate), log, "l2_prig");
 
-        return (Level3Prig) transform(
+        return records.isEmpty() ? null : (Level3Prig) transform(
                 () -> new Level3Prig(records, handbook, routes, trips, level3.getLatestT1P2() + 1),
                 log, "l2_prig"
         );
     }
 
-    private Level3Pass transformPass(Date requestDate, Log log) throws Exception {
+    private Level3Pass transformPassOrNull(Date requestDate, Log log) throws Exception {
         Set<Level2Dao.PassRecord> records = loadRecords(
                 () -> level2.findPassRecords(requestDate), log, "l2_pass");
 
-        return (Level3Pass) transform(
+        return records.isEmpty() ? null : (Level3Pass) transform(
                 () -> new Level3Pass(records, handbook, routes, level3.getLatestT1P2() + 1),
                 log, "l2_pass"
         );
@@ -123,21 +122,23 @@ public class Transformation {
         return requestDate;
     }
 
-    private void complete(Date date,
-                          Level3 level3,
+    private void complete(Level3 nullableLevel3,
                           Log log) {
 
+        if (nullableLevel3 == null) {
+            log.sumUp("Нет данных для формирования ЦО-22.");
+            return;
+        }
         Set<Level3.CO22>       co22Set = new HashSet<>();
-        co22Set.addAll(level3.getCo22Result().values());
+        co22Set.addAll(nullableLevel3.getCo22Result().values());
 
         log.sumUp("Сформировано записей ЦО-22:      " + co22Set.size(),
-                "Сформировано записей Льготников: " + level3.getLgotResult().size());
+                "Сформировано записей Льготников: " + nullableLevel3.getLgotResult().size());
 
-        update(date, co22Set, level3.getLgotResult(), log);
+        update(co22Set, nullableLevel3.getLgotResult(), log);
     }
 
-    private void update(Date date,
-                        Set<Level3.CO22> co22Set,
+    private void update(Set<Level3.CO22> co22Set,
                         Set<Lgot> lgotSet, Log log) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
             log.addTimeLine("Записываю T1...");

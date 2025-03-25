@@ -58,4 +58,10 @@ public class PassMain extends L2Key {
     @Getter
     @Setter
     private PassEx  ex;
+
+    @OneToOne(mappedBy = "main")
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private PassRefund refund;
 }
