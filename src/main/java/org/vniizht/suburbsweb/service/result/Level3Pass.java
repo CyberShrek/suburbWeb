@@ -96,7 +96,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p60(String.valueOf(main.subagent_code))
                         .build()
                 )
-                .p33(arrangeRefund(Long.valueOf(main.seats_qty)))
+                .p33(Long.valueOf(main.seats_qty))
                 .p34(0F)
                 .p35(0F)
                 .p36(arrangeRefund((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum()))
@@ -119,7 +119,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float arrangeRefund(Float value) {return isRefund ? -value : value;}
-    private Long  arrangeRefund(Long value)  {return isRefund ? -value : value;}
 
     @Override
     protected Lgot getLgot() {
