@@ -1,21 +1,14 @@
 package org.vniizht.suburbsweb.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jndi.JndiObjectFactoryBean;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -25,24 +18,8 @@ import javax.sql.DataSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.Properties;
 
 @Configuration
-//@EnableAutoConfiguration(exclude = {
-//        DataSourceAutoConfiguration.class,
-//        DataSourceTransactionManagerAutoConfiguration.class,
-//        JdbcTemplateAutoConfiguration.class,
-//})
-//@EnableTransactionManagement
-//@EnableJpaRepositories(
-//        basePackages = {
-//                "org.vniizht.suburbsweb.service.data.repository.level2",
-//                "org.vniizht.suburbsweb.service.data.repository.level3",
-//                "org.vniizht.suburbsweb.service.handbook"
-//        },
-//        entityManagerFactoryRef = "entityManagerFactory",
-//        transactionManagerRef = "transactionManager"
-//)
 public class DataSourceConfig {
 
     private static final String primaryJndiDS = "java:/ModelsDS";
@@ -52,16 +29,16 @@ public class DataSourceConfig {
     private static final String loggerXmlDS = "LogDS";
 
     @Bean
-    @Profile("war")
+//    @Profile("war")
     public DataSource dataSource() throws NamingException {
         return getJndiDataSource(primaryJndiDS);
     }
 
-    @Bean
-    @Profile("jar")
-    public DataSource consoleDataSource() throws Exception {
-        return getXmlDataSource(primaryXmlDS);
-    }
+//    @Bean
+//    @Profile("jar")
+//    public DataSource consoleDataSource() throws Exception {
+//        return getXmlDataSource(primaryXmlDS);
+//    }
 
     @Bean(name = "jdbcTemplate")
     @Primary
@@ -69,17 +46,17 @@ public class DataSourceConfig {
         return new JdbcTemplate(primaryDataSource);
     }
 
-//    @Bean(name = "ngLoggerJdbcTemplate")
-////    @Profile("war")
-//    public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
-//        return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
-//    }
-
     @Bean(name = "ngLoggerJdbcTemplate")
-    @Profile("jar")
-    public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
-        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
+//    @Profile("war")
+    public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
+        return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
     }
+
+//    @Bean(name = "ngLoggerJdbcTemplate")
+//    @Profile("jar")
+//    public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
+//        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
+//    }
 
     private DataSource getJndiDataSource(String jndiName) throws NamingException {
         JndiObjectFactoryBean bean = new JndiObjectFactoryBean();
@@ -100,39 +77,45 @@ public class DataSourceConfig {
         for (int i = 0; i < tasks.getLength(); i++) {
             Element task = (Element) tasks.item(i);
             if (dsName.equals(task.getAttribute("datasource"))) {
-                return getDriverManagerDataSource(task);
+                return getHikariDataSource(task);
             }
         }
         throw new IllegalArgumentException("Database config '" + dsName + "' not found in XML");
     }
 
-    private static DriverManagerDataSource getDriverManagerDataSource(Element task) {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setUrl(              task.getAttribute("jdbcString"));
-        dataSource.setUsername(         task.getAttribute("nameuser"));
-        dataSource.setPassword(         task.getAttribute("pass"));
-        dataSource.setDriverClassName(  task.getAttribute("driverName"));
-        return dataSource;
-    }
+    private static DataSource getHikariDataSource(Element task) {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(task.getAttribute("jdbcString"));
+        config.setUsername(task.getAttribute("nameuser"));
+        config.setPassword(task.getAttribute("pass"));
+        config.setDriverClassName(task.getAttribute("driverName"));
 
-//    @Bean(name = "entityManagerFactory") // Явное указание имени бина
-//    @Primary
-//    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-//            DataSource dataSource) {
-//
-//        LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-//        em.setDataSource(dataSource);
-//        em.setPackagesToScan("org.vniizht.suburbsweb.model"); // Укажите пакет с Entity-классами
-//
-//        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-//        em.setJpaVendorAdapter(vendorAdapter);
-//
-//        Properties properties = new Properties();
-//        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-//        properties.put("hibernate.hbm2ddl.auto", "validate"); // или update, если нужно
-//        properties.put("hibernate.show_sql", "true");
-//        em.setJpaProperties(properties);
-//
-//        return em;
-//    }
+        // Основные настройки
+        config.setMaximumPoolSize(5);               // Максимум 5 соединений
+        config.setMinimumIdle(1);                   // Минимум 1 соединение в простое
+        config.setConnectionTimeout(5000);          // 5 секунд на получение соединения
+        config.setIdleTimeout(300_000);             // 5 минут неактивности до закрытия
+        config.setMaxLifetime(1_800_000);           // 30 минут макс. время жизни соединения
+        config.setInitializationFailTimeout(0);     // Немедленный fail при ошибке подключения
+
+        // Оптимизация для быстрого старта
+        config.setPoolName("BatchPool");
+        config.setRegisterMbeans(false);            // Отключаем JMX для краткоживущих приложений
+
+        // Настройки для высокопроизводительных операций
+        config.setAutoCommit(false);                // Ручное управление транзакциями
+        config.setIsolateInternalQueries(true);     // Изолировать внутренние запросы пула
+        config.setAllowPoolSuspension(false);       // Не требуется для однопоточного доступа
+
+        // Оптимизация под "burst" нагрузку
+        config.setLeakDetectionThreshold(300_000);   // Детекция утечек после 300 сек
+
+        // Кэширование PreparedStatements:
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("reWriteBatchedInserts", "true");
+
+        return new HikariDataSource(config);
+    }
 }

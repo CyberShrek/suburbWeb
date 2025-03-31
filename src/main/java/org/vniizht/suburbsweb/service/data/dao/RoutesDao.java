@@ -25,7 +25,7 @@ public class RoutesDao {
         if (!routesCache.containsKey(key)) {
             RouteGroup group = new RouteGroup();
 
-             System.out.println("SELECT * FROM getfunction.estimate_km_suburb(" + routeNum + ", '" + date + "', '" + depStation + "', '" + arrStation + "')");
+//             System.out.println("SELECT * FROM getfunction.estimate_km_suburb(" + routeNum + ", '" + date + "', '" + depStation + "', '" + arrStation + "')");
 
 
             SqlRowSet prigRS = jdbcTemplate.queryForRowSet("SELECT * FROM getfunction.estimate_km_suburb(?, ?, ?, ?)",

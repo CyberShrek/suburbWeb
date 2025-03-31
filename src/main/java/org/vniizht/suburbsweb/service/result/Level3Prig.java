@@ -342,8 +342,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private Float getT1P39() {
         switch (main.oper){
-            case 'O': return Float.valueOf(main.fee_sum);
-            case 'V': return Float.valueOf(main.refundfee_sum);
+            case 'O': return  Float.valueOf(main.fee_sum);
+            case 'V': return -Float.valueOf(main.refundfee_sum);
         }
         return 0F;
     }
