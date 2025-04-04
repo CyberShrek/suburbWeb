@@ -17,8 +17,15 @@ import java.util.*;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
+    // Переменные для каждой записи
+    private Integer yyyyMM;
+    private String fullBenefit;
+    private PrigMain       main;
+    private List<PrigCost> costList;
+    private PrigAdi        adi;
     private final TripsDao trips;
     private boolean isAbonement;
+    private Boolean        isRefund;
 
     public Level3Prig(Set<Level2Dao.PrigRecord> records,
                       Handbook handbook,
@@ -45,13 +52,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
         fullBenefit = main.benefitgroup_code + main.benefit_code;
         yyyyMM = Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM"));
+        isRefund = main.oper_g == 'N' && main.oper == 'V';
     }
-    // Переменные для каждой записи
-    private Integer yyyyMM;
-    private String fullBenefit;
-    private PrigMain       main;
-    private List<PrigCost> costList;
-    private PrigAdi        adi;
+
 
     @Override
     protected boolean t1Exists() {
@@ -107,10 +110,10 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p61(main.train_num.matches("^\\d {4}") ? main.train_num.trim().charAt(0) : '0')
                         .build()
                 )
-                .p33((long) (isAbonement ? main.pass_qty : main.carryon_weight))
+                .p33((isAbonement ? (long) (short) (isRefund ? -1 : 1) * main.pass_qty : main.carryon_weight))
                 .p34(0F)
                 .p35(0F)
-                .p36(main.tariff_sum)
+                .p36(getT1P36())
                 .p37(0F)
                 .p38(0F)
                 .p39(getT1P39())
@@ -118,7 +121,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 .p41(0F)
                 .p42(0F)
                 .p43(0F)
-                .p44(main.department_sum)
+                .p44(getT1P44())
                 .p45(0F)
                 .p46(0F)
                 .p47(0F)
@@ -340,10 +343,26 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
     }
 
+    private Float getT1P36() {
+        switch (main.oper){
+            case 'O': return main.tariff_sum;
+            case 'V': return -main.refund_sum;
+        }
+        return 0F;
+    }
+
     private Float getT1P39() {
         switch (main.oper){
-            case 'O': return  Float.valueOf(main.fee_sum);
-            case 'V': return -Float.valueOf(main.refundfee_sum);
+            case 'O': return main.fee_sum;
+            case 'V': return -main.refundfee_sum;
+        }
+        return 0F;
+    }
+
+    private Float getT1P44() {
+        switch (main.oper){
+            case 'O': return main.department_sum;
+            case 'V': return -main.refunddepart_sum;
         }
         return 0F;
     }
