@@ -5,7 +5,6 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Table(schema = "rawdl2",
@@ -13,7 +12,7 @@ import java.io.Serializable;
 @ToString(callSuper=true)
 public class PassRefund extends L2Key {
     @Id  public Long        idnum;
-    public Character   flg_retil;
+    public Character flg_retpret;
 
     @OneToOne
     @JoinColumn(name = "idnum", referencedColumnName = "idnum", insertable = false, updatable = false)

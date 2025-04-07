@@ -29,16 +29,16 @@ public class DataSourceConfig {
     private static final String loggerXmlDS = "LogDS";
 
     @Bean
-//    @Profile("war")
+    @Profile("war")
     public DataSource dataSource() throws NamingException {
         return getJndiDataSource(primaryJndiDS);
     }
 
-//    @Bean
-//    @Profile("jar")
-//    public DataSource consoleDataSource() throws Exception {
-//        return getXmlDataSource(primaryXmlDS);
-//    }
+    @Bean
+    @Profile("jar")
+    public DataSource consoleDataSource() throws Exception {
+        return getXmlDataSource(primaryXmlDS);
+    }
 
     @Bean(name = "jdbcTemplate")
     @Primary
@@ -47,16 +47,16 @@ public class DataSourceConfig {
     }
 
     @Bean(name = "ngLoggerJdbcTemplate")
-//    @Profile("war")
+    @Profile("war")
     public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
         return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
     }
 
-//    @Bean(name = "ngLoggerJdbcTemplate")
-//    @Profile("jar")
-//    public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
-//        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
-//    }
+    @Bean(name = "ngLoggerJdbcTemplate")
+    @Profile("jar")
+    public JdbcTemplate ngLoggerConsoleJdbcTemplate() throws Exception {
+        return new JdbcTemplate(getXmlDataSource(loggerXmlDS));
+    }
 
     private DataSource getJndiDataSource(String jndiName) throws NamingException {
         JndiObjectFactoryBean bean = new JndiObjectFactoryBean();
@@ -103,7 +103,7 @@ public class DataSourceConfig {
         config.setRegisterMbeans(false);            // Отключаем JMX для краткоживущих приложений
 
         // Настройки для высокопроизводительных операций
-        config.setAutoCommit(false);                // Ручное управление транзакциями
+        config.setAutoCommit(true);                 // Автоматическое управление транзакциями
         config.setIsolateInternalQueries(true);     // Изолировать внутренние запросы пула
         config.setAllowPoolSuspension(false);       // Не требуется для однопоточного доступа
 

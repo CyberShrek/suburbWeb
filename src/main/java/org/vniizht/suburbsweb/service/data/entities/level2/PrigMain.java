@@ -58,7 +58,9 @@ public class PrigMain extends L2Key {
     public Float       refundfee_sum;
     public Float       total_sum;
     public Float       tariff_sum;
+    public Float       refund_sum;
     public Float       department_sum;
+    public Float       refunddepart_sum;
 
     public String      server_datetime;
     public Integer     server_reqnum;

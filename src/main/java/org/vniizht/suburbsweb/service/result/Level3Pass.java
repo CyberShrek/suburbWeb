@@ -13,6 +13,13 @@ import org.vniizht.suburbsweb.util.Util;
 import java.util.*;
 
 public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
+
+    // Переменные для каждой записи
+    private Integer yyyyMM;
+    private PassMain       main;
+    private List<PassCost> costList;
+    private PassEx         ex;
+    private Date           operationDate;
     
     public Level3Pass(Set<Level2Dao.PassRecord> records,
                       Handbook handbook,
@@ -27,21 +34,13 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         main     = record.getMain();
         costList = main.getCosts();
         ex       = main.getEx();
-        isRefund = main.oper_g == 'N' && main.oper == 'V';
-        operationDate = isRefund
+        operationDate = main.oper_g == 'N' && main.oper == 'V'
                 && main.getRefund() != null
-                && main.getRefund().flg_retil == '1'
+                && main.getRefund().flg_retpret == '1'
                 ? main.requestDate
                 : main.oper_date;
         yyyyMM   = Integer.parseInt(Util.formatDate(operationDate, "yyyyMM"));
     }
-    // Переменные для каждой записи
-    private Integer yyyyMM;
-    private PassMain       main;
-    private List<PassCost> costList;
-    private PassEx         ex;
-    private Boolean        isRefund;
-    private Date           operationDate;
 
     @Override
     protected boolean t1Exists() {
@@ -96,30 +95,27 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p60(String.valueOf(main.subagent_code))
                         .build()
                 )
-                .p33(arrangeRefund(Long.valueOf(main.seats_qty)))
+                .p33(Long.valueOf(main.seats_qty))
                 .p34(0F)
                 .p35(0F)
-                .p36(arrangeRefund((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum()))
+                .p36((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum())
                 .p37(0F)
                 .p38(0F)
-                .p39(arrangeRefund(getT1P39()))
-                .p40(arrangeRefund(getT1P40()))
+                .p39(getT1P39())
+                .p40(getT1P40())
                 .p41(0F)
                 .p42(0F)
                 .p43(0F)
-                .p44(arrangeRefund(getT1P44()))
+                .p44(getT1P44())
                 .p45(0F)
                 .p46(0F)
-                .p47(arrangeRefund(getT1P47()))
-                .p48(arrangeRefund(getT1P48()))
+                .p47(getT1P47())
+                .p48(getT1P48())
                 .p49(0F)
                 .p50(0F)
                 .p51(getT1P51())
                 .build();
     }
-
-    private Float arrangeRefund(Float value) {return isRefund ? -value : value;}
-    private Long  arrangeRefund(Long value)  {return isRefund ? -value : value;}
 
     @Override
     protected Lgot getLgot() {
