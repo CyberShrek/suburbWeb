@@ -11,7 +11,7 @@ import javax.persistence.*;
         name = "l2_pass_refund")
 @ToString(callSuper=true)
 public class PassRefund extends L2Key {
-    @Id  public Long        idnum;
+    @Id  public Long       idnum;
     public Character flg_retpret;
 
     @OneToOne

@@ -94,8 +94,9 @@ public class DataSourceConfig {
         config.setMaximumPoolSize(5);               // Максимум 5 соединений
         config.setMinimumIdle(1);                   // Минимум 1 соединение в простое
         config.setConnectionTimeout(5000);          // 5 секунд на получение соединения
+        config.setLeakDetectionThreshold(1_800_000);// Детекция утечек после 30 минут
         config.setIdleTimeout(300_000);             // 5 минут неактивности до закрытия
-        config.setMaxLifetime(1_800_000);           // 30 минут макс. время жизни соединения
+        config.setMaxLifetime(3_600_000);           // 60 минут макс. время жизни соединения
         config.setInitializationFailTimeout(0);     // Немедленный fail при ошибке подключения
 
         // Оптимизация для быстрого старта
@@ -103,9 +104,9 @@ public class DataSourceConfig {
         config.setRegisterMbeans(false);            // Отключаем JMX для краткоживущих приложений
 
         // Настройки для высокопроизводительных операций
-        config.setAutoCommit(true);                 // Автоматическое управление транзакциями
-        config.setIsolateInternalQueries(true);     // Изолировать внутренние запросы пула
-        config.setAllowPoolSuspension(false);       // Не требуется для однопоточного доступа
+        //        config.setAutoCommit(true);                 // Автоматическое управление транзакциями
+        //        config.setIsolateInternalQueries(true);     // Изолировать внутренние запросы пула
+        //        config.setAllowPoolSuspension(false);       // Не требуется для однопоточного доступа
 
         // Оптимизация под "burst" нагрузку
         config.setLeakDetectionThreshold(300_000);   // Детекция утечек после 300 сек
