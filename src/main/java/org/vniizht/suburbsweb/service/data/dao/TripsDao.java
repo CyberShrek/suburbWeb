@@ -17,14 +17,16 @@ public class TripsDao {
     @Autowired
     private HandbookCache handbookCache;
 
-    public Map<String, Integer> calculateTripsPerMonth(PrigMain main) {
+    public Map<String, Integer> calculateTripsPerMonth(PrigMain main, boolean isRefund) {
+        Date startDate = isRefund ? main.operation_date : main.ticket_begdate;
+
         return calculateTripsPerMonth(
                 handbookCache.findTrip(
                         abonementType2ticketCode(main.abonement_subtype, main.abonement_type),
                         main.seatstick_limit,
-                        main.ticket_begdate),
+                        startDate),
                 main.operation_date,
-                main.ticket_begdate,
+                startDate,
                 main.ticket_enddate
         );
     }

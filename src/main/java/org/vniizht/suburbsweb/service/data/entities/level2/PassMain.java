@@ -45,7 +45,14 @@ public class PassMain extends L2Key {
     public Character   trip_direction;
 
     public Short       distance;
+    public Short       persons_qty;
     public Short       seats_qty;
+
+    @OneToOne(mappedBy = "main")
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private PassMainUpd upd;
 
     @OneToMany(mappedBy = "main")
     @Fetch(FetchMode.JOIN)

@@ -104,9 +104,14 @@ public class Transformation {
         return records;
     }
 
-    private Level3 transform(Callable<Level3> loader, Log log, String name) throws Exception {
+    private Level3 transform(Callable<Level3> loader, Log log, String name) {
         log.addTimeLine("Трансформирую записи " + name + "...");
-        Level3 level3 = loader.call();
+        Level3 level3 = null;
+        try {
+            level3 = loader.call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         log.addTimeLine("Записи " + name + " успешно трансформированы.");
 
         return level3;

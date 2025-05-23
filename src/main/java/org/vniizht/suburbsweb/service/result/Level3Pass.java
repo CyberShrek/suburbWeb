@@ -20,6 +20,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private List<PassCost> costList;
     private PassEx         ex;
     private Date           operationDate;
+    private Character      noUse = '0';
     
     public Level3Pass(Set<Level2Dao.PassRecord> records,
                       Handbook handbook,
@@ -40,11 +41,14 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 ? main.requestDate
                 : main.oper_date;
         yyyyMM   = Integer.parseInt(Util.formatDate(operationDate, "yyyyMM"));
+        if (main.getUpd() != null && main.getUpd().no_use != null) {
+            noUse = main.getUpd().no_use;
+        }
     }
 
     @Override
     protected boolean t1Exists() {
-        return true;
+        return noUse != '1';
     }
 
     @Override
@@ -95,7 +99,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p60(String.valueOf(main.subagent_code))
                         .build()
                 )
-                .p33(Long.valueOf(main.seats_qty))
+                .p33(noUse == '2' && (main.oper_g == 'N' || main.oper == 'O') ? Long.valueOf(main.persons_qty) : Long.valueOf(main.seats_qty))
                 .p34(0F)
                 .p35(0F)
                 .p36((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum())
@@ -146,8 +150,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p26(main.arrival_station)
                                 .p30(Util.formatDate(new Date(main.requestDate.getTime() + main.request_time.getTime()), "ddMMyyHHmm"))
                                 .p32(ex == null ? null : ex.snils)
-                                .p34(main.agent_code == null ? null : String.valueOf(main.agent_code))
-                                .p35(main.sale_station)
+                                .p34(main.sale_station)
+                                .p35(main.agent_code == null ? null : String.valueOf(main.agent_code))
                                 .build())
                 .p19(main.seats_qty)
                 .p27(costList == null ? 0 : (costList.stream().mapToDouble(cost -> cost.sum_te).sum() * 10))
@@ -293,9 +297,16 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Long getT1P51() {
-        if (main.oper_g == 'N') switch (main.oper) {
-            case 'O': return  1L;
-            case 'V': return -1L;
+        if (main.oper_g == 'N') {
+            switch (main.oper) {
+                case 'O': return 1L;
+                case 'V': return -1L;
+            }
+            if (noUse == '2')
+                return -1L;
+        }
+        else if (main.oper_g == 'O' && noUse == '2') {
+            return 1L;
         }
         return 0L;
     }

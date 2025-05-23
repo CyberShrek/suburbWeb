@@ -52,13 +52,14 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
         fullBenefit = main.benefitgroup_code + main.benefit_code;
         yyyyMM = Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM"));
-        isRefund = main.oper_g == 'N' && main.oper == 'V';
+        if (main.no_use == null) main.no_use = '0';
+        isRefund = main.no_use == '2' || main.oper_g == 'N' && main.oper == 'V';
     }
 
 
     @Override
     protected boolean t1Exists() {
-        return true;
+        return main.no_use != '1';
     }
 
     @Override
@@ -174,8 +175,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p30(main.server_datetime)
                         .p31(Util.addLeadingZeros(main.server_reqnum == null ? null : main.server_reqnum.toString(), 7))
                         .p32(adi == null ? null : adi.snils)
-                        .p34(main.agent_code == null ? null : String.valueOf(main.agent_code))
-                        .p35(main.sale_station)
+                        .p34(main.sale_station)
+                        .p35(main.agent_code == null ? null : String.valueOf(main.agent_code))
                         .build()
                 )
                 .p19(getLgotP20() == '9' ? main.seatstick_limit : 0)
@@ -213,7 +214,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         Set<T1> t1Set = new LinkedHashSet<>();
 
         if (isAbonement) {
-            trips.calculateTripsPerMonth(main)
+            trips.calculateTripsPerMonth(main, isRefund)
                     .forEach((yyyymm, trips) -> {
                         boolean isActual = t1.getKey().getYyyymm() == Integer.parseInt(yyyymm);
                         t1Set.add(t1.toBuilder()
@@ -348,7 +349,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 'O': return main.tariff_sum;
             case 'V': return -main.refund_sum;
         }
-        return 0F;
+        return isRefund ? -main.refund_sum : 0F;
     }
 
     private Float getT1P39() {
@@ -356,7 +357,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 'O': return main.fee_sum;
             case 'V': return -main.refundfee_sum;
         }
-        return 0F;
+        return isRefund ? -main.refundfee_sum : 0F;
     }
 
     private Float getT1P44() {
@@ -364,7 +365,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 'O': return main.department_sum;
             case 'V': return -main.refunddepart_sum;
         }
-        return 0F;
+        return isRefund ? -main.refunddepart_sum : 0F;
     }
 
     private Long getT1P51() {
@@ -372,7 +373,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
             case 'O': return (long)  main.pass_qty;
             case 'V': return (long) -main.pass_qty;
         }
-        return 0L;
+        return isRefund ? -main.pass_qty : 0L;
     }
 
     private Character getT1P52() {
