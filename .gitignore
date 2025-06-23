@@ -1,4 +1,5 @@
 HELP.md
+out/*
 target/*
 !target/*.war
 !target/*.jar
