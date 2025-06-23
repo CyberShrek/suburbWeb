@@ -7,6 +7,8 @@ public class ServletInitializer extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        System.out.println("Running war...");
+        application.application().setAdditionalProfiles("war");
         return application.sources(SuburbsWebApplication.class);
     }
 }

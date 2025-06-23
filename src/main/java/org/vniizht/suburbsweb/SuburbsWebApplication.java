@@ -19,25 +19,14 @@ public class SuburbsWebApplication {
     public static void main(String[] args) throws Exception {
         SpringApplication app = new SpringApplication(SuburbsWebApplication.class);
 
-        // Активируем профиль "jar", если запущено из JAR
-        app.setAdditionalProfiles(isRunningFromJar() ? "jar" : "war");
+        System.out.println("Running jar...");
+        app.setAdditionalProfiles("jar");
 
         ConfigurableApplicationContext context = app.run(args);
 
         // Если запущено из JAR, выполняем базовую логику и завершаем
-        if (isRunningFromJar()) {
-            System.out.println("Запуск в консольном режиме...");
-            executeConsoleLogic(context, new HashSet<>(Arrays.asList(args)));
-            System.out.println("Завершение...");
-            SpringApplication.exit(context, () -> 0);
-        } else {
-            System.out.println("Запуск в веб-режиме...");
-        }
-    }
-
-    private static boolean isRunningFromJar() {
-        String classPath = System.getProperty("java.class.path");
-        return classPath.contains(".jar");
+        executeConsoleLogic(context, new HashSet<>(Arrays.asList(args)));
+        SpringApplication.exit(context, () -> 0);
     }
 
     private static void executeConsoleLogic(ConfigurableApplicationContext context, Set<String> args) throws Exception {

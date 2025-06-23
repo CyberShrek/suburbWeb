@@ -28,11 +28,11 @@ public class DataSourceConfig {
     private static final String primaryXmlDS = "NGDS";
     private static final String loggerXmlDS = "LogDS";
 
-//    @Bean
-//    @Profile("war")
-//    public DataSource dataSource() throws NamingException {
-//        return getJndiDataSource(primaryJndiDS);
-//    }
+    @Bean
+    @Profile("war")
+    public DataSource dataSource() throws NamingException {
+        return getJndiDataSource(primaryJndiDS);
+    }
 
     @Bean
     @Profile("jar")
@@ -46,11 +46,11 @@ public class DataSourceConfig {
         return new JdbcTemplate(primaryDataSource);
     }
 
-//    @Bean(name = "ngLoggerJdbcTemplate")
-//    @Profile("war")
-//    public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
-//        return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
-//    }
+    @Bean(name = "ngLoggerJdbcTemplate")
+    @Profile("war")
+    public JdbcTemplate ngLoggerJdbcTemplate() throws NamingException {
+        return new JdbcTemplate(getJndiDataSource(loggerJndiDS));
+    }
 
     @Bean(name = "ngLoggerJdbcTemplate")
     @Profile("jar")
@@ -102,11 +102,6 @@ public class DataSourceConfig {
         // Оптимизация для быстрого старта
         config.setPoolName("BatchPool");
         config.setRegisterMbeans(false);            // Отключаем JMX для краткоживущих приложений
-
-        // Настройки для высокопроизводительных операций
-        //        config.setAutoCommit(true);                 // Автоматическое управление транзакциями
-        //        config.setIsolateInternalQueries(true);     // Изолировать внутренние запросы пула
-        //        config.setAllowPoolSuspension(false);       // Не требуется для однопоточного доступа
 
         // Оптимизация под "burst" нагрузку
         config.setLeakDetectionThreshold(300_000);   // Детекция утечек после 300 сек

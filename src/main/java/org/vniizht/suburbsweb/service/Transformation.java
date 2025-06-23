@@ -20,6 +20,7 @@ import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -36,17 +37,19 @@ public class Transformation {
 
     @Autowired private NgLogger ngLogger;
 
+    private Log log;
+
     public synchronized void transform(TransformationOptions options) throws Exception {
 
         Date startTime = new Date();
-        Log log = new Log(ngLogger);
+        log = new Log(ngLogger);
         try {
             if(!options.pass && !options.prig) {
                 options.pass = true;
                 options.prig = true;
             }
             if(options.date == null) {
-                options.date = getRequestDate(log);
+                options.date = getRequestDate();
                 if(options.date == null) return;
             }
 
@@ -54,16 +57,19 @@ public class Transformation {
                     + Util.formatDate(options.date, "dd.MM.yyyy"));
             log.sumUp((options.prig ? " l2_prig" : "") + (options.pass ? " l2_pass" : ""));
 
-            log.addTimeLine("Получаю справочники...");
-            LogWS.spreadProgress(0);
-            handbook.loadCache();
-            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
-            LogWS.spreadProgress(0);
-            level3.deleteForDate(options.date);
-            log.sumUp();
-            if (options.prig) complete(transformPrigOrNull(options.date, log), log);
-            if (options.pass) complete(transformPassOrNull(options.date, log), log);
-            log.addTimeLine("Трансформация завершена успешно.");
+            calculatePortionSize(level2.findPrigRecord(options.date));
+//            calculatePortionSize(level2.findPassRecord(options.date));
+
+//            log.addTimeLine("Получаю справочники...");
+//            LogWS.spreadProgress(0);
+//            handbook.loadCache();
+//            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
+//            LogWS.spreadProgress(0);
+//            level3.deleteForDate(options.date);
+//            log.sumUp();
+//            if (options.prig) complete(transformPrigOrNull(options.date));
+//            if (options.pass) complete(transformPassOrNull(options.date));
+//            log.addTimeLine("Трансформация завершена успешно.");
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
             throw e;
@@ -75,27 +81,38 @@ public class Transformation {
         }
     }
 
-    private Level3Prig transformPrigOrNull(Date requestDate, Log log) throws Exception {
+    private int calculatePortionSize(Level2Dao.Record estimatedRecord) throws IOException {
+        log.addTimeLine("Вычисляю размер порции...");
+        long availableMemoryInMB = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+        log.addTimeLine("Доступная память: " + availableMemoryInMB + "MB");
+        long estimatedRecordSizeInB = Util.getObjectSizeInBytes(estimatedRecord);
+        log.addTimeLine("Расчетная размерность записи: " + estimatedRecordSizeInB + "B");
+        int portionSize = (int) (availableMemoryInMB / estimatedRecordSizeInB / 1024 / 2);
+        log.addTimeLine("Доступная память / расчетная размерность записи / 2 = размер порции = " + portionSize);
+        return portionSize;
+    }
+
+    private Level3Prig transformPrigOrNull(Date requestDate) throws Exception {
         Set<Level2Dao.PrigRecord> records = loadRecords(
-                () -> level2.findPrigRecords(requestDate), log, "l2_prig");
+                () -> level2.findPrigRecords(requestDate), "l2_prig");
 
         return records.isEmpty() ? null : (Level3Prig) transform(
                 () -> new Level3Prig(records, handbook, routes, trips, level3.getLatestT1P2() + 1),
-                log, "l2_prig"
+                "l2_prig"
         );
     }
 
-    private Level3Pass transformPassOrNull(Date requestDate, Log log) throws Exception {
+    private Level3Pass transformPassOrNull(Date requestDate) throws Exception {
         Set<Level2Dao.PassRecord> records = loadRecords(
-                () -> level2.findPassRecords(requestDate), log, "l2_pass");
+                () -> level2.findPassRecords(requestDate), "l2_pass");
 
         return records.isEmpty() ? null : (Level3Pass) transform(
                 () -> new Level3Pass(records, handbook, routes, level3.getLatestT1P2() + 1),
-                log, "l2_pass"
+                 "l2_pass"
         );
     }
 
-    private Set loadRecords(Callable<Set> loader, Log log, String name) throws Exception {
+    private Set loadRecords(Callable<Set> loader, String name) throws Exception {
         log.addTimeLine("Ищу записи " + name + "...");
         LogWS.spreadProgress(0);
         Set<Level2Dao.Record> records = loader.call();
@@ -104,7 +121,7 @@ public class Transformation {
         return records;
     }
 
-    private Level3 transform(Callable<Level3> loader, Log log, String name) {
+    private Level3 transform(Callable<Level3> loader, String name) {
         log.addTimeLine("Трансформирую записи " + name + "...");
         Level3 level3 = null;
         try {
@@ -117,7 +134,7 @@ public class Transformation {
         return level3;
     }
 
-    private Date getRequestDate(Log log) {
+    private Date getRequestDate() {
         log.addTimeLine("Определяю дату запроса...");
         LogWS.spreadProgress(0);
         Date requestDate = level3.getNextRequestDate();
@@ -127,8 +144,7 @@ public class Transformation {
         return requestDate;
     }
 
-    private void complete(Level3 nullableLevel3,
-                          Log log) {
+    private void complete(Level3 nullableLevel3) {
 
         if (nullableLevel3 == null) {
             log.sumUp("Нет данных для формирования ЦО-22.");
@@ -140,11 +156,10 @@ public class Transformation {
         log.sumUp("Сформировано записей ЦО-22:      " + co22Set.size(),
                 "Сформировано записей Льготников: " + nullableLevel3.getLgotResult().size());
 
-        update(co22Set, nullableLevel3.getLgotResult(), log);
+        update(co22Set, nullableLevel3.getLgotResult());
     }
 
-    private void update(Set<Level3.CO22> co22Set,
-                        Set<Lgot> lgotSet, Log log) {
+    private void update(Set<Level3.CO22> co22Set, Set<Lgot> lgotSet) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
             log.addTimeLine("Записываю T1...");
             level3.saveT1s(co22Set.stream().map(Level3.CO22::getT1).collect(Collectors.toSet()));

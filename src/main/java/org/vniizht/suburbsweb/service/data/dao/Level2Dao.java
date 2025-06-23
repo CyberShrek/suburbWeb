@@ -20,15 +20,13 @@ public class Level2Dao {
     public Set<PrigRecord> findPrigRecords(Date requestDate) {
         Map<Long, PrigRecord> collector = new LinkedHashMap<>();
         List<PrigMain> mainList = prigMainRepo.findAllByRequestDate(requestDate);
-//        List<PrigCost> costList = prigCostRepo.findAllByRequestDate(requestDate);
-
         mainList.forEach(main -> collector.put(main.idnum, new PrigRecord(main)));
-//        costList.forEach(cost -> {
-//            PrigRecord record = collector.get(cost.idnum);
-//            if (record != null)
-//                record.getCost().add(cost);
-//        });
         return new LinkedHashSet<>(collector.values());
+    }
+
+    public PrigRecord findPrigRecord(Date requestDate) {
+        Set<PrigRecord> records = findPrigRecords(requestDate);
+        return records.isEmpty() ? null : records.iterator().next();
     }
 
     public Set<PassRecord> findPassRecords(Date requestDate) {
@@ -36,6 +34,11 @@ public class Level2Dao {
         List<PassMain> mainList = passMainRepo.findAllByRequestDate(requestDate);
         mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));
         return new LinkedHashSet<>(collector.values());
+    }
+
+    public PassRecord findPassRecord(Date requestDate) {
+        Set<PassRecord> records = findPassRecords(requestDate);
+        return records.isEmpty() ? null : records.iterator().next();
     }
 
     @Getter

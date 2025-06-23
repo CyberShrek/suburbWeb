@@ -18,6 +18,8 @@ public interface PrigMainRepo extends Level2Repo<PrigMain, Long> {
     )
     List<PrigMain> findAllByRequestDate(Date date);
 
+    PrigMain findFirstByRequestDate(Date date);
+
     @Query("SELECT main FROM PrigMain main " +
             "LEFT OUTER JOIN FETCH main.adi adi " +
             "LEFT OUTER JOIN FETCH main.costs costs " +
