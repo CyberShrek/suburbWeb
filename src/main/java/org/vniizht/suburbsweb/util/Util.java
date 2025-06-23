@@ -1,8 +1,5 @@
 package org.vniizht.suburbsweb.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -64,13 +61,5 @@ public class Util {
         }
 
         return result;
-    }
-
-    public static long getObjectSizeInBytes(Object object) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(object);
-        oos.close();
-        return baos.size();
     }
 }

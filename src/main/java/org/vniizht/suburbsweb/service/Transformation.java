@@ -29,12 +29,14 @@ import java.util.stream.Collectors;
 @Scope("singleton")
 public class Transformation {
 
+
+
     @Autowired private Level2Dao level2;
     @Autowired private Level3Dao level3;
     @Autowired private Handbook  handbook;
     @Autowired private RoutesDao routes;
     @Autowired private TripsDao  trips;
-
+    private int estimatedRecordSizeInB = 100;
     @Autowired private NgLogger ngLogger;
 
     private Log log;
@@ -57,8 +59,7 @@ public class Transformation {
                     + Util.formatDate(options.date, "dd.MM.yyyy"));
             log.sumUp((options.prig ? " l2_prig" : "") + (options.pass ? " l2_pass" : ""));
 
-            calculatePortionSize(level2.findPrigRecord(options.date));
-//            calculatePortionSize(level2.findPassRecord(options.date));
+            calculatePortionSize();
 
 //            log.addTimeLine("Получаю справочники...");
 //            LogWS.spreadProgress(0);
@@ -81,14 +82,11 @@ public class Transformation {
         }
     }
 
-    private int calculatePortionSize(Level2Dao.Record estimatedRecord) throws IOException {
-        log.addTimeLine("Вычисляю размер порции...");
+    private int calculatePortionSize() {
         long availableMemoryInMB = Runtime.getRuntime().maxMemory() / 1024 / 1024;
-        log.addTimeLine("Доступная память: " + availableMemoryInMB + "MB");
-        long estimatedRecordSizeInB = Util.getObjectSizeInBytes(estimatedRecord);
-        log.addTimeLine("Расчетная размерность записи: " + estimatedRecordSizeInB + "B");
-        int portionSize = (int) (availableMemoryInMB / estimatedRecordSizeInB / 1024 / 2);
-        log.addTimeLine("Доступная память / расчетная размерность записи / 2 = размер порции = " + portionSize);
+        int portionSize = (int) (availableMemoryInMB * 1024 / estimatedRecordSizeInB);
+        log.addTimeLine("Расчетный размер порции = " + portionSize);
+        log.addTimeLine("KB: " + (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024);
         return portionSize;
     }
 

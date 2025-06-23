@@ -10,18 +10,19 @@ import java.util.List;
 @Repository
 public interface PassMainRepo extends Level2Repo<PassMain, Long> {
 
+    @Query("SELECT main.idnum FROM PassMain main WHERE main.requestDate = ?1")
+    List<Long> findIdnumByRequestDate(Date date);
+
     @Query(value = "SELECT pm.* FROM zzz_rawdl2.l2_pass_main pm " +
             "LEFT JOIN zzz_rawdl2.l2_pass_ex ex      ON pm.idnum = ex.idnum " +
             "LEFT JOIN zzz_rawdl2.l2_pass_cost costs ON pm.id = costs.idnum " +
-            "WHERE pm.request_date = ?1 " +
+            "WHERE pm.request_date = ?1 AND pm.idnum IN ?2 " +
             "AND pm.f_r10af3[8] = true", nativeQuery = true)
 //    @Query(value = "SELECT pm.* FROM rawdl2.l2_pass_main pm " +
 //            "LEFT JOIN rawdl2.l2_pass_ex ex      ON pm.idnum = ex.idnum " +
 //            "LEFT JOIN rawdl2.l2_pass_cost costs ON pm.id = costs.idnum " +
-//            "WHERE pm.request_date = ?1 " +
+//            "WHERE pm.request_date = ?1 AND pm.idnum IN ?2 " +
 //            "AND pm.f_r10af3[8] = true", nativeQuery = true)
 
-    List<PassMain> findAllByRequestDate(Date date);
-
-    PassMain findFirstByRequestDate(Date date);
+    List<PassMain> findAllByRequestDateAndIdnumIn(Date date, List<Long> ids);
 }
