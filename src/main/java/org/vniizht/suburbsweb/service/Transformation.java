@@ -20,26 +20,27 @@ import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @Scope("singleton")
 public class Transformation {
 
-
+    private static int ESTIMATED_RECORD_SIZE_IN_B = 64;
 
     @Autowired private Level2Dao level2;
     @Autowired private Level3Dao level3;
     @Autowired private Handbook  handbook;
     @Autowired private RoutesDao routes;
     @Autowired private TripsDao  trips;
-    private int estimatedRecordSizeInB = 100;
+
     @Autowired private NgLogger ngLogger;
 
     private Log log;
+    private int pageSize;
 
     public synchronized void transform(TransformationOptions options) throws Exception {
 
@@ -59,18 +60,19 @@ public class Transformation {
                     + Util.formatDate(options.date, "dd.MM.yyyy"));
             log.sumUp((options.prig ? " l2_prig" : "") + (options.pass ? " l2_pass" : ""));
 
-            calculatePortionSize();
+            log.addTimeLine("Получаю справочники...");
+            LogWS.spreadProgress(0);
+            handbook.loadCache();
 
-//            log.addTimeLine("Получаю справочники...");
-//            LogWS.spreadProgress(0);
-//            handbook.loadCache();
-//            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
-//            LogWS.spreadProgress(0);
-//            level3.deleteForDate(options.date);
-//            log.sumUp();
-//            if (options.prig) complete(transformPrigOrNull(options.date));
-//            if (options.pass) complete(transformPassOrNull(options.date));
-//            log.addTimeLine("Трансформация завершена успешно.");
+            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
+            LogWS.spreadProgress(0);
+            level3.deleteForDate(options.date);
+            log.sumUp();
+
+            pageSize = calculatePageSize();
+            if (options.prig) complete(transformPrigOrNull(options.date));
+            if (options.pass) complete(transformPassOrNull(options.date));
+            log.addTimeLine("Трансформация завершена успешно.");
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
             throw e;
@@ -82,51 +84,59 @@ public class Transformation {
         }
     }
 
-    private int calculatePortionSize() {
+    private int calculatePageSize() {
         long availableMemoryInMB = Runtime.getRuntime().maxMemory() / 1024 / 1024;
-        int portionSize = (int) (availableMemoryInMB * 1024 / estimatedRecordSizeInB);
-        log.addTimeLine("Расчетный размер порции = " + portionSize);
+        int portionSize = (int) (availableMemoryInMB * 1024 / ESTIMATED_RECORD_SIZE_IN_B);
+        log.addTimeLine("Расчётный размер порции = " + portionSize);
         log.addTimeLine("KB: " + (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024);
         return portionSize;
     }
 
     private Level3Prig transformPrigOrNull(Date requestDate) throws Exception {
-        Set<Level2Dao.PrigRecord> records = loadRecords(
-                () -> level2.findPrigRecords(requestDate), "l2_prig");
 
-        return records.isEmpty() ? null : (Level3Prig) transform(
-                () -> new Level3Prig(records, handbook, routes, trips, level3.getLatestT1P2() + 1),
+        List<Long> idnums = level2.findPrigIdnumsByRequestDate(requestDate);
+
+        return idnums.isEmpty() ? null : (Level3Prig) transform(
+                new Level3Prig(handbook, routes, trips, level3.getLatestT1P2() + 1),
+                idnums,
+                (List<Long> currentIdnums) -> level2.findPrigRecordsByIdnums(requestDate, currentIdnums),
                 "l2_prig"
         );
     }
 
     private Level3Pass transformPassOrNull(Date requestDate) throws Exception {
-        Set<Level2Dao.PassRecord> records = loadRecords(
-                () -> level2.findPassRecords(requestDate), "l2_pass");
+        List<Long> idnums = level2.findPassIdnumsByRequestDate(requestDate);
 
-        return records.isEmpty() ? null : (Level3Pass) transform(
-                () -> new Level3Pass(records, handbook, routes, level3.getLatestT1P2() + 1),
+        return idnums.isEmpty() ? null : (Level3Pass) transform(
+                new Level3Pass(handbook, routes, level3.getLatestT1P2() + 1),
+                idnums,
+                 (List<Long> currentIdnums) -> level2.findPassRecordsByIdnums(requestDate, currentIdnums),
                  "l2_pass"
         );
     }
 
-    private Set loadRecords(Callable<Set> loader, String name) throws Exception {
-        log.addTimeLine("Ищу записи " + name + "...");
-        LogWS.spreadProgress(0);
-        Set<Level2Dao.Record> records = loader.call();
-        log.addTimeLine("Записи " + name + " успешно получены. Количество " + name + "_main: " + records.size());
+    private Level3 transform(Level3 level3,
+                             List<Long> idnums,
+                             Function<List<Long>, Set<Level2Dao.Record>> recordsLoader,
+                             String name) {
+        log.addTimeLine("Найдено записей " + name + ": " + idnums.size());
 
-        return records;
-    }
+        List<List<Long>> pagedIdnums = Util.splitList(idnums, pageSize);
+        log.addTimeLine("Порций: " + pagedIdnums.size());
 
-    private Level3 transform(Callable<Level3> loader, String name) {
-        log.addTimeLine("Трансформирую записи " + name + "...");
-        Level3 level3 = null;
-        try {
-            level3 = loader.call();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        for (int i = 0; i < pagedIdnums.size(); i++) {
+            LogWS.spreadProgress(0);
+            List<Long> currentIdnums = pagedIdnums.get(i);
+            log.addTimeLine("Порция №" + (i + 1) + ": загружаю " + currentIdnums.size() + " записей...");
+            Set<Level2Dao.Record> records = recordsLoader.apply(currentIdnums);
+
+            log.addTimeLine("Порция №" + (i + 1) + ": трансформирую...");
+            level3.transform(records);
+
+            log.addTimeLine("Порция №" + (i + 1) + ": успешно");
         }
+        level3.finish();
+
         log.addTimeLine("Записи " + name + " успешно трансформированы.");
 
         return level3;

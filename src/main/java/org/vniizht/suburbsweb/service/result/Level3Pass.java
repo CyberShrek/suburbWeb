@@ -22,12 +22,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private Date           operationDate;
     private Character      noUse = '0';
     
-    public Level3Pass(Set<Level2Dao.PassRecord> records,
-                      Handbook handbook,
+    public Level3Pass(Handbook handbook,
                       RoutesDao routes,
                       Long initialT1Serial) {
-        super(records, handbook, routes, initialT1Serial);
-        transform();
+        super(handbook, routes, initialT1Serial);
     }
 
     @Override

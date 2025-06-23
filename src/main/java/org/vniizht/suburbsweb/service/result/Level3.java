@@ -47,31 +47,32 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
     abstract protected double getRegionIncomePerKm(String region);
     abstract protected double getRegionOutcomePerKm(String region);
 
-    protected final Set<L2_RECORD> records;
     protected final Handbook handbook;
     protected final RoutesDao routesDao;
     private Long t1Serial;
 
     protected Level3(
-            Set<L2_RECORD> records,
             Handbook handbook,
             RoutesDao routesDao,
             Long initialT1Serial) {
-        this.records   = records;
         this.handbook  = handbook;
         this.routesDao = routesDao;
         this.t1Serial  = initialT1Serial;
     }
 
-    protected void transform() {
+    public void transform(Set<L2_RECORD> records) {
         int progress = 0;
         for (L2_RECORD record : records) {
             transformRecord(record);
             progress++;
             LogWS.spreadProgress((int) ((float) progress / records.size() * 100));
         }
+    }
+
+    public void finish() {
         arrangeResult();
         roundTimes();
+        LogWS.spreadProgress(100);
     }
 
     private void transformRecord(L2_RECORD record) {

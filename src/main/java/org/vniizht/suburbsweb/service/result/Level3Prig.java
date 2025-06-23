@@ -27,14 +27,12 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     private boolean isAbonement;
     private Boolean        isRefund;
 
-    public Level3Prig(Set<Level2Dao.PrigRecord> records,
-                      Handbook handbook,
+    public Level3Prig(Handbook handbook,
                       RoutesDao routes,
                       TripsDao trips,
                       Long initialT1Serial) {
-        super(records, handbook, routes, initialT1Serial);
+        super(handbook, routes, initialT1Serial);
         this.trips = trips;
-        transform();
     }
 
     @Override

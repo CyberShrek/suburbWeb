@@ -4,13 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.level2.*;
 import org.vniizht.suburbsweb.service.data.repository.level2.*;
 
-import java.awt.print.Pageable;
 import java.util.*;
 
 @Service
@@ -27,14 +24,14 @@ public class Level2Dao {
         return passMainRepo.findIdnumByRequestDate(requestDate);
     }
 
-    public Set<PrigRecord> findPrigRecordsByIds(Date requestDate, List<Long> ids) {
+    public Set<Record> findPrigRecordsByIdnums(Date requestDate, List<Long> ids) {
         Map<Long, PrigRecord> collector = new LinkedHashMap<>();
         List<PrigMain> mainList = prigMainRepo.findAllByRequestDateAndIdnumIn(requestDate, ids);
         mainList.forEach(main -> collector.put(main.idnum, new PrigRecord(main)));
         return new LinkedHashSet<>(collector.values());
     }
 
-    public Set<PassRecord> findPassRecordsByIds(Date requestDate, List<Long> ids) {
+    public Set<Record> findPassRecordsByIdnums(Date requestDate, List<Long> ids) {
         Map<Long, PassRecord> collector = new LinkedHashMap<>();
         List<PassMain> mainList = passMainRepo.findAllByRequestDateAndIdnumIn(requestDate, ids);
         mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));

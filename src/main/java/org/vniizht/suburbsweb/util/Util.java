@@ -1,8 +1,10 @@
 package org.vniizht.suburbsweb.util;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class Util {
 
@@ -61,5 +63,16 @@ public class Util {
         }
 
         return result;
+    }
+
+    public static List<List<Long>> splitList(List<Long> prigIdnumsByRequestDate, int portionSize) {
+        int portionCount = (int) Math.ceil(prigIdnumsByRequestDate.size() / (double) portionSize);
+        List<List<Long>> portions = new ArrayList<>(portionCount);
+        for (int i = 0; i < portionCount; i++) {
+            int start = i * portionSize;
+            int end = Math.min((i + 1) * portionSize, prigIdnumsByRequestDate.size());
+            portions.add(prigIdnumsByRequestDate.subList(start, end));
+        }
+        return portions;
     }
 }
