@@ -21,7 +21,6 @@ import org.vniizht.suburbsweb.util.Util;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 @Scope("singleton")
 public class Transformation {
 
-    private static int ESTIMATED_RECORD_SIZE_IN_B = 64;
+    private static int PORTION_SIZE = 50000;
 
     @Autowired private Level2Dao level2;
     @Autowired private Level3Dao level3;
@@ -70,9 +69,15 @@ public class Transformation {
             log.sumUp();
 
             pageSize = calculatePageSize();
-            if (options.prig) complete(transformPrigOrNull(options.date));
-            if (options.pass) complete(transformPassOrNull(options.date));
-            log.addTimeLine("Трансформация завершена успешно.");
+            if (options.prig) {
+                log.addTimeLine("Выполняю трансформацию l2_prig...");
+                complete(transformPrigOrNull(options.date));
+            }
+            if (options.pass) {
+                log.addTimeLine("Выполняю трансформацию l2_pass...");
+                complete(transformPassOrNull(options.date));
+            }
+            log.addTimeLine("Конец выполнения.");
         } catch (Exception e) {
             log.error(e.getLocalizedMessage());
             throw e;
@@ -85,14 +90,14 @@ public class Transformation {
     }
 
     private int calculatePageSize() {
-        long availableMemoryInMB = Runtime.getRuntime().maxMemory() / 1024 / 1024;
-        int portionSize = (int) (availableMemoryInMB * 1024 / ESTIMATED_RECORD_SIZE_IN_B);
-        log.addTimeLine("Расчётный размер порции = " + portionSize);
-        log.addTimeLine("KB: " + (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024);
-        return portionSize;
+//        long availableMemoryInMB = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+//        log.addTimeLine("Доступный объём памяти: " + availableMemoryInMB + " Мб");
+//        int portionSize = (int) (availableMemoryInMB * 1024 / ESTIMATED_RECORD_SIZE_IN_B);
+        log.addTimeLine("Расчётный размер порции: " + PORTION_SIZE);
+        return PORTION_SIZE;
     }
 
-    private Level3Prig transformPrigOrNull(Date requestDate) throws Exception {
+    private Level3Prig transformPrigOrNull(Date requestDate) {
 
         List<Long> idnums = level2.findPrigIdnumsByRequestDate(requestDate);
 
@@ -104,7 +109,7 @@ public class Transformation {
         );
     }
 
-    private Level3Pass transformPassOrNull(Date requestDate) throws Exception {
+    private Level3Pass transformPassOrNull(Date requestDate) {
         List<Long> idnums = level2.findPassIdnumsByRequestDate(requestDate);
 
         return idnums.isEmpty() ? null : (Level3Pass) transform(
@@ -127,13 +132,11 @@ public class Transformation {
         for (int i = 0; i < pagedIdnums.size(); i++) {
             LogWS.spreadProgress(0);
             List<Long> currentIdnums = pagedIdnums.get(i);
-            log.addTimeLine("Порция №" + (i + 1) + ": загружаю " + currentIdnums.size() + " записей...");
+            log.addTimeLine("Порция №" + (i + 1) + ": загружаю записи (" + currentIdnums.size() + ")...");
             Set<Level2Dao.Record> records = recordsLoader.apply(currentIdnums);
 
             log.addTimeLine("Порция №" + (i + 1) + ": трансформирую...");
             level3.transform(records);
-
-            log.addTimeLine("Порция №" + (i + 1) + ": успешно");
         }
         level3.finish();
 
@@ -169,30 +172,46 @@ public class Transformation {
 
     private void update(Set<Level3.CO22> co22Set, Set<Lgot> lgotSet) {
         log.sumUp("\tЗатрачено времени на перезапись: " + Util.measureTime(() -> {
-            log.addTimeLine("Записываю T1...");
-            level3.saveT1s(co22Set.stream().map(Level3.CO22::getT1).collect(Collectors.toSet()));
-            log.addTimeLine("Записываю T2...");
+
+            Set<T1> t1Set = co22Set.stream().map(Level3.CO22::getT1).collect(Collectors.toSet());
+            if (!t1Set.isEmpty()) {
+                log.addTimeLine("Записываю T1 (" + t1Set.size() + ")...");
+                level3.saveT1s(t1Set);
+            }
             Set<T2> t2Set = new HashSet<>();
             co22Set.forEach(co22 -> t2Set.addAll(co22.getT2()));
-            level3.saveT2s(t2Set);
-            log.addTimeLine("Записываю T3...");
+            if (!t2Set.isEmpty()) {
+                log.addTimeLine("Записываю T2 (" + t2Set.size() + ")...");
+                level3.saveT2s(t2Set);
+            }
             Set<T3> t3Set = new HashSet<>();
             co22Set.forEach(co22 -> t3Set.addAll(co22.getT3()));
-            level3.saveT3s(t3Set);
-            log.addTimeLine("Записываю T4...");
+            if (!t3Set.isEmpty()) {
+                log.addTimeLine("Записываю T3 (" + t3Set.size() + ")...");
+                level3.saveT3s(t3Set);
+            }
             Set<T4> t4Set = new HashSet<>();
             co22Set.forEach(co22 -> t4Set.addAll(co22.getT4()));
-            level3.saveT4s(t4Set);
-            log.addTimeLine("Записываю T6...");
+            if (!t4Set.isEmpty()) {
+                log.addTimeLine("Записываю T4 (" + t4Set.size() + ")...");
+                level3.saveT4s(t4Set);
+            }
             Set<T6> t6Set = new HashSet<>();
             co22Set.forEach(co22 -> t6Set.addAll(co22.getT6()));
-            level3.saveT6s(t6Set);
-            log.addTimeLine("Записываю метаданные ЦО-22...");
+            if (!t6Set.isEmpty()) {
+                log.addTimeLine("Записываю T6 (" + t6Set.size() + ")...");
+                level3.saveT6s(t6Set);
+            }
             Set<CO22Meta> co22MetaSet = new HashSet<>();
             co22Set.forEach(co22 -> co22MetaSet.addAll(co22.getMetas()));
-            level3.saveCO22Metas(co22MetaSet);
-            log.addTimeLine("Записываю льготников...");
-            level3.saveLgots(lgotSet);
+            if (!co22MetaSet.isEmpty()) {
+                log.addTimeLine("Записываю метаданные ЦО-22 (" + co22MetaSet.size() + ")...");
+                level3.saveCO22Metas(co22MetaSet);
+            }
+            if (!lgotSet.isEmpty()) {
+                log.addTimeLine("Записываю льготников (" + lgotSet.size() + ")...");
+                level3.saveLgots(lgotSet);
+            }
         }) + "c");
     }
 

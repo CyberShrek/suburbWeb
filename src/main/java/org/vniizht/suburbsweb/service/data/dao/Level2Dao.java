@@ -34,7 +34,7 @@ public class Level2Dao {
     public Set<Record> findPassRecordsByIdnums(Date requestDate, List<Long> ids) {
         Map<Long, PassRecord> collector = new LinkedHashMap<>();
         List<PassMain> mainList = passMainRepo.findAllByRequestDateAndIdnumIn(requestDate, ids);
-        mainList.forEach(passMain -> collector.put(passMain.idnum, new PassRecord(passMain)));
+        mainList.forEach(main -> collector.put(main.idnum, new PassRecord(main)));
         return new LinkedHashSet<>(collector.values());
     }
 

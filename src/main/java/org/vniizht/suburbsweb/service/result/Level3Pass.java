@@ -25,6 +25,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     public Level3Pass(Handbook handbook,
                       RoutesDao routes,
                       Long initialT1Serial) {
+
         super(handbook, routes, initialT1Serial);
     }
 
