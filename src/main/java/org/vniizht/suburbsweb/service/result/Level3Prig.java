@@ -269,8 +269,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 incomeSum += cost.tariff_sum;
             }
         }
-        incomeSum = incomeSum == 0 ? main.tariff_sum : incomeSum;
-        return distance == 0 ? 0 : (double) incomeSum / distance;
+        return incomeSum == 0 && distance != 0 ?
+                (double) main.tariff_sum / distance
+                : incomeSum;
     }
 
     @Override
@@ -283,8 +284,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                 outcomeSum += cost.department_sum;
             }
         }
-        outcomeSum = outcomeSum == 0 ? main.department_sum : outcomeSum;
-        return distance == 0 ? 0 : (double) outcomeSum / distance;
+        return outcomeSum == 0 && distance != 0 ?
+                (double) main.department_sum / distance
+                : outcomeSum;
     }
 
     private String getT1P12() {
