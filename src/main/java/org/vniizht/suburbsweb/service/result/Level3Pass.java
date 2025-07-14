@@ -92,16 +92,21 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p52('1')
                         .p53(String.valueOf(main.agent_code))
                         .p54(main.arrival_station)
+                        .p55('0')
                         .p56("000")
+                        .p57('0')
                         .p58(getT1P58())
                         .p59(getT1P59())
                         .p60(String.valueOf(main.subagent_code))
+                        .p61('0')
+                        .p62((short) 0)
+                        .p63('0')
                         .build()
                 )
                 .p33(noUse == '2' && (main.oper_g == 'N' || main.oper == 'O') ? Long.valueOf(main.persons_qty) : Long.valueOf(main.seats_qty))
                 .p34(0F)
                 .p35(0F)
-                .p36((float) costList.stream().mapToDouble(costListItem -> costListItem.sum_nde).sum())
+                .p36((getLgotP28()))
                 .p37(0F)
                 .p38(0F)
                 .p39(getT1P39())
@@ -133,15 +138,18 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p5(getLgotP5())
                                 .p6('1')
                                 .p7(getT1P24())
-                                .p8(String.valueOf(main.carrier_code))
+                                .p8(Util.addLeadingZeros(String.valueOf(main.carrier_code), 4))
                                 .p9(handbook.getOkatoByRegion(main.benefitcnt_code, operationDate))
                                 .p10(ex != null && ex.lgot_info != null ? ex.nomlgud : null)
                                 .p11(getLgotP11())
                                 .p12(getLgotP12())
                                 .p13(getLgotP13())
                                 .p14(getLgotP14())
-                                .p16((byte) (main.oper_g == 'G' ? -1 : (main.oper == 'V' ? 0 : 1)))
+                                .p16((short) (main.oper_g == 'G' ? -1 : (main.oper == 'V' ? 0 : 1)))
                                 .p17(main.trip_direction == '3')
+                                .p18((byte) 0)
+                                .p20(' ')
+                                .p21((short) 0)
                                 .p22(operationDate)
                                 .p23(main.departure_date)
                                 .p24(ex == null ? null : ex.ticket_ser.substring(0, 2) + ex.ticket_num)
@@ -152,9 +160,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p34(main.sale_station)
                                 .p35(main.agent_code == null ? null : String.valueOf(main.agent_code))
                                 .build())
-                .p19(main.seats_qty)
-                .p27(costList == null ? 0 : (costList.stream().mapToDouble(cost -> cost.sum_te).sum() * 10))
+                .p19((short) 0)
+                .p27(getLgotP27())
                 .p28(getLgotP28())
+                .p33((short) 0)
                 .build();
     }
 
@@ -211,7 +220,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         return Objects.requireNonNull(f_tick).length > 2 && f_tick[2] ? '2'                                        // Детский
                 : !main.benefit_code.equals("000") || f_tick.length > 4 && f_tick[4] ? '3'  // Льготный
                 :  f_tick.length > 1 && f_tick[1] ? '1'                                     // Полный
-                : '4' ;
+                : '0' ;
     }
 
     private String getT1P24() {
@@ -219,7 +228,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 ? "21" + String.format("%02d", main.military_code)
                 : ex != null && ex.lgot_info != null && ex.lgot_info.length() > 4 && !main.benefit_code.equals("000") && !main.benefit_code.equals("013")
                 ? ex.lgot_info.substring(0, 4)
-                : null;
+                : "0000";
     }
 
     private Character getT1P25() {
@@ -351,7 +360,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private Character getLgotP13() {
         return ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") && ex.lgot_info.length() >= 5
                 ? ex.lgot_info.charAt(5)
-                : null;
+                : '0';
     }
 
     private String getLgotP14() {
@@ -366,18 +375,41 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 + (patronymic.isEmpty() ? "" : patronymic.charAt(0));
     }
 
-    private Double getLgotP28() {
+    private Float getLgotP27() {
         return costList == null ? 0 :
-                 (costList.stream().mapToDouble(
+                (float) (costList.stream().mapToDouble(
                         cost -> {
                             switch (cost.sum_code) {
-                                case 101: case 102: case 116:
+                                case 101:
+                                case 102:
+                                case 116:
                                     switch (main.paymenttype) {
-                                        case '1': case '6': case '8':
+                                        case '9':
+                                        case 'В':
+                                        case 'B':
                                             return cost.sum_nde;
-                                }
+                                    }
                             }
                             return 0;
-                        }).sum() * 10);
+                        }).sum());
+    }
+
+    private Float getLgotP28() {
+        return costList == null ? 0 :
+                (float) (costList.stream().mapToDouble(
+                        cost -> {
+                            switch (cost.sum_code) {
+                                case 101:
+                                case 102:
+                                case 116:
+                                    switch (main.paymenttype) {
+                                        case '1':
+                                        case '6':
+                                        case '8':
+                                            return cost.sum_nde;
+                                    }
+                            }
+                            return 0;
+                        }).sum());
     }
 }

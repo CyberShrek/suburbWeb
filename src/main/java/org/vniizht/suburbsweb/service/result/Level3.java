@@ -123,9 +123,13 @@ abstract public class Level3 <L2_RECORD extends Level2Dao.Record> {
             this.t1 = t1;
             routeGroup.getDepartmentRoutes().forEach(route  -> t2.add(new T2(requestDate, route)));
             routeGroup.getRegionRoutes().forEach(route      -> t3.add(new T3(requestDate, route)));
-            routeGroup.getFollowRoutes().forEach(route      -> t4.add(new T4(requestDate, route,
-                    (long) getRegionIncomePerKm(route.getRegion()),
-                    (long) getRegionOutcomePerKm(route.getRegion()))));
+            routeGroup.getFollowRoutes().forEach(route      -> {
+                T4 t4 = new T4(requestDate, route,
+                        (long) getRegionIncomePerKm(route.getRegion()),
+                        (long) getRegionOutcomePerKm(route.getRegion()));
+                if (t4.getP7() != 0 || t4.getP8() != 0)
+                    this.t4.add(t4);
+            });
             routeGroup.getDcsRoutes().forEach(route         -> t6.add(new T6(requestDate, route)));
             metas.add(getMeta());
         }

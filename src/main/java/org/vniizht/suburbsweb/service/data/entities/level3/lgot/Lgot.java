@@ -24,8 +24,8 @@ public class Lgot {
     @EmbeddedId
     private Key         key;
     private Short       p19;
-    private Double      p27;
-    private Double      p28;
+    private Float       p27;
+    private Float       p28;
     private Short       p33;
 
     @Embeddable
@@ -52,7 +52,7 @@ public class Lgot {
         private Character   p13;
         private String      p14;
         private String      p15;
-        private Byte        p16;
+        private Short       p16;
         private Boolean     p17;
         private Byte        p18;
 
