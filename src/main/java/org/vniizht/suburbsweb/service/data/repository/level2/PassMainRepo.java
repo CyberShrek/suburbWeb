@@ -13,6 +13,9 @@ public interface PassMainRepo extends Level2Repo<PassMain, Long> {
     @Query(value = "SELECT main.idnum FROM zzz_rawdl2.l2_pass_main main " +
             "WHERE main.request_date = ?1 " +
             "AND main.f_r10af3[8] = true", nativeQuery = true)
+//    @Query(value = "SELECT main.idnum FROM rawdl2.l2_pass_main main " +
+//            "WHERE main.request_date = ?1 " +
+//            "AND main.f_r10af3[8] = true", nativeQuery = true)
     List<Long> findIdnumByRequestDate(Date date);
 
     @Query(value = "SELECT main.* FROM zzz_rawdl2.l2_pass_main main " +

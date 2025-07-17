@@ -27,14 +27,16 @@ public class TripsDao {
                         startDate),
                 main.operation_date,
                 startDate,
-                main.ticket_enddate
+                main.ticket_enddate,
+                isRefund
         );
     }
 
     public Map<String, Integer> calculateTripsPerMonth(SeasonTrip seasonTrip,
                                                         Date saleDate,
                                                         Date begDate,
-                                                        Date endDate) {
+                                                        Date endDate,
+                                                       boolean isRefund) {
 
         Map<String, Integer> totalTripsPerMonth = new LinkedHashMap<>();
         calculateDaysWithTripsPerMonth(saleDate, begDate, endDate)
@@ -46,7 +48,7 @@ public class TripsDao {
                     if(trips == 0 && Util.formatDate(begDate, "yyyyMM").equals(yyyymm))
                         trips = 1;
 
-                    totalTripsPerMonth.put(yyyymm, trips);
+                    totalTripsPerMonth.put(yyyymm, trips * (isRefund ? -1 : 1));
                 });
 
         return totalTripsPerMonth;
@@ -108,7 +110,8 @@ public class TripsDao {
                 ),
                 new Date(2024 - 1900, Calendar.OCTOBER, 29),
                 new Date(2024 - 1900, Calendar.OCTOBER, 29),
-                new Date(2024 - 1900, Calendar.NOVEMBER, 27))
+                new Date(2024 - 1900, Calendar.NOVEMBER, 27),
+                false)
                 .forEach((k, v) -> System.out.println(k + " " + v));
     }
 }

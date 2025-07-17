@@ -91,7 +91,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p21(getT1P21())
                         .p22(getT1P22())
                         .p23('3')
-                        .p24(fullBenefit)
+                        .p24(Optional.ofNullable(fullBenefit).orElse("0000"))
                         .p25(getT1P25())
                         .p26(handbook.getGvc(main.benefitgroup_code, main.benefit_code, main.operation_date))
                         .p30(handbook.getOkatoByStation(main.arrival_station, main.operation_date))
@@ -160,11 +160,11 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p13(main.benefitgroup_code.equals("22") && adi != null ? adi.employee_cat : '0')
                         .p14(getLgotP14())
                         .p15(getLgotP15())
-                        .p16(single_qty)
+                        .p16(getLgotP16())
                         .p17(main.flg_2wayticket == '1')
                         .p18(abonem_qty)
                         .p20(getLgotP20())
-                        .p21(getLgotP20() != '9' && single_qty != 0 ? main.seatstick_limit : 0)
+                        .p21(getLgotP20() != '9' && abonem_qty != 0 ? main.seatstick_limit : 0)
                         .p22(main.operation_date)
                         .p23(main.ticket_begdate)
                         .p24(main.ticket_ser + Util.addLeadingZeros(String.valueOf(main.ticket_num), 6))
@@ -178,8 +178,8 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .build()
                 )
                 .p19(getLgotP20() == '9' ? main.seatstick_limit : 0)
-                .p27(Math.ceil((double) main.department_sum * 100) / 100)
-                .p28(Math.ceil((double) main.total_sum * 100) / 100)
+                .p27(getLgotP27())
+                .p28(getLgotP28())
                 .p33(main.carryon_weight)
                 .build();
     }
@@ -323,14 +323,13 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private Character getT1P22() {
-        return    main.flg_bsp   == '1' ? '4'            // Бесплатный
-                : main.flg_child == '1' ? '2'            // Детский
+        return    main.flg_child == '1' ? '2'            // Детский
                 : main.benefit_code.equals("00") ? '1'   // Полный
                 : '3' ;
     }
 
     private Character getT1P25() {
-        if(getTSite(main)
+        if(getTSite()
                 .equals("09") && handbook.getPlagnVr(main.payagent_id, main.departure_station, main.operation_date)
                 .equals("6 "))
             return '4'; // Электронный кошелёк
@@ -377,7 +376,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private Character getT1P52() {
-        String tSite = getTSite(main);
+        String tSite = getTSite();
         if(tSite.equals("  ")) {
             if(main.request_type == 64)
                 return '1';
@@ -484,7 +483,19 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         return surname + (initials == null ? "" : " " + initials);
     }
 
+    private short getLgotP16() {
+        if (main.abonement_type.charAt(0) == '0'){
+            if (main.oper_g == 'N') switch (main.oper) {
+                case 'O': return main.pass_qty;
+                case 'V': return (short) -main.pass_qty;
+            }
+        }
+        return 0;
+    }
+
     private Character getLgotP20() {
+        if (!isAbonement)
+            return ' ';
         switch (main.abonement_type.trim()) {
             case "1": return '9';
             case "2": return '7';
@@ -496,7 +507,25 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
     }
 
-    private String getTSite(PrigMain main) {
+    private Float getLgotP27() {
+        float sum = 0;
+        if (main.oper_g == 'N') switch (main.oper) {
+            case 'O': sum = main.department_sum; break;
+            case 'V': sum = main.refunddepart_sum;
+        }
+        return (float) (Math.ceil((double) sum * 100) / 100);
+    }
+
+    private Float getLgotP28() {
+        float sum = 0;
+        if (main.oper_g == 'N') switch (main.oper) {
+            case 'O': sum = main.total_sum; break;
+            case 'V': sum = main.refund_sum;
+        }
+        return (float) (Math.ceil((double) sum * 100) / 100);
+    }
+
+    private String getTSite() {
         return handbook.getTSite(
                 main.web_id,
                 main.sale_station.substring(0, 2),

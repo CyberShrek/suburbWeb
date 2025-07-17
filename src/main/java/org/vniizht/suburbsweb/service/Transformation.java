@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Scope("singleton")
 public class Transformation {
 
-    private static int PORTION_SIZE = 50000;
+    private static int PORTION_SIZE = 25000;
 
     @Autowired private Level2Dao level2;
     @Autowired private Level3Dao level3;
