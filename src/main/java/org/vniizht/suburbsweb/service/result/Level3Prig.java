@@ -14,6 +14,8 @@ import org.vniizht.suburbsweb.service.data.dao.TripsDao;
 import org.vniizht.suburbsweb.util.Util;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
@@ -261,32 +263,37 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected double getRegionIncomePerKm(String region) {
-        int distance = 0;
-        float incomeSum = 0;
-        for (PrigCost cost : costList) {
-            if (cost.region_code.equals(region)) {
-                distance += cost.route_distance;
-                incomeSum += cost.tariff_sum;
-            }
-        }
-        return incomeSum == 0 && distance != 0 ?
-                (double) main.tariff_sum / distance
-                : incomeSum;
+        return calculateRegionSumPerKm(
+                region,
+                cost -> cost.tariff_sum, main.tariff_sum
+        );
     }
 
     @Override
     protected double getRegionOutcomePerKm(String region) {
+        return calculateRegionSumPerKm(
+                region,
+                cost -> cost.department_sum, main.department_sum
+        );
+    }
+
+    private double calculateRegionSumPerKm(
+            String region,
+            Function<PrigCost, Long> costSumExtractor,
+            Float mainSum
+    ) {
         int distance = 0;
-        float outcomeSum = 0;
+        float costSum = 0;
         for (PrigCost cost : costList) {
             if (cost.region_code.equals(region)) {
                 distance += cost.route_distance;
-                outcomeSum += cost.department_sum;
+                costSum += costSumExtractor.apply(cost);
             }
         }
-        return outcomeSum == 0 && distance != 0 ?
-                (double) main.department_sum / distance
-                : outcomeSum;
+
+        return distance > 0
+                ? (costSum > 0 ? costSum : mainSum) / distance
+                : 0;
     }
 
     private String getT1P12() {
