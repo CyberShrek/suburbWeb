@@ -14,18 +14,20 @@ import org.vniizht.suburbsweb.service.data.dao.TripsDao;
 import org.vniizht.suburbsweb.util.Util;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     // Переменные для каждой записи
-    private Integer yyyyMM;
-    private String fullBenefit;
-    private PrigMain       main;
-    private List<PrigCost> costList;
-    private PrigAdi        adi;
-    private final TripsDao trips;
-    private boolean isAbonement;
-    private Boolean        isRefund;
+    private Integer         yyyyMM;
+    private String          fullBenefit;
+    private PrigMain        main;
+    private List<PrigCost>  costList;
+    private PrigAdi         adi;
+    private final TripsDao  trips;
+    private boolean         isAbonement;
+    private Boolean         isRefund;
 
     public Level3Prig(Handbook handbook,
                       RoutesDao routes,
@@ -54,7 +56,6 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         isRefund = main.no_use == '2' || main.oper_g == 'N' && main.oper == 'V';
     }
 
-
     @Override
     protected boolean t1Exists() {
         return main.no_use != '1';
@@ -62,7 +63,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected boolean lgotExists() {
-        return t1Exists() && !main.benefit_code.equals("00") && !main.benefitgroup_code.equals("21");
+        return main.no_use != '1'
+                && !main.benefit_code.equals("00")
+                && !main.benefitgroup_code.equals("21");
     }
 
     @Override
@@ -148,7 +151,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p3(handbook.getDepartment(main.sale_station, main.operation_date))
                         .p4(getLgotP4())
                         .p5(getLgotP5())
-                        .p6(main.train_category)
+                        .p6(main.train_category != 'O' ? main.train_category : '0')
                         .p7(fullBenefit)
                         .p8(Util.addLeadingZeros(String.valueOf(main.carriage_code), 4))
                         .p9(handbook.getOkatoByRegion(main.benefit_region, main.operation_date))
@@ -162,7 +165,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p15(getLgotP15())
                         .p16(getLgotP16())
                         .p17(main.flg_2wayticket == '1')
-                        .p18(abonem_qty)
+                        .p18(getLgotP18())
                         .p20(getLgotP20())
                         .p21(getLgotP20() != '9' && abonem_qty != 0 ? main.seatstick_limit : 0)
                         .p22(main.operation_date)
@@ -261,32 +264,37 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     @Override
     protected double getRegionIncomePerKm(String region) {
-        int distance = 0;
-        float incomeSum = 0;
-        for (PrigCost cost : costList) {
-            if (cost.region_code.equals(region)) {
-                distance += cost.route_distance;
-                incomeSum += cost.tariff_sum;
-            }
-        }
-        return incomeSum == 0 && distance != 0 ?
-                (double) main.tariff_sum / distance
-                : incomeSum;
+        return calculateRegionSumPerKm(
+                region,
+                cost -> cost.tariff_sum, main.tariff_sum
+        );
     }
 
     @Override
     protected double getRegionOutcomePerKm(String region) {
+        return calculateRegionSumPerKm(
+                region,
+                cost -> cost.department_sum, main.department_sum
+        );
+    }
+
+    private double calculateRegionSumPerKm(
+            String region,
+            Function<PrigCost, Long> costSumExtractor,
+            Float mainSum
+    ) {
         int distance = 0;
-        float outcomeSum = 0;
+        float costSum = 0;
         for (PrigCost cost : costList) {
             if (cost.region_code.equals(region)) {
                 distance += cost.route_distance;
-                outcomeSum += cost.department_sum;
+                costSum += costSumExtractor.apply(cost);
             }
         }
-        return outcomeSum == 0 && distance != 0 ?
-                (double) main.department_sum / distance
-                : outcomeSum;
+
+        return distance > 0
+                ? (costSum > 0 ? costSum : mainSum) / distance
+                : 0;
     }
 
     private String getT1P12() {
@@ -484,13 +492,29 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private short getLgotP16() {
-        if (main.abonement_type.charAt(0) == '0'){
-            if (main.oper_g == 'N') switch (main.oper) {
-                case 'O': return main.pass_qty;
-                case 'V': return (short) -main.pass_qty;
+        if (main.no_use == '2' && main.abonement_type.charAt(0) == '0'){
+            switch (main.oper) {
+                case 'O': switch (main.oper_g) {
+                    case 'N': return main.pass_qty;
+                    case 'G':
+                    case 'O':
+                        return (short) -main.pass_qty;
+                }
+                case 'V': if (main.oper_g == 'N')
+                    return (short) -main.pass_qty;
             }
         }
         return 0;
+    }
+
+    private byte getLgotP18() {
+        if (main.no_use == '2' && main.abonement_type.charAt(0) == '0'){
+            if (main.oper == 'O' && (main.oper_g == 'G' || main.oper_g == 'O'))
+                return -1;
+            if (main.oper == 'V' && main.oper_g == 'N')
+                return -1;
+        }
+        return 1;
     }
 
     private Character getLgotP20() {
@@ -509,18 +533,40 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private Float getLgotP27() {
         float sum = 0;
-        if (main.oper_g == 'N') switch (main.oper) {
-            case 'O': sum = main.department_sum; break;
-            case 'V': sum = main.refunddepart_sum;
+        if (main.no_use == '2') {
+            switch (main.oper) {
+                case 'O': switch (main.oper_g) {
+                    case 'N':
+                        sum = main.department_sum;
+                        break;
+                    case 'G':
+                    case 'O':
+                        sum = -main.department_sum;
+                        break;
+                }
+                case 'V': if (main.oper_g == 'N')
+                    sum = -main.refunddepart_sum;
+            }
         }
         return (float) (Math.ceil((double) sum * 100) / 100);
     }
 
     private Float getLgotP28() {
         float sum = 0;
-        if (main.oper_g == 'N') switch (main.oper) {
-            case 'O': sum = main.total_sum; break;
-            case 'V': sum = main.refund_sum;
+        if (main.no_use == '2') {
+            switch (main.oper) {
+                case 'O': switch (main.oper_g) {
+                    case 'N':
+                        sum = main.total_sum;
+                        break;
+                    case 'G':
+                    case 'O':
+                        sum = -main.refund_sum;
+                        break;
+                }
+                case 'V': if (main.oper_g == 'N')
+                    sum = -main.refund_sum;
+            }
         }
         return (float) (Math.ceil((double) sum * 100) / 100);
     }

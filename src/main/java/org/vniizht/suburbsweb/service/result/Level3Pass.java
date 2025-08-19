@@ -52,7 +52,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected boolean lgotExists() {
-        return t1Exists()
+        return noUse != '1'
                 && !main.benefit_code.equals("000")
                 && !main.benefit_code.equals("021");
     }
@@ -94,7 +94,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p54(main.arrival_station)
                         .p55('0')
                         .p56("000")
-                        .p57('0')
+                        .p57(' ')
                         .p58(getT1P58())
                         .p59(getT1P59())
                         .p60(String.valueOf(main.subagent_code))
@@ -145,7 +145,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 .p12(getLgotP12())
                                 .p13(getLgotP13())
                                 .p14(getLgotP14())
-                                .p16((short) (main.oper_g == 'G' ? -1 : (main.oper == 'V' ? 0 : 1)))
+                                .p16(getLgotP16())
                                 .p17(main.trip_direction == '3')
                                 .p18((byte) 0)
                                 .p20(' ')
@@ -220,7 +220,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         return Objects.requireNonNull(f_tick).length > 2 && f_tick[2] ? '2'                                        // Детский
                 : !main.benefit_code.equals("000") || f_tick.length > 4 && f_tick[4] ? '3'  // Льготный
                 :  f_tick.length > 1 && f_tick[1] ? '1'                                     // Полный
-                : '0' ;
+                : '?' ;
     }
 
     private String getT1P24() {
@@ -375,6 +375,16 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 + (patronymic.isEmpty() ? "" : patronymic.charAt(0));
     }
 
+    private short getLgotP16() {
+        if (main.getUpd().no_use == '2') {
+            if (main.oper == 'O' && (main.oper_g == 'G' || main.oper_g == 'O'))
+                return -1;
+            if (main.oper == 'V' && main.oper_g == 'N')
+                return -1;
+        }
+        return 1;
+    }
+
     private Float getLgotP27() {
         return costList == null ? 0 :
                 (float) (costList.stream().mapToDouble(
@@ -387,6 +397,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                         case '9':
                                         case 'В':
                                         case 'B':
+                                        case 'Б':
                                             return cost.sum_nde;
                                     }
                             }
