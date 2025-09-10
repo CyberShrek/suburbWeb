@@ -376,7 +376,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private short getLgotP16() {
-        if (main.getUpd().no_use == '2') {
+        if (noUse == '2') {
             if (main.oper == 'O' && (main.oper_g == 'G' || main.oper_g == 'O'))
                 return -1;
             if (main.oper == 'V' && main.oper_g == 'N')
