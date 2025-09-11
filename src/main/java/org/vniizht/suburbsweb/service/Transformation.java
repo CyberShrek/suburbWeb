@@ -63,10 +63,29 @@ public class Transformation {
             LogWS.spreadProgress(0);
             handbook.loadCache();
 
-            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
-            LogWS.spreadProgress(0);
-            level3.deleteForDate(options.date);
-            log.sumUp();
+//            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
+//            LogWS.spreadProgress(0);
+//            boolean prigWasTransformed = level3.prigWasTransformedForDate(options.date),
+//                    passWasTransformed = level3.passWasTransformedForDate(options.date);
+//            if (options.prig) {
+//                log.addLine("l2_prig:");
+//                if (prigWasTransformed)
+//                    level3.deletePrigForDate(options.date, log);
+//                else
+//                    log.addLine("Нечего удалять");
+//            }
+//            if (options.pass) {
+//                log.addLine("l2_pass:");
+//                if (passWasTransformed)
+//                    level3.deletePassForDate(options.date, log);
+//                else
+//                    log.addLine("Нечего удалять");
+//            }
+//            if (passWasTransformed && options.pass || prigWasTransformed && options.prig) {
+//                log.addLine("lgot:");
+//                level3.deleteLgotForDate(options.date, log);
+//            }
+//            log.sumUp();
 
             pageSize = calculatePageSize();
             if (options.prig) {
@@ -161,8 +180,7 @@ public class Transformation {
             log.sumUp("Нет данных для формирования ЦО-22.");
             return;
         }
-        Set<Level3.CO22>       co22Set = new HashSet<>();
-        co22Set.addAll(nullableLevel3.getCo22Result().values());
+        Set<Level3.CO22> co22Set = new HashSet<>(nullableLevel3.getCo22Result().values());
 
         log.sumUp("Сформировано записей ЦО-22:      " + co22Set.size(),
                 "Сформировано записей Льготников: " + nullableLevel3.getLgotResult().size());

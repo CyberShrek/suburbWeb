@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.vniizht.suburbsweb.service.data.entities.level3.co22.*;
 import org.vniizht.suburbsweb.service.data.entities.level3.lgot.Lgot;
 import org.vniizht.suburbsweb.service.data.entities.level3.meta.CO22Meta;
+import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
 import java.util.*;
@@ -14,12 +15,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class Level3Dao {
 
-    private static final String T1_TABLE        = "prigl3.co22_t1";
-    private static final String T2_TABLE        = "prigl3.co22_t2";
-    private static final String T3_TABLE        = "prigl3.co22_t3";
-    private static final String T4_TABLE        = "prigl3.co22_t4";
+    private static final String CO22_T1_TABLE = "prigl3.co22_t1";
+    private static final String CO22_T2_TABLE = "prigl3.co22_t2";
+    private static final String CO22_T3_TABLE = "prigl3.co22_t3";
+    private static final String CO22_T4_TABLE = "prigl3.co22_t4";
     private static final String T5_TABLE        = "prigl3.co22_t5";
-    private static final String T6_TABLE        = "prigl3.co22_t6";
+    private static final String CO22_T6_TABLE = "prigl3.co22_t6";
     private static final String CO22_META_TABLE = "prigl3.co22_meta";
     private static final String LGOT_TABLE      = "prigl3.lgot";
     private static final int    BATCH_SIZE      = 500;
@@ -30,29 +31,76 @@ public class Level3Dao {
 
         Date lastRequestDate =
                 jdbcTemplate.queryForObject(
-                        "SELECT request_date FROM " + T1_TABLE + " ORDER BY request_date DESC LIMIT 1", Date.class);
+                        "SELECT request_date FROM " + CO22_T1_TABLE + " ORDER BY request_date DESC LIMIT 1", Date.class);
 
         // + 1 day
         return new Date(lastRequestDate.getTime() + 24*60*60*1000);
     }
 
-    public Long getLatestT1P2() {
-        return jdbcTemplate.queryForObject("SELECT coalesce(max(p2), 0) FROM " + T1_TABLE, Long.class);
+    public Boolean prigWasTransformedForDate(Date date) {
+        return getCO22CountForDate(date, "l2_prig_idnum") > 0;
     }
 
-    public void deleteForDate(Date date){
-        deleteForDate(date,
-                T1_TABLE,
-                T2_TABLE,
-                T3_TABLE,
-                T4_TABLE,
-                T6_TABLE,
-                CO22_META_TABLE,
-                LGOT_TABLE);
+    public Boolean passWasTransformedForDate(Date date) {
+        return getCO22CountForDate(date, "l2_pass_idnum") > 0;
     }
-    private void deleteForDate(Date date, String ...tables){
+
+    private Long getCO22CountForDate(Date date, String metaIdnumField) {
+        return jdbcTemplate.queryForObject(
+                "SELECT count(*) " +
+                        "FROM " + CO22_META_TABLE + " meta " +
+                        "WHERE request_date = ? " +
+                        "AND " + metaIdnumField + " IS NOT NULL",
+                Long.class, date);
+    }
+
+    public Long getLatestT1P2() {
+        return jdbcTemplate.queryForObject("SELECT coalesce(max(p2), 0) FROM " + CO22_T1_TABLE, Long.class);
+    }
+
+    public void deletePrigForDate(Date date, Log log) {
+        deleteCO22ForDate(date, "l2_prig_idnum", log);
+    }
+    public void deletePassForDate(Date date, Log log){
+        deleteCO22ForDate(date, "l2_pass_idnum", log);
+    }
+    public void deleteLgotForDate(Date date, Log log){
+        log.addTimeLine(LGOT_TABLE + "...");
+        jdbcTemplate.update(
+                "DELETE FROM " + LGOT_TABLE +
+                        " WHERE request_date = ?", date);
+    }
+
+    private void deleteCO22ForDate(Date date, String metaIdnumField, Log log){
+        deleteCO22ForDate(date,
+                metaIdnumField,
+                log,
+                CO22_T1_TABLE,
+                CO22_T2_TABLE,
+                CO22_T3_TABLE,
+                CO22_T4_TABLE,
+                CO22_T6_TABLE,
+                CO22_META_TABLE);
+    }
+    private void deleteCO22ForDate(Date date, String metaIdnumField, Log log, String ...tables){
         for(String table : tables) {
-            jdbcTemplate.update("DELETE FROM " + table + " WHERE request_date = ?", date);
+            log.addTimeLine(table + "...");
+
+            String t1Id;
+            switch (table) {
+                case CO22_T1_TABLE: t1Id = "p2";      break;
+                case CO22_META_TABLE: t1Id = "t1_id";   break;
+                case LGOT_TABLE     : t1Id = "null";   break;
+                default             : t1Id = "p3";
+            }
+            jdbcTemplate.update("WITH t1_ids AS (\n" +
+                    "    SELECT DISTINCT t1_id FROM " + CO22_META_TABLE + " meta\n" +
+                    "    WHERE request_date = ?\n" +
+                    "    AND meta." + metaIdnumField + " IS NOT NULL\n" +
+                    ")\n" +
+                    "DELETE FROM " + table +"\n" +
+                    "WHERE request_date = ?\n" +
+                    "  AND (" + t1Id + " IS NULL OR " + t1Id + " IN (SELECT t1_id FROM t1_ids))", date, date);
         }
     }
 
@@ -95,7 +143,7 @@ public class Level3Dao {
 
     private void insertT1s(List<T1> t1List) {
         AtomicInteger progress = new AtomicInteger();
-        jdbcTemplate.batchUpdate("INSERT INTO " + T1_TABLE + " VALUES (\n" +
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_T1_TABLE + " VALUES (\n" +
                 "?::integer    , ?::date       ,\n" +
                 "?::char(4)    , ?::bigint     , ?::char(4)    , ?::char(2)    , ?::char(3)    ,\n" +
                 "?::char(3)    , ?::char(3)    , ?::char(7)    , ?::char(9)    , ?::char(2)    ,\n" +
@@ -186,7 +234,7 @@ public class Level3Dao {
 
     private void insertT2s(List<T2> t2List){
         AtomicInteger progress = new AtomicInteger();
-        jdbcTemplate.batchUpdate("INSERT INTO " + T2_TABLE + " VALUES (\ndefault," +
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_T2_TABLE + " VALUES (\ndefault," +
                 "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::char(2), ?::int, ?::date)",
                 t2List,
                 BATCH_SIZE,
@@ -206,7 +254,7 @@ public class Level3Dao {
 
     private void insertT3s(List<T3> t3List){
         AtomicInteger progress = new AtomicInteger();
-        jdbcTemplate.batchUpdate("INSERT INTO " + T3_TABLE + " VALUES (\ndefault," +
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_T3_TABLE + " VALUES (\ndefault," +
                 "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(2), ?::char(5), ?::int, ?::date)",
                 t3List,
                 BATCH_SIZE,
@@ -226,7 +274,7 @@ public class Level3Dao {
 
     private void insertT4s(List<T4> t4List){
         AtomicInteger progress = new AtomicInteger();
-        jdbcTemplate.batchUpdate("INSERT INTO " + T4_TABLE + " VALUES (\ndefault," +
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_T4_TABLE + " VALUES (\ndefault," +
                 "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::char(5), ?::numeric(11,2), ?::numeric(11,2), ?::int, ?::date)",
                 t4List,
                 BATCH_SIZE,
@@ -250,7 +298,7 @@ public class Level3Dao {
 
     private void insertT6s(List<T6> t6List){
         AtomicInteger progress = new AtomicInteger();
-        jdbcTemplate.batchUpdate("INSERT INTO " + T6_TABLE + " VALUES (\ndefault," +
+        jdbcTemplate.batchUpdate("INSERT INTO " + CO22_T6_TABLE + " VALUES (\ndefault," +
                         "?::char(4), ?::char(3), ?::bigint, ?::int, ?::char(3), ?::int, ?::int, ?::date)",
                 t6List,
                 BATCH_SIZE,

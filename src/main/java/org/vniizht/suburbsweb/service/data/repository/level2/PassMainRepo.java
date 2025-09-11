@@ -19,13 +19,17 @@ public interface PassMainRepo extends Level2Repo<PassMain, Long> {
     List<Long> findIdnumByRequestDate(Date date);
 
     @Query(value = "SELECT main.* FROM zzz_rawdl2.l2_pass_main main " +
-            "LEFT JOIN zzz_rawdl2.l2_pass_ex ex      ON main.idnum = ex.idnum " +
-            "LEFT JOIN zzz_rawdl2.l2_pass_cost costs ON main.id = costs.idnum " +
+            "LEFT JOIN zzz_rawdl2.l2_pass_main_upd upd  USING (idnum) " +
+            "LEFT JOIN zzz_rawdl2.l2_pass_ex ex         USING (idnum) " +
+            "LEFT JOIN zzz_rawdl2.l2_pass_refund refund USING (idnum) " +
+            "LEFT JOIN zzz_rawdl2.l2_pass_cost costs    ON costs.idnum = main.id " +
             "WHERE main.request_date = ?1 AND main.idnum IN ?2 " +
             "AND main.f_r10af3[8] = true", nativeQuery = true)
 //    @Query(value = "SELECT pm.* FROM rawdl2.l2_pass_main pm " +
-//            "LEFT JOIN rawdl2.l2_pass_ex ex      ON pm.idnum = ex.idnum " +
-//            "LEFT JOIN rawdl2.l2_pass_cost costs ON pm.id = costs.idnum " +
+//            "LEFT JOIN rawdl2.l2_pass_main_upd upd  ON pm.idnum = upd.idnum " +
+//            "LEFT JOIN rawdl2.l2_pass_ex ex         ON pm.idnum = ex.idnum " +
+//            "LEFT JOIN rawdl2.l2_pass_cost costs    ON pm.id    = costs.idnum " +
+//            "LEFT JOIN rawdl2.l2_pass_refund refund ON pm.idnum = refund.idnum " +
 //            "WHERE pm.request_date = ?1 AND pm.idnum IN ?2 " +
 //            "AND pm.f_r10af3[8] = true", nativeQuery = true)
     List<PassMain> findAllByRequestDateAndIdnumIn(Date date, List<Long> ids);

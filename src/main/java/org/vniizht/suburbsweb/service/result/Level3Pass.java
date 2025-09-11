@@ -20,7 +20,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private List<PassCost> costList;
     private PassEx         ex;
     private Date           operationDate;
-    private Character      noUse = '0';
+    private Character      noUse;
     
     public Level3Pass(Handbook handbook,
                       RoutesDao routes,
@@ -40,9 +40,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 ? main.requestDate
                 : main.oper_date;
         yyyyMM   = Integer.parseInt(Util.formatDate(operationDate, "yyyyMM"));
-        if (main.getUpd() != null && main.getUpd().no_use != null) {
+        if (main.getUpd() != null && main.getUpd().no_use != null)
             noUse = main.getUpd().no_use;
-        }
+        else
+            noUse = '0';
     }
 
     @Override
@@ -220,7 +221,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
         return Objects.requireNonNull(f_tick).length > 2 && f_tick[2] ? '2'                                        // Детский
                 : !main.benefit_code.equals("000") || f_tick.length > 4 && f_tick[4] ? '3'  // Льготный
                 :  f_tick.length > 1 && f_tick[1] ? '1'                                     // Полный
-                : '?' ;
+                : '0' ;
     }
 
     private String getT1P24() {
