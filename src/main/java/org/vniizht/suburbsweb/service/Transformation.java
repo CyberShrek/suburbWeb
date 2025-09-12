@@ -46,9 +46,15 @@ public class Transformation {
         Date startTime = new Date();
         log = new Log(ngLogger);
         try {
-            if(!options.pass && !options.prig) {
-                options.pass = true;
-                options.prig = true;
+            boolean prigWasTransformed = level3.prigWasTransformedForDate(options.date),
+                    passWasTransformed = level3.passWasTransformedForDate(options.date);
+
+            if(!options.pass && !options.prig) { // auto
+                options.prig = !prigWasTransformed;
+                options.pass = !passWasTransformed;
+                if (!options.prig && !options.pass) {
+                    options.prig = options.pass = true;
+                };
             }
             if(options.date == null) {
                 options.date = getRequestDate();
@@ -63,29 +69,28 @@ public class Transformation {
             LogWS.spreadProgress(0);
             handbook.loadCache();
 
-//            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
-//            LogWS.spreadProgress(0);
-//            boolean prigWasTransformed = level3.prigWasTransformedForDate(options.date),
-//                    passWasTransformed = level3.passWasTransformedForDate(options.date);
-//            if (options.prig) {
-//                log.addLine("l2_prig:");
-//                if (prigWasTransformed)
-//                    level3.deletePrigForDate(options.date, log);
-//                else
-//                    log.addLine("Нечего удалять");
-//            }
-//            if (options.pass) {
-//                log.addLine("l2_pass:");
-//                if (passWasTransformed)
-//                    level3.deletePassForDate(options.date, log);
-//                else
-//                    log.addLine("Нечего удалять");
-//            }
-//            if (passWasTransformed && options.pass || prigWasTransformed && options.prig) {
-//                log.addLine("lgot:");
-//                level3.deleteLgotForDate(options.date, log);
-//            }
-//            log.sumUp();
+            log.addTimeLine("Удаляю старые записи третьего уровня за " + Util.formatDate(options.date, "dd.MM.yyyy") + "...");
+            LogWS.spreadProgress(0);
+
+            if (options.prig) {
+                log.addLine("l2_prig:");
+                if (prigWasTransformed)
+                    level3.deletePrigForDate(options.date, log);
+                else
+                    log.addLine("Нечего удалять");
+            }
+            if (options.pass) {
+                log.addLine("l2_pass:");
+                if (passWasTransformed)
+                    level3.deletePassForDate(options.date, log);
+                else
+                    log.addLine("Нечего удалять");
+            }
+            if (passWasTransformed && options.pass || prigWasTransformed && options.prig) {
+                log.addLine("lgot:");
+                level3.deleteLgotForDate(options.date, log);
+            }
+            log.sumUp();
 
             pageSize = calculatePageSize();
             if (options.prig) {
