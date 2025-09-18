@@ -15,7 +15,7 @@ import java.util.*;
 public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     // Переменные для каждой записи
-    private Integer yyyyMM;
+    private Integer        yyyyMM;
     private PassMain       main;
     private List<PassCost> costList;
     private PassEx         ex;

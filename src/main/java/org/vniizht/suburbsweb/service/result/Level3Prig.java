@@ -46,7 +46,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         fullBenefit = main.benefitgroup_code + main.benefit_code;
         yyyyMM = Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM"));
         if (main.no_use == null) main.no_use = '0';
-        isRefund = main.no_use == '2' || main.oper_g == 'N' && main.oper == 'V';
+        isRefund = main.oper_g == 'N' && main.oper == 'V';
     }
 
     @Override
@@ -485,7 +485,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private short getLgotP16() {
-        if (main.no_use == '2' && main.abonement_type.charAt(0) == '0'){
+        if (main.abonement_type.charAt(0) == '0'){
             switch (main.oper) {
                 case 'O': switch (main.oper_g) {
                     case 'N': return main.pass_qty;
@@ -501,7 +501,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private byte getLgotP18() {
-        if (main.no_use == '2' && main.abonement_type.charAt(0) == '0'){
+        if (main.abonement_type.charAt(0) == '0'){
             if (main.oper == 'O' && (main.oper_g == 'G' || main.oper_g == 'O'))
                 return -1;
             if (main.oper == 'V' && main.oper_g == 'N')
@@ -526,40 +526,36 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private Float getLgotP27() {
         float sum = 0;
-        if (main.no_use == '2') {
-            switch (main.oper) {
-                case 'O': switch (main.oper_g) {
-                    case 'N':
-                        sum = main.department_sum;
-                        break;
-                    case 'G':
-                    case 'O':
-                        sum = -main.department_sum;
-                        break;
-                }
-                case 'V': if (main.oper_g == 'N')
-                    sum = -main.refunddepart_sum;
+        switch (main.oper) {
+            case 'O': switch (main.oper_g) {
+                case 'N':
+                    sum = main.department_sum;
+                    break;
+                case 'G':
+                case 'O':
+                    sum = -main.department_sum;
+                    break;
             }
+            case 'V': if (main.oper_g == 'N')
+                sum = -main.refunddepart_sum;
         }
         return (float) (Math.ceil((double) sum * 100) / 100);
     }
 
     private Float getLgotP28() {
         float sum = 0;
-        if (main.no_use == '2') {
-            switch (main.oper) {
-                case 'O': switch (main.oper_g) {
-                    case 'N':
-                        sum = main.total_sum;
-                        break;
-                    case 'G':
-                    case 'O':
-                        sum = -main.refund_sum;
-                        break;
-                }
-                case 'V': if (main.oper_g == 'N')
+        switch (main.oper) {
+            case 'O': switch (main.oper_g) {
+                case 'N':
+                    sum = main.total_sum;
+                    break;
+                case 'G':
+                case 'O':
                     sum = -main.refund_sum;
+                    break;
             }
+            case 'V': if (main.oper_g == 'N')
+                sum = -main.refund_sum;
         }
         return (float) (Math.ceil((double) sum * 100) / 100);
     }
