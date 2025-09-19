@@ -104,7 +104,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         .p63('0')
                         .build()
                 )
-                .p33(noUse == '2' && (main.oper_g == 'N' || main.oper == 'O') ? Long.valueOf(main.persons_qty) : Long.valueOf(main.seats_qty))
+                .p33((main.oper_g == 'N' || main.oper == 'O') ? Long.valueOf(main.persons_qty) : Long.valueOf(main.seats_qty))
                 .p34(0F)
                 .p35(0F)
                 .p36((getLgotP28()))
@@ -397,7 +397,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                     switch (main.paymenttype) {
                                         case '9':
                                         case 'В':
-                                        case 'B':
                                         case 'Б':
                                             return cost.sum_nde;
                                     }

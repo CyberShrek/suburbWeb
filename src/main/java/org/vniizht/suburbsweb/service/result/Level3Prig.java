@@ -15,7 +15,6 @@ import org.vniizht.suburbsweb.util.Util;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
@@ -105,7 +104,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p61(main.train_num.matches("^\\d {4}") ? main.train_num.trim().charAt(0) : '0')
                         .build()
                 )
-                .p33((isAbonement ? (long) (short) (isRefund ? -1 : 1) * main.pass_qty : main.carryon_weight))
+                .p33((long) (short) (isRefund ? -1 : 1) * (getT1P21() == '6' ? main.carryon_weight : main.pass_qty))
                 .p34(0F)
                 .p35(0F)
                 .p36(getT1P36())
@@ -501,13 +500,13 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private byte getLgotP18() {
-        if (main.abonement_type.charAt(0) == '0'){
+        if (main.abonement_type.charAt(0) != '0'){
             if (main.oper == 'O' && (main.oper_g == 'G' || main.oper_g == 'O'))
                 return -1;
             if (main.oper == 'V' && main.oper_g == 'N')
                 return -1;
         }
-        return 1;
+        return 0;
     }
 
     private Character getLgotP20() {
@@ -525,39 +524,29 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private Float getLgotP27() {
-        float sum = 0;
-        switch (main.oper) {
-            case 'O': switch (main.oper_g) {
-                case 'N':
-                    sum = main.department_sum;
-                    break;
-                case 'G':
-                case 'O':
-                    sum = -main.department_sum;
-                    break;
+        if (main.oper == 'O') {
+            if (main.oper_g == 'N') {
+                return (float) (Math.ceil(main.department_sum * 100) / 100);
+            } else if (main.oper_g == 'G' || main.oper_g == 'O') {
+                return (float) (Math.ceil(-main.department_sum * 100) / 100);
             }
-            case 'V': if (main.oper_g == 'N')
-                sum = -main.refunddepart_sum;
+        } else if (main.oper == 'V' && main.oper_g == 'N') {
+            return (float) (Math.ceil(-main.refunddepart_sum * 100) / 100);
         }
-        return (float) (Math.ceil((double) sum * 100) / 100);
+        return 0.0f;
     }
 
     private Float getLgotP28() {
-        float sum = 0;
-        switch (main.oper) {
-            case 'O': switch (main.oper_g) {
-                case 'N':
-                    sum = main.total_sum;
-                    break;
-                case 'G':
-                case 'O':
-                    sum = -main.refund_sum;
-                    break;
+        if (main.oper == 'O') {
+            if (main.oper_g == 'N') {
+                return (float) (Math.ceil(main.total_sum * 100) / 100);
+            } else if (main.oper_g == 'G' || main.oper_g == 'O') {
+                return (float) (Math.ceil(-main.refund_sum * 100) / 100);
             }
-            case 'V': if (main.oper_g == 'N')
-                sum = -main.refund_sum;
+        } else if (main.oper == 'V' && main.oper_g == 'N') {
+            return (float) (Math.ceil(-main.refund_sum * 100) / 100);
         }
-        return (float) (Math.ceil((double) sum * 100) / 100);
+        return 0.0f;
     }
 
     private String getTSite() {
