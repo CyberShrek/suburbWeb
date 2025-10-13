@@ -55,7 +55,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected boolean lgotExists() {
         return noUse != '1'
                 && !main.benefit_code.equals("000")
-                && !main.benefit_code.equals("021");
+                && main.paymenttype != 'В';
     }
 
     @Override
@@ -132,7 +132,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                         Lgot.Key.builder()
                                 .requestDate(main.requestDate)
                                 .yyyymm(yyyyMM)
-                                .list("R800" + (main.paymenttype == 'Ж' && ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
+                                .list("R800" + (ex != null && ex.lgot_info != null && ex.lgot_info.startsWith("22") ? 'Z' : 'G'))
                                 .p2(handbook.getRoad3(main.sale_station, operationDate))
                                 .p3(handbook.getDepartment(main.sale_station, operationDate))
                                 .p4('0')
