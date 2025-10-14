@@ -26,8 +26,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     private PrigAdi         adi;
     private final TripsDao  trips;
     private boolean         isAbonement;
-    private Boolean         isRefund;
-
+    private boolean         isRefund;
+    private boolean         isRefuse;
+    private boolean         isCancel;
     public Level3Prig(Handbook handbook,
                       RoutesDao routes,
                       TripsDao trips,
@@ -45,7 +46,9 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         fullBenefit = main.benefitgroup_code + main.benefit_code;
         yyyyMM = Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM"));
         if (main.no_use == null) main.no_use = '0';
-        isRefund = main.oper_g == 'N' && main.oper == 'V';
+        isRefund = main.oper == 'V' && main.oper_g == 'N';
+        isRefuse = main.oper == 'O' && main.oper_g == 'O';
+        isCancel = main.oper == 'O' && main.oper_g == 'G';
     }
 
     @Override
@@ -104,7 +107,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p61(main.train_num.matches("^\\d {4}") ? main.train_num.trim().charAt(0) : '0')
                         .build()
                 )
-                .p33((long) (short) (isRefund ? -1 : 1) * (getT1P21() == '6' ? main.carryon_weight : main.pass_qty))
+                .p33(getT1P33())
                 .p34(0F)
                 .p35(0F)
                 .p36(getT1P36())
@@ -300,13 +303,14 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private Character getT1P19() {
         switch (main.train_category) {
-            case 'С': return '6';           // скорые пригородные поезда типа «Спутник» (7ХХХ)
-            case '7': return '5';           // скорые пригородные поезда без предоставления мест (7ХХХ)
-            case 'А': return '8';           // рельсовые автобусы 6000-е
-            case 'Б': return '7';           // рельсовые автобусы 7000-е
-            case 'Г': return '9';           // городские линии
-            case '1':   case 'М': return '4'; // скорые пригородные с предоставлением мест (7XXX(8xx-c АМГ))
-            default: return '1';            // пригородные пассажирские
+            case 'Л': return 'Л';               // просто скорые пригородные
+            case 'С': return '6';               // скорые пригородные поезда типа «Спутник» (7ХХХ)
+            case '7': return '5';               // скорые пригородные поезда без предоставления мест (7ХХХ)
+            case '1':   case 'М': return '4';   // скорые пригородные с предоставлением мест (7XXX(8xx-c АМГ))
+            case 'А': return '8';               // рельсовые автобусы 6000-е
+            case 'Б': return '7';               // рельсовые автобусы 7000-е
+            case 'Г': return '9';               // городские линии
+            default: return '1';                // пригородные пассажирские
         }
     }
 
@@ -343,36 +347,42 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         }
     }
 
+    private Long getT1P33() {
+        return (long) (short)
+                (isRefund || isRefuse || isCancel ? -1 : 1) * (getT1P21() == '6'
+                ? main.carryon_weight
+                : main.pass_qty);
+    }
+
     private Float getT1P36() {
-        switch (main.oper){
-            case 'O': return main.tariff_sum;
-            case 'V': return -main.refund_sum;
-        }
-        return isRefund ? -main.refund_sum : 0F;
+        return isRefund
+                ? -main.refund_sum
+                : isRefuse || isCancel
+                ? -main.tariff_sum
+                : main.tariff_sum;
     }
 
     private Float getT1P39() {
-        switch (main.oper){
-            case 'O': return main.fee_sum;
-            case 'V': return -main.refundfee_sum;
-        }
-        return isRefund ? -main.refundfee_sum : 0F;
+        return isRefund
+                ? -main.refundfee_sum
+                : isRefuse || isCancel
+                ? -main.fee_sum
+                : main.fee_sum;
     }
 
     private Float getT1P44() {
-        switch (main.oper){
-            case 'O': return main.department_sum;
-            case 'V': return -main.refunddepart_sum;
-        }
-        return isRefund ? -main.refunddepart_sum : 0F;
+        return isRefund
+                ? -main.refunddepart_sum
+                : isRefuse || isCancel
+                ? -main.department_sum
+                : main.department_sum;
     }
 
     private Long getT1P51() {
-        if(main.oper_g == 'N') switch (main.oper) {
-            case 'O': return (long)  main.pass_qty;
-            case 'V': return (long) -main.pass_qty;
-        }
-        return isRefund ? -main.pass_qty : 0L;
+
+        return (long) (isRefund || isRefuse || isCancel
+                        ? -main.pass_qty
+                        : main.pass_qty);
     }
 
     private Character getT1P52() {
