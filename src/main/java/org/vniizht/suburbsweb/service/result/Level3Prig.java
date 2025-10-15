@@ -146,7 +146,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
                         .p3(handbook.getDepartment(main.sale_station, main.operation_date))
                         .p4(getLgotP4())
                         .p5(getLgotP5())
-                        .p6(main.train_category != '0' ? main.train_category : '0')
+                        .p6(main.train_category != 'О' ? main.train_category : '0')
                         .p7(fullBenefit)
                         .p8(Util.addLeadingZeros(String.valueOf(main.carriage_code), 4))
                         .p9(handbook.getOkatoByRegion(main.benefit_region, main.operation_date))
@@ -495,68 +495,53 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
 
     private short getLgotP16() {
         if (main.abonement_type.charAt(0) == '0'){
-            switch (main.oper) {
-                case 'O': switch (main.oper_g) {
-                    case 'N': return main.pass_qty;
-                    case 'G':
-                    case 'O':
-                        return (short) -main.pass_qty;
-                }
-                case 'V': if (main.oper_g == 'N')
-                    return (short) -main.pass_qty;
-            }
+            return isRefund || isRefuse || isCancel
+                    ? (short) -main.pass_qty
+                    : main.pass_qty;
         }
         return 0;
     }
 
     private byte getLgotP18() {
         if (main.abonement_type.charAt(0) != '0'){
-            if (main.oper == 'O' && (main.oper_g == 'G' || main.oper_g == 'O'))
+            if (isRefuse || isCancel || isRefund)
                 return -1;
-            if (main.oper == 'V' && main.oper_g == 'N')
-                return -1;
+            return 1;
         }
         return 0;
     }
 
     private Character getLgotP20() {
-        if (!isAbonement)
-            return ' ';
-        switch (main.abonement_type.trim()) {
-            case "1": return '9';
-            case "2": return '7';
-            case "4": return '1';
-            case "5": return '2';
-            case "7": return '4';
-            case "8": return '5';
-            default: return  '0';
+        if (main.abonement_type.charAt(0) != '0') {
+            switch (main.abonement_type.trim()) {
+                case "1": return '9';
+                case "2": return '7';
+                case "3": return '0';
+                case "4": return '1';
+                case "5": return '2';
+                case "7": return '4';
+                case "8": return '5';
+            }
         }
+        return ' ';
     }
 
     private Float getLgotP27() {
-        if (main.oper == 'O') {
-            if (main.oper_g == 'N') {
-                return (float) (Math.ceil(main.department_sum * 100) / 100);
-            } else if (main.oper_g == 'G' || main.oper_g == 'O') {
-                return (float) (Math.ceil(-main.department_sum * 100) / 100);
-            }
-        } else if (main.oper == 'V' && main.oper_g == 'N') {
-            return (float) (Math.ceil(-main.refunddepart_sum * 100) / 100);
-        }
-        return 0.0f;
+        return (float) (Math.ceil((
+                        isRefuse || isCancel ? -main.department_sum
+                        : isRefund ? -main.refunddepart_sum
+                        : main.department_sum
+                        ) * 100
+                ) / 100);
     }
 
     private Float getLgotP28() {
-        if (main.oper == 'O') {
-            if (main.oper_g == 'N') {
-                return (float) (Math.ceil(main.total_sum * 100) / 100);
-            } else if (main.oper_g == 'G' || main.oper_g == 'O') {
-                return (float) (Math.ceil(-main.refund_sum * 100) / 100);
-            }
-        } else if (main.oper == 'V' && main.oper_g == 'N') {
-            return (float) (Math.ceil(-main.refund_sum * 100) / 100);
-        }
-        return 0.0f;
+        return (float) (Math.ceil((
+                        isRefuse || isCancel || isRefund
+                                ? -main.refund_sum
+                                : main.total_sum
+                ) * 100
+        ) / 100);
     }
 
     private String getTSite() {
