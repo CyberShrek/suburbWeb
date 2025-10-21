@@ -10,22 +10,31 @@ import java.util.List;
 @Repository
 public interface PrigMainRepo extends Level2Repo<PrigMain, Long> {
 
-    @Query("SELECT main.idnum FROM PrigMain main WHERE main.requestDate = ?1")
+    @Query("SELECT main.idnum FROM PrigMain main " +
+            "WHERE (main.no_use IS NULL OR main.no_use != '1') " +
+            "AND main.requestDate = ?1")
     List<Long> findIdnumByRequestDate(Date date);
+
+    @Query("SELECT main.idnum FROM PrigMain main " +
+            "WHERE (main.no_use IS NULL OR main.no_use != '1') " +
+            "AND   main.ticket_begdate <  '2025-04-01' " +
+            "AND   main.ticket_enddate >= '2025-04-01'"
+    )
+    List<Long> findSpecialIdnums();
 
     @Query("SELECT main FROM PrigMain main " +
             "LEFT JOIN FETCH main.adi adi " +
             "LEFT JOIN FETCH main.costs costs " +
-            "WHERE main.requestDate = ?1 AND main.idnum IN ?2 " +
+            "WHERE main.requestDate = ?1 " +
+            "AND main.idnum IN ?2 " +
             "ORDER BY costs.doc_reg")
     List<PrigMain> findAllByRequestDateAndIdnumIn(Date date, List<Long> ids);
 
-//    @Query("SELECT main FROM PrigMain main " +
-//            "LEFT OUTER JOIN FETCH main.adi adi " +
-//            "LEFT OUTER JOIN FETCH main.costs costs " +
-//            "WHERE main.ticket_begdate >= '2024-04-01' " +
-//            "AND   main.ticket_enddate >= '2025-04-01' " +
-//            "ORDER BY costs.doc_reg"
-//    )
-//    List<PrigMain> findAllBy2024();
+
+    @Query("SELECT main FROM PrigMain main " +
+            "LEFT JOIN FETCH main.adi adi " +
+            "LEFT JOIN FETCH main.costs costs " +
+            "WHERE main.idnum IN ?2 " +
+            "ORDER BY costs.doc_reg")
+    List<PrigMain> findAllByIdnumIn(List<Long> ids);
 }

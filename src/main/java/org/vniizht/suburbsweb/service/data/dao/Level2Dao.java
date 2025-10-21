@@ -20,6 +20,10 @@ public class Level2Dao {
         return prigMainRepo.findIdnumByRequestDate(requestDate);
     }
 
+    public List<Long> findSpecialIdnums() {
+        return prigMainRepo.findSpecialIdnums();
+    }
+
     public List<Long> findPassIdnumsByRequestDate(Date requestDate) {
         return passMainRepo.findIdnumByRequestDate(requestDate);
     }
@@ -27,6 +31,13 @@ public class Level2Dao {
     public Set<Record> findPrigRecordsByIdnums(Date requestDate, List<Long> ids) {
         Map<Long, PrigRecord> collector = new LinkedHashMap<>();
         List<PrigMain> mainList = prigMainRepo.findAllByRequestDateAndIdnumIn(requestDate, ids);
+        mainList.forEach(main -> collector.put(main.idnum, new PrigRecord(main)));
+        return new LinkedHashSet<>(collector.values());
+    }
+
+    public Set<Record> findPrigRecordsByIdnums(List<Long> ids) {
+        Map<Long, PrigRecord> collector = new LinkedHashMap<>();
+        List<PrigMain> mainList = prigMainRepo.findAllByIdnumIn(ids);
         mainList.forEach(main -> collector.put(main.idnum, new PrigRecord(main)));
         return new LinkedHashSet<>(collector.values());
     }
