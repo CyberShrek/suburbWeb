@@ -20,6 +20,7 @@ import org.vniizht.suburbsweb.util.Log;
 import org.vniizht.suburbsweb.util.Util;
 import org.vniizht.suburbsweb.websocket.LogWS;
 
+import java.net.UnknownHostException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,7 +40,40 @@ public class Transformation {
     @Autowired private NgLogger ngLogger;
 
     private Log log;
-    private int pageSize;
+
+    public synchronized void transformSpecial() throws Exception {
+        Date startTime = new Date();
+        log = new Log(ngLogger);
+        log.addTimeLine("Выполняю специальную трансформацию");
+        try {
+
+            log.addTimeLine("Получаю идентификаторы (idnum) специальных записей...");
+
+            List<Long> idnums = level2.findSpecialIdnums();
+
+            if (idnums.isEmpty()) {
+                log.addTimeLine("Специальных записей не обнаружено");
+                return;
+            }
+            log.addTimeLine("Получаю справочники...");
+            LogWS.spreadProgress(0);
+            handbook.loadCache();
+
+            log.addTimeLine("Начинаю трансформацию...");
+            complete(transformPrigOrNull(idnums));
+
+            log.addTimeLine("Конец выполнения.");
+
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage());
+            throw e;
+        } finally {
+            handbook.clearCache();
+            routes.clearCache();
+            LogWS.spreadProgress(-1);
+            log.finish("Итоговое время выполнения: " + (new Date().getTime() - startTime.getTime()) / 1000 + "с");
+        }
+    }
 
     public synchronized void transform(TransformationOptions options) throws Exception {
 
@@ -92,7 +126,6 @@ public class Transformation {
             }
             log.sumUp();
 
-            pageSize = calculatePageSize();
             if (options.prig) {
                 log.addTimeLine("Выполняю трансформацию l2_prig...");
                 complete(transformPrigOrNull(options.date));
@@ -119,6 +152,15 @@ public class Transformation {
 //        int portionSize = (int) (availableMemoryInMB * 1024 / ESTIMATED_RECORD_SIZE_IN_B);
         log.addTimeLine("Расчётный размер порции: " + PORTION_SIZE);
         return PORTION_SIZE;
+    }
+
+    private Level3Prig transformPrigOrNull(List<Long> idnums) {
+        return idnums.isEmpty() ? null : (Level3Prig) transform(
+                new Level3Prig(handbook, routes, trips, level3.getLatestT1P2() + 1),
+                idnums,
+                (List<Long> currentIdnums) -> level2.findPrigRecordsByIdnums(currentIdnums),
+                "l2_prig"
+        );
     }
 
     private Level3Prig transformPrigOrNull(Date requestDate) {
@@ -150,7 +192,7 @@ public class Transformation {
                              String name) {
         log.addTimeLine("Найдено записей " + name + ": " + idnums.size());
 
-        List<List<Long>> pagedIdnums = Util.splitList(idnums, pageSize);
+        List<List<Long>> pagedIdnums = Util.splitList(idnums, PORTION_SIZE);
         log.addTimeLine("Порций: " + pagedIdnums.size());
 
         for (int i = 0; i < pagedIdnums.size(); i++) {

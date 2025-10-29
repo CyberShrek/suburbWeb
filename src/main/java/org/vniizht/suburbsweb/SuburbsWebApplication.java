@@ -1,13 +1,8 @@
 package org.vniizht.suburbsweb;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.vniizht.suburbsweb.model.TransformationOptions;
 import org.vniizht.suburbsweb.service.Transformation;
 
@@ -46,6 +41,10 @@ public class SuburbsWebApplication {
 
         // Запуск функции бина
         Transformation transformation = context.getBean(Transformation.class);
-        transformation.transform(new TransformationOptions(requestDate, args.contains("prig"), args.contains("pass")));
+        if (args.contains("spec")) {
+            transformation.transformSpecial();
+        }
+        else
+            transformation.transform(new TransformationOptions(requestDate, args.contains("prig"), args.contains("pass")));
     }
 }

@@ -34,7 +34,7 @@ public interface PrigMainRepo extends Level2Repo<PrigMain, Long> {
     @Query("SELECT main FROM PrigMain main " +
             "LEFT JOIN FETCH main.adi adi " +
             "LEFT JOIN FETCH main.costs costs " +
-            "WHERE main.idnum IN ?2 " +
+            "WHERE main.idnum IN ?1 " +
             "ORDER BY costs.doc_reg")
     List<PrigMain> findAllByIdnumIn(List<Long> ids);
 }
