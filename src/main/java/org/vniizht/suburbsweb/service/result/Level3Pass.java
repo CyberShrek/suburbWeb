@@ -107,7 +107,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 .p33((main.oper_g == 'N' || main.oper == 'O') ? Long.valueOf(main.persons_qty) : Long.valueOf(main.seats_qty))
                 .p34(0F)
                 .p35(0F)
-                .p36((getLgotP28()))
+                .p36(getT1P36())
                 .p37(0F)
                 .p38(0F)
                 .p39(getT1P39())
@@ -183,14 +183,17 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected Set<T1> multiplyT1(T1 t1) {
         Set<T1> result = new LinkedHashSet<>();
         result.add(t1);
-        if (!operationDate.equals(main.departure_date)) {
-            result.add(t1.toBuilder()
-                    .key(t1.getKey().toBuilder()
-                            .yyyymm(Integer.parseInt(Util.formatDate(main.departure_date, "yyyyMM")))
-                            .build()
-                    )
+        String operationYYYYMM = Util.formatDate(operationDate, "yyyyMM");
+        String departureYYYYMM = Util.formatDate(main.departure_date, "yyyyMM");
+        if (!operationYYYYMM.equals(departureYYYYMM)) {
+            result.add(T1.builder()
+                            .key(t1.getKey().toBuilder()
+                                    .yyyymm(Integer.parseInt(departureYYYYMM))
+                                    .build())
+                            .p33(t1.getP33())
                     .build()
             );
+            t1.setP33(0L);
         }
         return result;
     }
@@ -248,6 +251,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                 handbook.getGvc(
                         ex.lgot_info.substring(0, 2),
                         main.benefit_code, operationDate);
+    }
+
+    private Float getT1P36() {
+        return getLgotP28();
     }
 
     private Float getT1P39() {
