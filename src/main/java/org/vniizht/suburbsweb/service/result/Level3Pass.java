@@ -48,14 +48,16 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected boolean t1Exists() {
-        return noUse != '1';
+        return  (ex == null || ex.npp == 1) &&
+                noUse != '1';
     }
 
     @Override
     protected boolean lgotExists() {
-        return noUse != '1'
-                && !main.benefit_code.equals("000")
-                && main.paymenttype != 'В';
+        return (ex == null || ex.npp == 1) &&
+                noUse != '1' &&
+                !main.benefit_code.equals("000") &&
+                main.paymenttype != 'В';
     }
 
     @Override
@@ -258,10 +260,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P39() {
-        return (float) costList.stream().mapToDouble(costListItem -> {
-                    switch (costListItem.sum_code) {
+        return (float) costList.stream().mapToDouble(cost -> {
+                    switch (cost.sum_code) {
                         case 104: case 105: case 106:
-                            return costListItem.sum_nde;
+                            return cost.sum_nde;
                         default: return 0F;
                     }}
                 ).sum();
@@ -269,19 +271,19 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     private Float getT1P40() {
         return (float) costList.stream().mapToDouble(
-                        costListItem -> costListItem.sum_code == 101
-                                ? costListItem.sum_nde
+                        cost -> cost.sum_code == 101
+                                ? cost.sum_nde
                                 : 0F
                 ).sum();
     }
 
     private Float getT1P44() {
-        return (float) costList.stream().mapToDouble(costListItem -> {
-                    switch (costListItem.sum_code) {
+        return (float) costList.stream().mapToDouble(cost -> {
+                    switch (cost.sum_code) {
                         case 101: case 116: {
-                            switch (main.paymenttype) {
+                            switch (cost.paymenttype) {
                                 case 'Б': case 'В': case 'Ж': case '9':
-                                    return costListItem.sum_nde;
+                                    return cost.sum_nde;
                             }
                         }
                     }
@@ -290,12 +292,12 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P47() {
-        return (float) costList.stream().mapToDouble(costListItem -> {
-                    switch (costListItem.sum_code) {
+        return (float) costList.stream().mapToDouble(cost -> {
+                    switch (cost.sum_code) {
                         case 104: case 105: case 106:
-                            switch (main.paymenttype) {
+                            switch (cost.paymenttype) {
                                 case 'Б': case 'В': case 'Ж': case '9':
-                                    return costListItem.sum_nde;
+                                    return cost.sum_nde;
                             }
                     }
                     return 0F;
@@ -303,10 +305,10 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P48() {
-        return (float) costList.stream().mapToDouble(costListItem -> {
-                    if (costListItem.sum_code == 101) switch (main.paymenttype) {
+        return (float) costList.stream().mapToDouble(cost -> {
+                    if (cost.sum_code == 101) switch (cost.paymenttype) {
                         case 'Б': case 'В': case 'Ж': case '9':
-                            return costListItem.sum_nde;
+                            return cost.sum_nde;
                     }
                     return 0F;
                 }).sum();
@@ -401,7 +403,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 case 101:
                                 case 102:
                                 case 116:
-                                    switch (main.paymenttype) {
+                                    switch (cost.paymenttype) {
                                         case '9':
                                         case 'В':
                                         case 'Б':
@@ -413,6 +415,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getLgotP28() {
+//        if (ex.npp != 1)
+//            throw new RuntimeException("ex.npp != 1");
         return costList == null ? 0 :
                 (float) (costList.stream().mapToDouble(
                         cost -> {
@@ -420,7 +424,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 case 101:
                                 case 102:
                                 case 116:
-                                    switch (main.paymenttype) {
+                                    switch (cost.paymenttype) {
                                         case '1':
                                         case '6':
                                         case '8':
