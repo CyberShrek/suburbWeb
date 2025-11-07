@@ -13,7 +13,7 @@ import java.sql.Time;
 import java.util.List;
 
 @Entity
-@Table(schema = "zzz_rawdl2",
+@Table(schema = "rawdl2",
         name = "l2_pass_main")
 @ToString(callSuper=true)
 public class PassMain extends L2Key {

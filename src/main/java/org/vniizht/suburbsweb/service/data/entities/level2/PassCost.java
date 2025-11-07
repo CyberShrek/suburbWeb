@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "zzz_rawdl2",
+@Table(schema = "rawdl2",
         name = "l2_pass_cost")
 @IdClass(PassCost.Identifier.class)
 @ToString(callSuper=true)
