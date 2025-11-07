@@ -26,6 +26,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     private PrigAdi         adi;
     private final TripsDao  trips;
     private boolean         isAbonement;
+    private boolean         isBasic;
     private boolean         isRefund;
     private boolean         isRefuse;
     private boolean         isCancel;
@@ -46,6 +47,7 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
         fullBenefit = main.benefitgroup_code + main.benefit_code;
         yyyyMM = Integer.parseInt(Util.formatDate(main.operation_date, "yyyyMM"));
         if (main.no_use == null) main.no_use = '0';
+        isBasic  = main.oper == 'O' && main.oper_g == 'N';
         isRefund = main.oper == 'V' && main.oper_g == 'N';
         isRefuse = main.oper == 'O' && main.oper_g == 'O';
         isCancel = main.oper == 'O' && main.oper_g == 'G';
@@ -527,21 +529,21 @@ public final class Level3Prig extends Level3 <Level2Dao.PrigRecord> {
     }
 
     private Float getLgotP27() {
-        return (float) (Math.ceil((
-                        isRefuse || isCancel ? -main.department_sum
-                        : isRefund ? -main.refunddepart_sum
-                        : main.department_sum
-                        ) * 100
-                ) / 100);
+        float sum = isBasic ? main.department_sum
+                : isRefuse || isCancel ? -main.department_sum
+                : isRefund ? -main.refunddepart_sum
+                : 0;
+
+        return (float) (Math.ceil(sum * 100) / 100);
     }
 
     private Float getLgotP28() {
-        return (float) (Math.ceil((
-                        isRefuse || isCancel || isRefund
-                                ? -main.refund_sum
-                                : main.total_sum
-                ) * 100
-        ) / 100);
+        float sum = isBasic ? main.total_sum
+                : isRefuse || isCancel ? -main.total_sum
+                : isRefund ? -main.refund_sum
+                : 0;
+
+        return (float) (Math.ceil(sum * 100) / 100);
     }
 
     private String getTSite() {

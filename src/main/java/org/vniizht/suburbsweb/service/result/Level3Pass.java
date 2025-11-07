@@ -405,7 +405,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                 case 116:
                                     switch (cost.paymenttype) {
                                         case '9':
-                                        case 'В':
                                         case 'Б':
                                             return cost.sum_nde;
                                     }
