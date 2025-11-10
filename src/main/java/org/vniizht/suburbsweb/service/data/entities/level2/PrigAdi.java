@@ -13,7 +13,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(schema = "rawdl2",
+@Table(schema = "prig_bekap",
         name = "l2_prig_adi")
 @ToString(callSuper=true)
 public class PrigAdi extends L2Key {

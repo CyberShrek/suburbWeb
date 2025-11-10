@@ -11,7 +11,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "rawdl2",
+@Table(schema = "prig_bekap",
         name = "l2_pass_ex")
 @IdClass(PassEx.Identifier.class)
 @ToString(callSuper=true)
