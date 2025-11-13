@@ -193,6 +193,24 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
                                     .yyyymm(Integer.parseInt(departureYYYYMM))
                                     .build())
                             .p33(t1.getP33())
+                            .p34(0F)
+                            .p35(0F)
+                            .p36(0F)
+                            .p37(0F)
+                            .p38(0F)
+                            .p39(0F)
+                            .p40(0F)
+                            .p41(0F)
+                            .p42(0F)
+                            .p43(0F)
+                            .p44(0F)
+                            .p45(0F)
+                            .p46(0F)
+                            .p47(0F)
+                            .p48(0F)
+                            .p49(0F)
+                            .p50(0F)
+                            .p51(0L)
                     .build()
             );
             t1.setP33(0L);
@@ -260,7 +278,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P39() {
-        return (float) costList.stream().mapToDouble(cost -> {
+        return costList == null ? 0F : (float) costList.stream().mapToDouble(cost -> {
                     switch (cost.sum_code) {
                         case 104: case 105: case 106:
                             return cost.sum_nde;
@@ -270,7 +288,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P40() {
-        return (float) costList.stream().mapToDouble(
+        return costList == null ? 0F : (float) costList.stream().mapToDouble(
                         cost -> cost.sum_code == 101
                                 ? cost.sum_nde
                                 : 0F
@@ -278,7 +296,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P44() {
-        return (float) costList.stream().mapToDouble(cost -> {
+        return costList == null ? 0F : (float) costList.stream().mapToDouble(cost -> {
                     switch (cost.sum_code) {
                         case 101: case 116: {
                             switch (cost.paymenttype) {
@@ -292,7 +310,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P47() {
-        return (float) costList.stream().mapToDouble(cost -> {
+        return costList == null ? 0F : (float) costList.stream().mapToDouble(cost -> {
                     switch (cost.sum_code) {
                         case 104: case 105: case 106:
                             switch (cost.paymenttype) {
@@ -305,7 +323,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getT1P48() {
-        return (float) costList.stream().mapToDouble(cost -> {
+        return costList == null ? 0F : (float) costList.stream().mapToDouble(cost -> {
                     if (cost.sum_code == 101) switch (cost.paymenttype) {
                         case 'Б': case 'В': case 'Ж': case '9':
                             return cost.sum_nde;
@@ -414,8 +432,6 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     }
 
     private Float getLgotP28() {
-//        if (ex.npp != 1)
-//            throw new RuntimeException("ex.npp != 1");
         return costList == null ? 0 :
                 (float) (costList.stream().mapToDouble(
                         cost -> {

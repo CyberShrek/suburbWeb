@@ -7,7 +7,7 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 
 @Entity
-@Table(schema = "prig_bekap",
+@Table(schema = "rawdl2",
         name = "l2_pass_refund")
 @ToString(callSuper=true)
 public class PassRefund extends L2Key {

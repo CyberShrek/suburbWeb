@@ -9,7 +9,7 @@ import org.hibernate.annotations.FetchMode;
 import javax.persistence.*;
 
 @Entity
-@Table(schema = "prig_bekap",
+@Table(schema = "rawdl2",
         name = "l2_pass_main_upd")
 @ToString(callSuper=true)
 public class PassMainUpd extends L2Key {

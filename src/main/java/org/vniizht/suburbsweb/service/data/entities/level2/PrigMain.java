@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(schema = "prig_bekap",
+@Table(schema = "rawdl2",
         name = "l2_prig_main")
 @ToString(callSuper=true)
 public class PrigMain extends L2Key {

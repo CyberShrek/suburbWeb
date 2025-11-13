@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(schema = "prig_bekap",
+@Table(schema = "rawdl2",
         name = "l2_prig_cost")
 @IdClass(PrigCost.Identifier.class)
 @ToString(callSuper=true)
