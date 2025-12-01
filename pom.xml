@@ -16,7 +16,6 @@
     <name>suburbWeb</name>
     <description>suburbWeb</description>
 
-<!---->
     <properties>
         <java.version>1.8</java.version>
     </properties>
