@@ -17,6 +17,7 @@ public interface PassMainRepo extends Level2Repo<PassMain, Long> {
 
     @Query(value = "SELECT main.* FROM rawdl2.l2_pass_main main " +
             "LEFT JOIN rawdl2.l2_pass_main_upd upd  ON (main.idnum = upd.idnum) " +
+            "LEFT JOIN rawdl2.l2_pass_lgots lgots   ON (main.idnum = lgots.idnum  AND lgots.npp = 1) " +
             "LEFT JOIN rawdl2.l2_pass_ex ex         ON (main.idnum = ex.idnum AND ex.npp = 1) " +
             "LEFT JOIN rawdl2.l2_pass_refund refund ON (main.idnum = refund.idnum) " +
             "LEFT JOIN rawdl2.l2_pass_cost costs    ON (main.idnum = costs.idnum)" +

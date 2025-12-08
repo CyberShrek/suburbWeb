@@ -17,6 +17,7 @@ import java.util.List;
         name = "l2_pass_main")
 @ToString(callSuper=true)
 public class PassMain extends L2Key {
+
     public Long        id;
     public Short       request_subtype;
     public Time        request_time;
@@ -60,6 +61,12 @@ public class PassMain extends L2Key {
     @Getter
     @Setter
     private List<PassCost> costs;
+
+    @OneToOne(mappedBy = "main")
+    @Fetch(FetchMode.JOIN)
+    @Getter
+    @Setter
+    private PassLgot  lgot;
 
     @OneToOne(mappedBy = "main")
     @Fetch(FetchMode.JOIN)

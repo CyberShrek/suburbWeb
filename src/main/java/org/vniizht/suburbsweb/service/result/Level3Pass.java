@@ -18,6 +18,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     private Integer        yyyyMM;
     private PassMain       main;
     private List<PassCost> costList;
+    private PassLgot       lgot;
     private PassEx         ex;
     private Date           operationDate;
     private Character      noUse;
@@ -33,6 +34,7 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
     protected void next(Level2Dao.PassRecord record) {
         main     = record.getMain();
         costList = main.getCosts();
+        lgot     = main.getLgot();
         ex       = main.getEx();
         operationDate = main.oper_g == 'N' && main.oper == 'V'
                 && main.getRefund() != null
@@ -48,7 +50,8 @@ public final class Level3Pass extends Level3 <Level2Dao.PassRecord> {
 
     @Override
     protected boolean t1Exists() {
-        return  (ex == null || ex.npp == 1) &&
+        return  (lgot == null || lgot.npp == 1) &&
+                (ex == null || ex.npp == 1) &&
                 noUse != '1';
     }
 
